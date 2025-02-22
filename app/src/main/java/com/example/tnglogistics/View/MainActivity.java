@@ -14,6 +14,9 @@ import com.example.tnglogistics.R;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
+    // initial fragment
+    private PlanFragment plan_frag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,5 +33,12 @@ public class MainActivity extends AppCompatActivity {
         PermissionManager.registerPermissionLauncher(this);
         // ขอสิทธิ์
         PermissionManager.requestPermission(this);
+
+        plan_frag = new PlanFragment();
+
+        // โหลดหน้าเริ่มต้น
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, plan_frag)
+                .commit();
     }
 }

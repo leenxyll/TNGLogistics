@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="10dp"
+    android:background="@android:color/transparent"
+    app:cardCornerRadius="8dp">
+
+    <TextView
+        android:id="@+id/txtview_address"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="สถานที่"
+        android:textSize="16sp"
+        android:padding="20dp"
+        android:background="@drawable/rounded_border_transparent"/>
+
+
+</androidx.cardview.widget.CardView>

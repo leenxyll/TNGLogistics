@@ -10,7 +10,7 @@ public class SharedPreferencesHelper {
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(KEY_USER_SESSION, false);  // Default to false
+        return sharedPreferences.getBoolean(KEY_USER_SESSION, true);  // Default to false
     }
 
     public static void setUserLoggedIn(Context context, boolean isLoggedIn) {

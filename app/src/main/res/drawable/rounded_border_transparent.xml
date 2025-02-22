@@ -1,0 +1,6 @@
+<!-- res/drawable/border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent"/> <!-- พื้นหลังโปร่งใส -->
+    <stroke android:width="2dp" android:color="@color/neutral4"/>
+    <corners android:radius="8dp"/> <!-- มุมโค้ง 8dp (เลือกใส่หรือไม่ก็ได้) -->
+</shape>
