@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SharedPreferencesHelper {
+    private static final String TAG = "SharedPreferencesHelper";
     private static final String KEY_APP_PREF = "appPreferences";
     private static final String KEY_USER_SESSION = "UserSession";
 

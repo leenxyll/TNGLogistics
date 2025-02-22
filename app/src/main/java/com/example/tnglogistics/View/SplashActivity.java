@@ -1,5 +1,6 @@
 package com.example.tnglogistics.View;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -13,7 +14,8 @@ import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
 
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_TIMEOUT = 2000; // 2 วินาที
+    private static final String TAG = "SplashActivity";
+    private static final int SPLASH_TIMEOUT = 200; // 0.2 วินาที
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +33,10 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
                     // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง HomeActivity
-//                    startActivity(new Intent(SplashActivity.this, HomeActivity.class));
+                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 } else {
                     // ถ้ายังไม่ล็อกอิน ไปยัง LoginActivity
-//                    startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                    startActivity(new Intent(SplashActivity.this, LoginActivity.class));
                 }
                 finish(); // ปิด SplashActivity
             }
