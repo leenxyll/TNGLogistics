@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
-//import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Controller.GeofenceHelper;
 import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
@@ -41,7 +41,7 @@ import java.util.UUID;
  */
 public class PlanFragment extends Fragment {
     private static final String TAG = "PlanFragment";
-//    private GeofenceHelper geofenceHelper;
+    private GeofenceHelper geofenceHelper;
     private RecycleAddrViewModel recycleAddrViewModel;
     private AdapterAddrHelper adapter;
     private String addr;
@@ -148,14 +148,14 @@ public class PlanFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        geofenceHelper = GeofenceHelper.getInstance(requireContext());
+        geofenceHelper = GeofenceHelper.getInstance(requireContext());
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ArrayList<AddrModel> addrList = recycleAddrViewModel.getItemList().getValue();
                 Log.d(TAG, "Size Addr :"+addrList.size());
                 for (AddrModel addr : addrList) {
-//                    geofenceHelper.addGeofence(UUID.randomUUID().toString(),addr.getLatLng());
+                    geofenceHelper.addGeofence(UUID.randomUUID().toString(),addr.getLatLng());
                 }
                 Toast.makeText(getContext(), "GEOFENCE ADDED", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
