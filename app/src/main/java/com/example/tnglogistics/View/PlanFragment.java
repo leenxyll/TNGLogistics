@@ -2,7 +2,6 @@ package com.example.tnglogistics.View;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -23,6 +22,7 @@ import android.widget.EditText;
 
 import com.example.tnglogistics.Controller.AdapterPlanHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
+import com.example.tnglogistics.Model.RecyclePlanModel;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecyclePlanViewModel;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,6 +39,8 @@ public class PlanFragment extends Fragment {
     private RecyclePlanViewModel recyclePlanViewModel;
     private AdapterPlanHelper adapter;
     private String addr;
+    private Button btn_opencamera;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -53,10 +55,22 @@ public class PlanFragment extends Fragment {
         EditText edt_address = view.findViewById(R.id.edt_address);
         Button btn_add = view.findViewById(R.id.btn_add);
         Button btn_check = view.findViewById(R.id.btn_check);
+        btn_opencamera = view.findViewById(R.id.btn_opencamera);
 
         recyclePlanViewModel = new ViewModelProvider(this).get(RecyclePlanViewModel.class);
-        recyclePlanViewModel.getItemList().observe(getViewLifecycleOwner(), adapter::updateList);
-        Log.d(TAG, "address before click "+ addr);
+        recyclePlanViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
+            adapter.updateList(items);
+            checkItemList(items);
+        });
+
+        // ตั้งค่า Listener เมื่อมีการลบไอเท็ม
+        adapter.setOnItemRemovedListener(new AdapterPlanHelper.OnItemRemovedListener() {
+            @Override
+            public void onItemRemoved() {
+                ArrayList<RecyclePlanModel> currentList = recyclePlanViewModel.getItemList().getValue();
+                checkItemList(currentList); // เรียกเช็คข้อมูลใหม่
+            }
+        });
 
         edt_address.addTextChangedListener(new TextWatcher() {
             @Override
@@ -120,5 +134,14 @@ public class PlanFragment extends Fragment {
         });
 
         return view;
+    }
+
+    // ฟังก์ชันเช็คว่ามีไอเท็มเหลือหรือไม่
+    private void checkItemList(ArrayList<RecyclePlanModel> items) {
+        if (items != null && !items.isEmpty()) {
+            btn_opencamera.setVisibility(View.VISIBLE);
+        } else {
+            btn_opencamera.setVisibility(View.GONE);
+        }
     }
 }

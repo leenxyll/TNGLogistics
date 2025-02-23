@@ -38,30 +38,20 @@ public class GeocodeHelper {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocationName(address, 1);
-//            Log.d(TAG, "In Try");
             if (addresses != null && !addresses.isEmpty()) {
-//                Log.d(TAG, "In If");
                 Address location = addresses.get(0);
-//                Log.d(TAG, address);
-//                Log.d(TAG, location.getAddressLine(0));
-                LatLng locationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-//                latitude = location.getLatitude();
-//                longitude = location.getLongitude();
-//                Log.d(TAG, Double.toString(latitude));
-//                Log.d(TAG, Double.toString(longitude));
-//                textResultLat.setText(Double.toString(latitude));
-//                textResultLng.setText(Double.toString(longitude));
-                return locationLatLng;
-//                textResult.setText(String.format(Locale.getDefault(), "Latitude: %.6f\nLongitude: %.6f", latitude, longitude));
+                if( location.getLatitude() == 0.0 && location.getLongitude() == 0.0){
+                    return null;
+                }else{
+                    return new LatLng(location.getLatitude(), location.getLongitude());
+                }
             } else {
+                return null;
 //                textResult.setText("ไม่พบพิกัดสำหรับที่อยู่นี้");
             }
         } catch (IOException e) {
-//            Log.d(TAG, "In Catch");
-//            Log.e(TAG, String.valueOf(e));
             e.printStackTrace();
-//            textResult.setText("เกิดข้อผิดพลาดในการแปลงที่อยู่");
+            return null;
         }
-        return new LatLng(0.0, 0.0);
     }
 }

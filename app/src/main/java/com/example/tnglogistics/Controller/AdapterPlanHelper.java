@@ -16,6 +16,15 @@ import java.util.ArrayList;
 
 public class AdapterPlanHelper extends RecyclerView.Adapter<AdapterPlanHelper.ViewHolder> {
     private ArrayList<RecyclePlanModel> itemList;
+    private OnItemRemovedListener itemRemovedListener; // เพิ่ม Listener
+
+    public interface OnItemRemovedListener {
+        void onItemRemoved();
+    }
+
+    public void setOnItemRemovedListener(OnItemRemovedListener listener) {
+        this.itemRemovedListener = listener;
+    }
 
     public AdapterPlanHelper(ArrayList<RecyclePlanModel> itemList) {
         this.itemList = itemList;
@@ -31,6 +40,11 @@ public class AdapterPlanHelper extends RecyclerView.Adapter<AdapterPlanHelper.Vi
             itemList.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, itemList.size()); // อัปเดตตำแหน่งที่เหลือ
+
+            // แจ้งเตือนไปยัง Fragment
+            if (itemRemovedListener != null) {
+                itemRemovedListener.onItemRemoved();
+            }
         }
     }
 
