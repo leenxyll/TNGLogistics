@@ -35,9 +35,20 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.play.services.location
+    implementation libs.camera.core
+    implementation libs.camera.lifecycle
+    implementation libs.camera.view
+    implementation libs.vision.common
+    implementation libs.play.services.mlkit.text.recognition.common
+    implementation libs.play.services.mlkit.text.recognition
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     // import Google Maps SDK ที่มีคลาส LatLng
     implementation 'com.google.android.gms:play-services-maps:18.2.0'
+
+    implementation libs.camera.core.v130
+    implementation libs.camera.camera2
+    implementation libs.camera.lifecycle.v130
+    implementation libs.camera.view.v130
 }

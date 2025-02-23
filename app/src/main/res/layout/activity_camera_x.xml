@@ -1,0 +1,31 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context="View.CameraXActivity">
+
+
+  <!-- PreviewView สำหรับกล้อง -->
+  <androidx.camera.view.PreviewView
+      android:id="@+id/preview_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"/>
+
+  <!-- Custom View สำหรับกรอบโปร่งใส -->
+  <com.example.tnglogistics.View.CameraXOverlay
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"/>
+
+  <!-- ปุ่มถ่ายภาพ -->
+  <Button
+      android:id="@+id/btn_capture"
+      android:layout_width="100dp"
+      android:layout_height="100dp"
+      android:background="@drawable/ic_shutter_white"
+      android:layout_alignParentBottom="true"
+      android:layout_centerHorizontal="true"/>
+</RelativeLayout>
