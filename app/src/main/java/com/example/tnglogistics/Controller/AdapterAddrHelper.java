@@ -9,13 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.tnglogistics.Model.RecyclePlanModel;
+import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.R;
 
 import java.util.ArrayList;
 
-public class AdapterPlanHelper extends RecyclerView.Adapter<AdapterPlanHelper.ViewHolder> {
-    private ArrayList<RecyclePlanModel> itemList;
+public class AdapterAddrHelper extends RecyclerView.Adapter<AdapterAddrHelper.ViewHolder> {
+    private ArrayList<AddrModel> itemList;
     private OnItemRemovedListener itemRemovedListener; // เพิ่ม Listener
 
     public interface OnItemRemovedListener {
@@ -26,11 +26,11 @@ public class AdapterPlanHelper extends RecyclerView.Adapter<AdapterPlanHelper.Vi
         this.itemRemovedListener = listener;
     }
 
-    public AdapterPlanHelper(ArrayList<RecyclePlanModel> itemList) {
+    public AdapterAddrHelper(ArrayList<AddrModel> itemList) {
         this.itemList = itemList;
     }
 
-    public void updateList(ArrayList<RecyclePlanModel> newList) {
+    public void updateList(ArrayList<AddrModel> newList) {
         itemList = newList;
         notifyDataSetChanged();
     }
@@ -46,6 +46,10 @@ public class AdapterPlanHelper extends RecyclerView.Adapter<AdapterPlanHelper.Vi
                 itemRemovedListener.onItemRemoved();
             }
         }
+    }
+
+    public ArrayList<AddrModel> getItemList() {
+        return itemList;
     }
 
     @NonNull

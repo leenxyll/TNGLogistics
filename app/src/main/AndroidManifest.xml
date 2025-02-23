@@ -42,6 +42,17 @@
         <activity
             android:name=".View.MainActivity"
             android:exported="false" />
+        <service
+            android:name=".Controller.LocationService"
+            android:foregroundServiceType="location" />
+<!--        <receiver-->
+<!--            android:name="com.example.myapplication.GeofenceBroadcastReceiver"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.example.geofencing.GEOFENCE_ACTION" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
     </application>
 
 </manifest>

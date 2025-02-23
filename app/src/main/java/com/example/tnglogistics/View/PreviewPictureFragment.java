@@ -106,6 +106,8 @@ public class PreviewPictureFragment extends Fragment {
                                 ContextCompat.getColor(getContext(), R.color.red)
                         )));
                         txtview_detectnum.setText("0");
+                        // for test
+                        btn_confirm.setVisibility(View.VISIBLE);
                     } else {
                         txtview_detectnum.setText(result);
                         btn_confirm.setVisibility(View.VISIBLE);
@@ -139,6 +141,7 @@ public class PreviewPictureFragment extends Fragment {
                 // ลบ TextView ออกและเพิ่ม EditText เข้าไปแทน
                 ((LinearLayout) v.getParent()).removeView(txtview_detectnum);
                 ((LinearLayout) v.getParent()).addView(editText, 1); // ใส่ที่ตำแหน่งที่ต้องการใน LinearLayout
+                imgview_edt.setVisibility(View.GONE);
             }
         });
 

@@ -45,7 +45,7 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     // import Google Maps SDK ที่มีคลาส LatLng
-    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.android.gms:play-services-maps:19.1.0'
 
     implementation libs.camera.core.v130
     implementation libs.camera.camera2

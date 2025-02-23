@@ -1,13 +1,12 @@
 package com.example.tnglogistics.View;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,15 +21,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.tnglogistics.Controller.AdapterPlanHelper;
+import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
-import com.example.tnglogistics.Model.RecyclePlanModel;
+//import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.R;
-import com.example.tnglogistics.ViewModel.RecyclePlanViewModel;
+import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,9 +41,11 @@ import java.util.ArrayList;
  */
 public class PlanFragment extends Fragment {
     private static final String TAG = "PlanFragment";
-    private RecyclePlanViewModel recyclePlanViewModel;
-    private AdapterPlanHelper adapter;
+//    private GeofenceHelper geofenceHelper;
+    private RecycleAddrViewModel recycleAddrViewModel;
+    private AdapterAddrHelper adapter;
     private String addr;
+    private LatLng tmpLatLng;
     private Button btn_opencamera;
 
     @Override
@@ -52,7 +56,7 @@ public class PlanFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new AdapterPlanHelper(new ArrayList<>());
+        adapter = new AdapterAddrHelper(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
         EditText edt_address = view.findViewById(R.id.edt_address);
@@ -60,17 +64,17 @@ public class PlanFragment extends Fragment {
         Button btn_check = view.findViewById(R.id.btn_check);
         btn_opencamera = view.findViewById(R.id.btn_opencamera);
 
-        recyclePlanViewModel = new ViewModelProvider(this).get(RecyclePlanViewModel.class);
-        recyclePlanViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
+        recycleAddrViewModel = new ViewModelProvider(this).get(RecycleAddrViewModel.class);
+        recycleAddrViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
             adapter.updateList(items);
             checkItemList(items);
         });
 
         // ตั้งค่า Listener เมื่อมีการลบไอเท็ม
-        adapter.setOnItemRemovedListener(new AdapterPlanHelper.OnItemRemovedListener() {
+        adapter.setOnItemRemovedListener(new AdapterAddrHelper.OnItemRemovedListener() {
             @Override
             public void onItemRemoved() {
-                ArrayList<RecyclePlanModel> currentList = recyclePlanViewModel.getItemList().getValue();
+                ArrayList<AddrModel> currentList = recycleAddrViewModel.getItemList().getValue();
                 checkItemList(currentList); // เรียกเช็คข้อมูลใหม่
             }
         });
@@ -100,7 +104,7 @@ public class PlanFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (!addr.isEmpty()) {
-                    recyclePlanViewModel.addItem(addr);
+                    recycleAddrViewModel.addItem(addr, tmpLatLng);
                     edt_address.setText("");
                 }
                 btn_add.setVisibility(View.GONE);
@@ -124,6 +128,7 @@ public class PlanFragment extends Fragment {
                             intent.setPackage("com.google.android.apps.maps");
                             Log.d(TAG, "Open gg maps " + location);
                             startActivity(intent);
+                            tmpLatLng = new LatLng(latLng.latitude, latLng.longitude);
                             btn_add.setVisibility(View.VISIBLE);
                             btn_check.setVisibility(View.GONE);
                         } else {
@@ -136,19 +141,31 @@ public class PlanFragment extends Fragment {
             }
         });
 
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+//        geofenceHelper = GeofenceHelper.getInstance(requireContext());
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ArrayList<AddrModel> addrList = recycleAddrViewModel.getItemList().getValue();
+                Log.d(TAG, "Size Addr :"+addrList.size());
+                for (AddrModel addr : addrList) {
+//                    geofenceHelper.addGeofence(UUID.randomUUID().toString(),addr.getLatLng());
+                }
+                Toast.makeText(getContext(), "GEOFENCE ADDED", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
                 ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
             }
         });
-
-        return view;
     }
 
     // ฟังก์ชันเช็คว่ามีไอเท็มเหลือหรือไม่
-    private void checkItemList(ArrayList<RecyclePlanModel> items) {
+    private void checkItemList(ArrayList<AddrModel> items) {
         if (items != null && !items.isEmpty()) {
             btn_opencamera.setVisibility(View.VISIBLE);
         } else {
