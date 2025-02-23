@@ -1,9 +1,12 @@
 package com.example.tnglogistics.View;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -63,6 +66,9 @@ public class PlanFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // ถ้ามีการแก้ไขข้อความ ให้แสดง btn_check และซ่อน btn_add
                 if (!s.toString().trim().isEmpty()) {
+                    edt_address.setBackgroundTintList((ColorStateList.valueOf(
+                            ContextCompat.getColor(getContext(), R.color.neutral4)
+                    )));
                     btn_check.setVisibility(View.VISIBLE);
                     btn_add.setVisibility(View.GONE);
                 }
@@ -93,15 +99,21 @@ public class PlanFragment extends Fragment {
                 GeocodeHelper.getLatLngAsync(getActivity(), addr, new GeocodeHelper.GeocodeCallback() {
                     @Override
                     public void onAddressFetched(LatLng latLng) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri location = Uri.parse("geo:" + latLng.latitude + "," + latLng.longitude + "?q=" + latLng.latitude + "," + latLng.longitude);
-                        intent.setData(location); // เปิดแผนที่
-                        intent.setPackage("com.google.android.apps.maps");
-                        Log.d(TAG, "Open gg maps " + location);
-                        startActivity(intent);
-
-                        btn_add.setVisibility(View.VISIBLE);
-                        btn_check.setVisibility(View.GONE);
+                        Log.d(TAG, "latlng is : "+latLng);
+                        if(latLng != null){
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            Uri location = Uri.parse("geo:" + latLng.latitude + "," + latLng.longitude + "?q=" + latLng.latitude + "," + latLng.longitude);
+                            intent.setData(location); // เปิดแผนที่
+                            intent.setPackage("com.google.android.apps.maps");
+                            Log.d(TAG, "Open gg maps " + location);
+                            startActivity(intent);
+                            btn_add.setVisibility(View.VISIBLE);
+                            btn_check.setVisibility(View.GONE);
+                        } else {
+                            edt_address.setBackgroundTintList((ColorStateList.valueOf(
+                                    ContextCompat.getColor(getContext(), R.color.red)
+                            )));
+                        }
                     }
                 });
             }

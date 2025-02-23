@@ -51,7 +51,7 @@
                 android:background="@drawable/rounded_main"
                 android:backgroundTint="@color/neutral1"
                 android:text="ตรวจ"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:layout_marginStart="4dp"
                 android:textColor="@color/white"
                 android:layout_weight="1"/>
@@ -62,7 +62,7 @@
                 android:background="@drawable/rounded_main"
                 android:backgroundTint="@color/neutral1"
                 android:text="ยืนยัน"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:visibility="gone"
                 android:layout_marginStart="4dp"
                 android:textColor="@color/white"
