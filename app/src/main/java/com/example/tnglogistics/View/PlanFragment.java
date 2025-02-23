@@ -64,7 +64,7 @@ public class PlanFragment extends Fragment {
         Button btn_check = view.findViewById(R.id.btn_check);
         btn_opencamera = view.findViewById(R.id.btn_opencamera);
 
-        recycleAddrViewModel = new ViewModelProvider(this).get(RecycleAddrViewModel.class);
+        recycleAddrViewModel = new ViewModelProvider(requireActivity()).get(RecycleAddrViewModel.class);
         recycleAddrViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
             adapter.updateList(items);
             checkItemList(items);

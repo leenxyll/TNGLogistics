@@ -117,7 +117,7 @@
                 android:backgroundTint="@color/neutral4"
                 android:text="ถ่ายใหม่อีกครั้ง"
                 android:textColor="@color/neutral1"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:layout_marginEnd="4dp"
                 app:layout_constraintBottom_toBottomOf="parent">
             </Button>
@@ -133,7 +133,7 @@
                 android:visibility="gone"
                 android:layout_marginStart="4dp"
                 android:textColor="@color/white"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent">
             </Button>
         </LinearLayout>

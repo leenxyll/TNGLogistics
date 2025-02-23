@@ -67,16 +67,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFragmentPreviewPicture(String imagePath, long imageTimestamp) {
-        PreviewPictureFragment frag_preview_pic_driver = new PreviewPictureFragment();
+        PreviewPictureFragment frag_preview_pic = new PreviewPictureFragment();
 
         // ส่งค่าไปให้ FragmentB ผ่าน arguments
         Bundle args = new Bundle();
         args.putString("image_path", imagePath);
         args.putLong("image_timestamp", imageTimestamp);
-        frag_preview_pic_driver.setArguments(args);
+        frag_preview_pic.setArguments(args);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, frag_preview_pic_driver)
+                .replace(R.id.fragment_container, frag_preview_pic)
                 .addToBackStack(null)
                 .commit();
     }

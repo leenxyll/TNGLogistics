@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
 import com.example.tnglogistics.R;
@@ -150,6 +151,20 @@ public class PreviewPictureFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
                 ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+            }
+        });
+
+        btn_confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // สร้าง Fragment ใหม่ที่ต้องการแสดง
+                StatusFragment frag_status = new StatusFragment();
+
+                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
+//                transaction.addToBackStack(null);  // เพื่อให้สามารถกดปุ่ม back กลับไปยัง Fragment ก่อนหน้าได้
+                transaction.commit();
             }
         });
 

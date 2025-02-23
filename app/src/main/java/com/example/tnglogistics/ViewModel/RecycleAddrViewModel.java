@@ -25,4 +25,8 @@ public class RecycleAddrViewModel extends ViewModel {
         updatedList.add(new AddrModel(name, latLng));
         itemList.setValue(updatedList);
     }
+
+    public int getSize(){
+        return itemList.getValue().size();
+    }
 }
