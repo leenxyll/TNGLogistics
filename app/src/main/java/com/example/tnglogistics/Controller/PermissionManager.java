@@ -10,6 +10,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +115,19 @@ public class PermissionManager {
             }
         }
     }
+
+//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//        // TODO: Consider calling
+//        //    ActivityCompat#requestPermissions
+//        // here to request the missing permissions, and then overriding
+//        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//        //                                          int[] grantResults)
+//        // to handle the case where the user grants the permission. See the documentation
+//        // for ActivityCompat#requestPermissions for more details.
+//        return;
+//    }
+
+//    public static vo
 
     public static void showBackgroundLocationDialog(Activity activity) {
         new AlertDialog.Builder(activity)

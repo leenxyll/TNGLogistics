@@ -40,7 +40,7 @@
                 android:background="@drawable/rounded_border_transparent"
                 android:ems="10"
                 android:hint="กรอกสถานที่จัดส่ง"
-                android:inputType="text"
+                android:inputType="textMultiLine"
                 android:padding="16dp"
                 android:textSize="16sp"
                 android:layout_weight="3"/>
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/rounded_main"
                 android:backgroundTint="@color/neutral1"
-                android:text="ตรวจสอบ"
+                android:text="ตรวจ"
                 android:textSize="18sp"
                 android:layout_marginStart="4dp"
                 android:textColor="@color/white"

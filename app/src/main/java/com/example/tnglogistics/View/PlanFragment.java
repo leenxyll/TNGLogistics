@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +55,24 @@ public class PlanFragment extends Fragment {
         recyclePlanViewModel.getItemList().observe(getViewLifecycleOwner(), adapter::updateList);
         Log.d(TAG, "address before click "+ addr);
 
+        edt_address.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // ถ้ามีการแก้ไขข้อความ ให้แสดง btn_check และซ่อน btn_add
+                if (!s.toString().trim().isEmpty()) {
+                    btn_check.setVisibility(View.VISIBLE);
+                    btn_add.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,6 +81,7 @@ public class PlanFragment extends Fragment {
                     edt_address.setText("");
                 }
                 btn_add.setVisibility(View.GONE);
+                btn_check.setVisibility(View.VISIBLE);
             }
         });
 
@@ -80,9 +101,7 @@ public class PlanFragment extends Fragment {
                         startActivity(intent);
 
                         btn_add.setVisibility(View.VISIBLE);
-                        // นำ LatLng มาแสดงใน TextView
-//                        textViewLatLng.setText("ที่อยู่: " + latLng);
-//                        Log.d(TAG, "LatLng: " + latLng); // หรือใช้ Log เพื่อ debug
+                        btn_check.setVisibility(View.GONE);
                     }
                 });
             }
