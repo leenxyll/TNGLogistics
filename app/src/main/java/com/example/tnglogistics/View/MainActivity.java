@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.R;
 
@@ -53,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         // ขอสิทธิ์
         PermissionManager.requestPermission(this);
 
+        // เริ่มติดตามตำแหน่ง
+        startLocationService();
+
         plan_frag = new PlanFragment();
 
         // โหลดหน้าเริ่มต้น
@@ -79,5 +83,15 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, frag_preview_pic)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private void startLocationService() {
+        // เริ่ม startForegroundService เพื่อเริ่ม LocationService
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent); // ใช้ startForegroundService สำหรับ Android 8.0 (API 26) ขึ้นไป
+        } else {
+            startService(serviceIntent); // ใช้ startService สำหรับเวอร์ชันเก่ากว่า
+        }
     }
 }

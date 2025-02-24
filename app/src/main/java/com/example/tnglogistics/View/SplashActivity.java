@@ -36,8 +36,6 @@ public class SplashActivity extends AppCompatActivity {
                 if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
                     // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง HomeActivity
                     startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                    // เริ่มติดตามตำแหน่ง
-                    startLocationService();
                 } else {
                     // ถ้ายังไม่ล็อกอิน ไปยัง LoginActivity
                     startActivity(new Intent(SplashActivity.this, LoginActivity.class));
@@ -47,13 +45,4 @@ public class SplashActivity extends AppCompatActivity {
         }, SPLASH_TIMEOUT);
     }
 
-    private void startLocationService() {
-        // เริ่ม startForegroundService เพื่อเริ่ม LocationService
-        Intent serviceIntent = new Intent(this, LocationService.class);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent); // ใช้ startForegroundService สำหรับ Android 8.0 (API 26) ขึ้นไป
-        } else {
-            startService(serviceIntent); // ใช้ startService สำหรับเวอร์ชันเก่ากว่า
-        }
-    }
 }
