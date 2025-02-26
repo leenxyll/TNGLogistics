@@ -11,9 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.PermissionManager;
+import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +25,12 @@ public class MainActivity extends AppCompatActivity {
 
     // initial fragment
     private PlanFragment plan_frag;
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +65,28 @@ public class MainActivity extends AppCompatActivity {
         // เริ่มติดตามตำแหน่ง
         startLocationService();
 
-        plan_frag = new PlanFragment();
+        String lastFragment = SharedPreferencesHelper.getLastFragment(this);
+        Fragment fragment;
 
-        // โหลดหน้าเริ่มต้น
+        switch(lastFragment){
+            case "PlanFragment":
+                fragment = new PlanFragment();
+                break;
+            case "PreviewPictureFragment":
+                fragment = new PreviewPictureFragment();
+                break;
+            case "StatusFragment":
+                fragment = new StatusFragment();
+                break;
+            default:
+                fragment = new PlanFragment();
+                break;
+        }
+
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, plan_frag)
+                .replace(R.id.fragment_container, fragment)
                 .commit();
+
     }
 
     // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้

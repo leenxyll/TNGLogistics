@@ -3,6 +3,7 @@ package com.example.tnglogistics.View;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Switch;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,19 +31,35 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
-                    // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง HomeActivity
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                } else {
-                    // ถ้ายังไม่ล็อกอิน ไปยัง LoginActivity
-                    startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-                }
-                finish(); // ปิด SplashActivity
-            }
-        }, SPLASH_TIMEOUT);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
+//                    // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง HomeActivity
+//                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
+//                } else {
+//                    // ถ้ายังไม่ล็อกอิน ไปยัง LoginActivity
+//                    startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+//                }
+//                finish(); // ปิด SplashActivity
+//            }
+//        }, SPLASH_TIMEOUT);
+
+        String lastActivity = SharedPreferencesHelper.getLastActivity(this);
+        Intent intent;
+
+        switch(lastActivity){
+            case "MainActivity":
+                intent = new Intent(this, MainActivity.class);
+                break;
+            default:
+                intent = new Intent(this, MainActivity.class);
+                break;
+
+        }
+
+        startActivity(intent);
+        finish();
     }
 
 }

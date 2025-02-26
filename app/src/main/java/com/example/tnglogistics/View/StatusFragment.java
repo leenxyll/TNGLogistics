@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
 
@@ -22,6 +23,12 @@ import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
 public class StatusFragment extends Fragment {
     private static final String TAG = "StatusFragment";
     private RecycleAddrViewModel recycleAddrViewModel;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
 import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
@@ -47,6 +48,12 @@ public class PlanFragment extends Fragment {
     private String addr;
     private LatLng tmpLatLng;
     private Button btn_opencamera;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
