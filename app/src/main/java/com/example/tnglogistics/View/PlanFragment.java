@@ -56,6 +56,30 @@ public class PlanFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_plan, container, false);

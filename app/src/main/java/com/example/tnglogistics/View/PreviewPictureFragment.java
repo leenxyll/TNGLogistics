@@ -47,6 +47,30 @@ public class PreviewPictureFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.preview_picture_fragment, container, false);

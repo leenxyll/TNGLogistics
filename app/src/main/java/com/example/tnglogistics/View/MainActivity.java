@@ -33,6 +33,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+    }
+
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);

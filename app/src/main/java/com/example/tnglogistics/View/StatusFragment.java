@@ -31,6 +31,30 @@ public class StatusFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
