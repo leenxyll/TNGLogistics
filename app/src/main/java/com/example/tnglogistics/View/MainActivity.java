@@ -3,6 +3,7 @@ package com.example.tnglogistics.View;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,31 +25,51 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> cameraLauncher;
 
     // initial fragment
-    private PlanFragment plan_frag;
+//    private PlanFragment plan_frag;
 
     @Override
     protected void onPause(){
         super.onPause();
         SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+        Log.d(TAG, TAG +" onPause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+        Log.d(TAG, TAG +" onDestroy");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
+        Log.d(TAG, TAG +" onStop");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, TAG +" onStart");
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, TAG +" onResume");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, TAG +" onCreate");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, TAG +" onCreate");
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
@@ -80,27 +101,33 @@ public class MainActivity extends AppCompatActivity {
         startLocationService();
 
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
+        Log.d(TAG, lastFragment + " is lastFragment");
         Fragment fragment;
 
-        switch(lastFragment){
-            case "PlanFragment":
-                fragment = new PlanFragment();
-                break;
-            case "PreviewPictureFragment":
-                fragment = new PreviewPictureFragment();
-                break;
-            case "StatusFragment":
-                fragment = new StatusFragment();
-                break;
-            default:
-                fragment = new PlanFragment();
-                break;
+        if (savedInstanceState == null) {
+            switch (lastFragment) {
+                case "PlanFragment":
+                    fragment = PlanFragment.newInstance();
+                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
+                    break;
+//                case "PreviewPictureFragment":
+//                    fragment = PreviewPictureFragment.newInstance();
+//                    break;
+                case "StatusFragment":
+                    fragment = StatusFragment.newInstance();
+                    break;
+                default:
+                    fragment = PlanFragment.newInstance();
+                    Log.d(TAG, "Call DefaultFragment");
+                    break;
+            }
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+
         }
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .commit();
-
+//            finish();
     }
 
     // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้
@@ -109,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFragmentPreviewPicture(String imagePath, long imageTimestamp) {
-        PreviewPictureFragment frag_preview_pic = new PreviewPictureFragment();
+        PreviewPictureFragment frag_preview_pic = PreviewPictureFragment.newInstance();
 
         // ส่งค่าไปให้ FragmentB ผ่าน arguments
         Bundle args = new Bundle();
@@ -119,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, frag_preview_pic)
-                .addToBackStack(null)
+//                .addToBackStack(null)
                 .commit();
     }
 

@@ -37,13 +37,13 @@ public class SharedPreferencesHelper {
     public static void saveLastFragment(Context context, String fragmentName){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();;
-        editor.putString(KEY_LAST_ACTIVITY, fragmentName);
+        editor.putString(KEY_LAST_FRAGMENT, fragmentName);
         editor.apply();
     }
 
     public static String getLastFragment(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "plan_frag");
+        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "PlanFragment");
     }
 
 

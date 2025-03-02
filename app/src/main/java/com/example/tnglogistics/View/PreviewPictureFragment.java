@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -38,7 +39,15 @@ import java.util.Locale;
 public class PreviewPictureFragment extends Fragment {
     private static String TAG ="PreviewPictureFragment";
     private TextRecognitionHelper txtRecog;
+    private OnBackPressedCallback callback;
 
+    public static PreviewPictureFragment newInstance() {
+        return new PreviewPictureFragment();
+    }
+
+    public OnBackPressedCallback getCallback() {
+        return callback;
+    }
 
     @Override
     public void onPause() {

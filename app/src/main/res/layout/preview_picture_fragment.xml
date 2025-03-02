@@ -33,12 +33,12 @@
                 android:layout_height="24dp"
                 android:background="@drawable/ic_time_black"/>
 
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:textSize="16sp"-->
-<!--                android:text="เวลา : "-->
-<!--                android:layout_marginStart="8dp"/>-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="เวลา : "
+                android:layout_marginStart="8dp"/>
 
             <TextView
                 android:id="@+id/txtview_time"
@@ -68,12 +68,12 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/ic_car_black"/>
 
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="8dp"-->
-<!--                android:text="เลขไมล์ : "-->
-<!--                android:textSize="16sp"/>-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="เลขไมล์ : "
+                android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/txtview_detectnum"
@@ -83,11 +83,11 @@
                 android:textSize="16sp"
                 android:textColor="@color/neutral1"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" กิโลเมตร"
-                android:textSize="16sp"/>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text=" กิโลเมตร"-->
+<!--                android:textSize="16sp"/>-->
 
             <View
                 android:layout_width="0dp"

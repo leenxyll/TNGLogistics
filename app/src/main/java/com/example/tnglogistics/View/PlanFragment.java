@@ -1,5 +1,6 @@
 package com.example.tnglogistics.View;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tnglogistics.Controller.AdapterAddrHelper;
@@ -30,6 +33,7 @@ import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
+import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -48,58 +52,152 @@ public class PlanFragment extends Fragment {
     private String addr;
     private LatLng tmpLatLng;
     private Button btn_opencamera;
+    private ShipLocationViewModel shipLocationViewModel;
+
+    public static PlanFragment newInstance() {
+        return new PlanFragment();
+    }
 
     @Override
     public void onPause() {
         super.onPause();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+        Log.d(TAG, TAG +" onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+        Log.d(TAG, TAG +" onStop");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+        Log.d(TAG, TAG +" onDestroy");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+        Log.d(TAG, TAG +" onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PlanFragment");
+        Log.d(TAG, TAG +" onDetach");
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.d(TAG, TAG +" onAttach");
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, TAG +" onCreate");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, TAG +" onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, TAG +" onResume");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, TAG +" onCreateView");
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
+
+//        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+//        shipLocationViewModel.fetchLocationsFromServer(); // ดึงข้อมูลจาก Server
+//
+//        shipLocationViewModel.getShipLocationList().observe(getViewLifecycleOwner(), shipLocations -> {
+//            Log.d(TAG, ""+shipLocations);
+//        });
+
 
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new AdapterAddrHelper(new ArrayList<>());
+        adapter = new AdapterAddrHelper(new ArrayList<>(), true);
         recyclerView.setAdapter(adapter);
 
-        EditText edt_address = view.findViewById(R.id.edt_address);
-        Button btn_add = view.findViewById(R.id.btn_add);
-        Button btn_check = view.findViewById(R.id.btn_check);
-        btn_opencamera = view.findViewById(R.id.btn_opencamera);
-
-        recycleAddrViewModel = new ViewModelProvider(requireActivity()).get(RecycleAddrViewModel.class);
+        recycleAddrViewModel = RecycleAddrViewModel.getInstance(requireActivity().getApplication());
         recycleAddrViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
             adapter.updateList(items);
             checkItemList(items);
         });
+
+
+        // สร้างและเชื่อมต่อ ItemTouchHelper
+        ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return true; // อนุญาตให้ลากได้เมื่อกดค้าง
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return false; // ปิดการเลื่อนเพื่อสไลด์
+            }
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                int fromPosition = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+                // ตรวจสอบว่า fromPosition และ toPosition อยู่ในขอบเขตของ itemList หรือไม่
+                if (fromPosition >= 0 && fromPosition < adapter.getItemList().size() && toPosition >= 0 && toPosition < adapter.getItemList().size()) {
+                    // สลับตำแหน่งรายการ
+                    Log.d("Adapter", "Condition True");
+                    AddrModel fromItem = adapter.getItemList().get(fromPosition);
+                    adapter.getItemList().set(fromPosition, adapter.getItemList().get(toPosition));
+                    adapter.getItemList().set(toPosition, fromItem);
+                    adapter.notifyItemMoved(fromPosition, toPosition);
+                    recycleAddrViewModel.getItemList().observe(getViewLifecycleOwner(), items -> {
+                        adapter.updateList(items);
+                    });
+                    return true;  // คืนค่า true เมื่อการย้ายรายการเสร็จสมบูรณ์
+                }
+                Log.d("Adapter", "Condition false");
+                return false;  // คืนค่า false หากไม่สามารถย้ายรายการได้
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                // ไม่มีการใช้งานการ swipe
+            }
+
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN; // อนุญาตให้ลากขึ้นและลง
+                int swipeFlags = 0;  // ปิดการลากซ้ายขวา
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+        };
+
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+
+        EditText edt_address = view.findViewById(R.id.edt_address);
+        Button btn_add = view.findViewById(R.id.btn_add);
+        Button btn_check = view.findViewById(R.id.btn_check);
+        TextView txtview_address = view.findViewById(R.id.txtview_address);
+        btn_opencamera = view.findViewById(R.id.btn_opencamera);
 
         // ตั้งค่า Listener เมื่อมีการลบไอเท็ม
         adapter.setOnItemRemovedListener(new AdapterAddrHelper.OnItemRemovedListener() {
@@ -140,6 +238,8 @@ public class PlanFragment extends Fragment {
                 }
                 btn_add.setVisibility(View.GONE);
                 btn_check.setVisibility(View.VISIBLE);
+                txtview_address.setVisibility(View.GONE);
+                edt_address.setVisibility(View.VISIBLE);
             }
         });
 
@@ -162,6 +262,11 @@ public class PlanFragment extends Fragment {
                             tmpLatLng = new LatLng(latLng.latitude, latLng.longitude);
                             btn_add.setVisibility(View.VISIBLE);
                             btn_check.setVisibility(View.GONE);
+
+                            // เปลี่ยน edt_address เป็น TextView
+                            edt_address.setVisibility(View.GONE);
+                            txtview_address.setVisibility(View.VISIBLE);
+                            txtview_address.setText(addr);
                         } else {
                             edt_address.setBackgroundTintList((ColorStateList.valueOf(
                                     ContextCompat.getColor(getContext(), R.color.red)
@@ -172,12 +277,21 @@ public class PlanFragment extends Fragment {
             }
         });
 
+        txtview_address.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                edt_address.setVisibility(View.VISIBLE);
+                txtview_address.setVisibility(View.GONE);
+            }
+        });
+
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, TAG +" onViewCreated");
 
         geofenceHelper = GeofenceHelper.getInstance(requireContext());
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
@@ -185,12 +299,17 @@ public class PlanFragment extends Fragment {
             public void onClick(View v) {
                 ArrayList<AddrModel> addrList = recycleAddrViewModel.getItemList().getValue();
                 Log.d(TAG, "Size Addr :"+addrList.size());
-                for (AddrModel addr : addrList) {
-                    geofenceHelper.addGeofence(UUID.randomUUID().toString(),addr.getLatLng());
+                if (addrList != null) {
+                    for (int i = 0; i < addrList.size(); i++) {
+                        String generatedId = UUID.randomUUID().toString();
+                        recycleAddrViewModel.updateItemId(i, generatedId); // อัปเดต ID ให้แต่ละตัว
+                        geofenceHelper.addGeofence(generatedId, recycleAddrViewModel.getItem(i).getLatLng());
+                    }
                 }
                 Toast.makeText(getContext(), "GEOFENCE ADDED", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
                 ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+
             }
         });
     }

@@ -30,7 +30,7 @@ public class GeofenceHelper {
     private GeofencingClient geofencingClient;
     private List<Geofence> geofenceList = new ArrayList<>();
 
-    public GeofenceHelper(Context context) {
+    private GeofenceHelper(Context context) {
         this.context = context.getApplicationContext();
         this.geofencingClient = LocationServices.getGeofencingClient(context);
     }
