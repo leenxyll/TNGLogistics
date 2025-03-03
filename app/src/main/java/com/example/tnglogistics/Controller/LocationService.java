@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
@@ -27,8 +28,21 @@ import com.google.android.gms.location.LocationServices;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
+    private final IBinder binder = new LocalBinder();
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
+    private Location currentLocation;
+
+    public class LocalBinder extends Binder {
+        public LocationService getService() {
+            return LocationService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
 
     @Override
     public void onCreate() {
@@ -47,6 +61,7 @@ public class LocationService extends Service {
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult != null) {
                     for (Location location : locationResult.getLocations()) {
+                        currentLocation = location;
                         // อัปเดตตำแหน่งที่ได้รับ
                         Log.d(TAG, "Location: " + location.getLatitude() + ", " + location.getLongitude() + ", " + location.getTime());
                     }
@@ -56,6 +71,10 @@ public class LocationService extends Service {
 
         // เริ่มการติดตามตำแหน่ง
         startLocationUpdates();
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
     }
 
     private void startLocationUpdates() {
@@ -116,8 +135,4 @@ public class LocationService extends Service {
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
 }

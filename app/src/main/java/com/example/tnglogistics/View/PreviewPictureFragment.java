@@ -21,9 +21,9 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 
 import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Controller.LocationHelper;
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
@@ -47,6 +47,7 @@ public class PreviewPictureFragment extends Fragment {
     private OnBackPressedCallback callback;
     private ShipLocationViewModel shipLocationViewModel;
     private GeofenceHelper geofenceHelper;
+    private Location currentLocation;
     private LocationService locationService;
 
     public static PreviewPictureFragment newInstance() {
@@ -179,15 +180,25 @@ public class PreviewPictureFragment extends Fragment {
             }
         });
 
+
+        LocationHelper.getInstance(requireContext()).getCurrentLocation(requireContext(), new LocationHelper.LocationListener() {
+            @Override
+            public void onLocationResult(Location location) {
+                if(location != null){
+                    Log.d(TAG, "Current Location:" + location.getLatitude()+ " " + location.getLongitude());
+                    currentLocation = location;
+                }
+            }
+        });
+
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue();
-                if (shipLocationList != null) {
+                if (shipLocationList != null & currentLocation != null) {
                     for (int i = 0; i < shipLocationList.size(); i++) {
                         String generatedId = UUID.randomUUID().toString();
-                        shipLocationViewModel.updateGeofenceID(i, generatedId, 0.0, 0.0);
+                        shipLocationViewModel.updateGeofenceID(i, generatedId, currentLocation.getLatitude(), currentLocation.getLongitude());
                         geofenceHelper = GeofenceHelper.getInstance(requireContext());
                         geofenceHelper.addGeofence(generatedId, shipLocationViewModel.getLocation(i).getShipLoLat(), shipLocationViewModel.getLocation(i).getShipLoLong());
 //                        recycleAddrViewModel.updateItemId(i, generatedId); // อัปเดต ID ให้แต่ละตัว
