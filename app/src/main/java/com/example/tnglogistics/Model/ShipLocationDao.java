@@ -16,4 +16,11 @@ public interface ShipLocationDao {
 
     @Query("SELECT * FROM ship_location")
     LiveData<List<ShipLocation>> getAllLocations();
+
+    @Query("UPDATE ship_location SET geofenceID = :geofenceID WHERE shipLoCode = :shipLoCode")
+    void updateGeofenceID(int shipLoCode, String geofenceID);
+
+    @Query("UPDATE ship_location SET LatUpdateStatus = :LatUpdateStatus, LongUpdateStatus = :LongUpdateStatus WHERE shipLoCode = :shipLoCode")
+    void updateLatLong(int shipLoCode, Double LatUpdateStatus, Double LongUpdateStatus);
+
 }

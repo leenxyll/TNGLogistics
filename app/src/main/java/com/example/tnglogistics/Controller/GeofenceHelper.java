@@ -22,7 +22,7 @@ import java.util.List;
 public class GeofenceHelper {
     private static final String TAG = "GeofenceHelper";
 
-    private float radius = 200;
+    private float radius = 1000;
     private int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER;
     private PendingIntent pendingIntent;
     private static GeofenceHelper instance;
@@ -43,9 +43,9 @@ public class GeofenceHelper {
     }
 
     // เพิ่ม geofence
-    public void addGeofence(String ID, LatLng latLng) {
+    public void addGeofence(String ID, double latitude,double longitude) {
         Geofence geofence = new Geofence.Builder()
-                .setCircularRegion(latLng.latitude, latLng.longitude, radius)
+                .setCircularRegion(latitude, longitude, radius)
                 .setRequestId(ID)
                 .setTransitionTypes(transitionTypes)
                 .setLoiteringDelay(5000)

@@ -10,9 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.R;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AdapterShipLocationHelper extends RecyclerView.Adapter<AdapterShipLocationHelper.ViewHolder> {
-    private ArrayList<ShipLocation> shipLocationList;
+    private List<ShipLocation> shipLocationList;
     private OnItemRemovedListener itemRemovedListener; // เพิ่ม Listener
     private boolean isRemovable;
 
@@ -29,7 +30,7 @@ public class AdapterShipLocationHelper extends RecyclerView.Adapter<AdapterShipL
         this.itemRemovedListener = listener;
     }
 
-    public void updateList(ArrayList<ShipLocation> newList) {
+    public void updateList(List<ShipLocation> newList) {
         shipLocationList = newList;
         notifyDataSetChanged();
     }
@@ -47,7 +48,7 @@ public class AdapterShipLocationHelper extends RecyclerView.Adapter<AdapterShipL
         }
     }
 
-    public ArrayList<ShipLocation> getItemList() {
+    public List<ShipLocation> getItemList() {
         return shipLocationList;
     }
 

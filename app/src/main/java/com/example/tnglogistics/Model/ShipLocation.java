@@ -1,4 +1,6 @@
 package com.example.tnglogistics.Model;
+import android.icu.text.SimpleDateFormat;
+
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,62 +10,96 @@ import com.google.gson.annotations.SerializedName;
 public class ShipLocation {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("ShipLoCode")
-    private int shipLoCode;
+    private int ShipLoCode;
     @SerializedName("ShipLoLat")
-    private Double shipLoLat;
+    private Double ShipLoLat;
     @SerializedName("ShipLoLong")
-    private Double shipLoLong;
+    private Double ShipLoLong;
     @SerializedName("ShipLoAddr")
-    private String shipLoAddr;
+    private String ShipLoAddr;
     @SerializedName("ShipLoAddr2")
-    private String shipLoAddr2;
-    private String geofenceID; // ใช้เป็น ID อ้างอิงสำหรับ Geofencing
-    private String geofenceEvent; // เช่น ENTER, EXIT
+    private String ShipLoAddr2;
+    @SerializedName("ShipLoStatus")
+    private String ShipLoStatus;
+    @SerializedName("LatUpdateStatus")
+    private Double LatUpdateStatus;
+    @SerializedName("LongUpdateStatus")
+    private Double LongUpdateStatus;
+    @SerializedName("LastUpdateStatus")
+    private String LastUpdateStatus;
+    private String GeofenceID; // ใช้เป็น ID อ้างอิงสำหรับ Geofencing
 
-    // Constructor
-    public ShipLocation(int shipLoCode, double shipLoLat, double shipLoLong, String shipLoAddr,
-                        String shipLoAddr2, String geofenceID, String geofenceEvent) {
-        this.shipLoCode = shipLoCode;
-        this.shipLoLat = shipLoLat;
-        this.shipLoLong = shipLoLong;
-        this.shipLoAddr = shipLoAddr;
-        this.shipLoAddr2 = shipLoAddr2;
-        this.geofenceID = geofenceID;
-        this.geofenceEvent = geofenceEvent;
+    public ShipLocation() {
+    }
+
+    public ShipLocation(double ShipLoLat, double ShipLoLong, String ShipLoAddr) {
+        this.ShipLoLat = ShipLoLat;
+        this.ShipLoLong = ShipLoLong;
+        this.ShipLoAddr = ShipLoAddr;
     }
 
     // Getter และ Setter
-    public int getShipLoCode() { return shipLoCode; }
-    public void setShipLoCode(int shipLoCode) { this.shipLoCode = shipLoCode; }
+    public int getShipLoCode() { return ShipLoCode; }
+    public void setShipLoCode(int ShipLoCode) { this.ShipLoCode = ShipLoCode; }
 
     public Double getShipLoLat() {
-        if(shipLoLat != null){
-            return shipLoLat.doubleValue();
+        if(ShipLoLat != null){
+            return ShipLoLat.doubleValue();
         } else {
             return 0.0;
         }
     }
-    public void setShipLoLat(Double shipLoLat) { this.shipLoLat = shipLoLat; }
+    public void setShipLoLat(Double ShipLoLat) { this.ShipLoLat = ShipLoLat; }
 
     public Double getShipLoLong() {
-        if(shipLoLat != null){
-            return shipLoLat.doubleValue();
+        if(ShipLoLong != null){
+            return ShipLoLong.doubleValue();
         } else {
             return 0.0;
         }
     }
-    public void setShipLoLong(Double shipLoLong) { this.shipLoLong = shipLoLong; }
+    public void setShipLoLong(Double ShipLoLong) { this.ShipLoLong = ShipLoLong; }
 
-    public String getShipLoAddr() { return shipLoAddr; }
-    public void setShipLoAddr(String shipLoAddr) { this.shipLoAddr = shipLoAddr; }
+    public String getShipLoAddr() { return ShipLoAddr; }
+    public void setShipLoAddr(String ShipLoAddr) { this.ShipLoAddr = ShipLoAddr; }
 
-    public String getShipLoAddr2() { return shipLoAddr2; }
-    public void setShipLoAddr2(String shipLoAddr2) { this.shipLoAddr2 = shipLoAddr2; }
+    public String getShipLoAddr2() { return ShipLoAddr2; }
+    public void setShipLoAddr2(String ShipLoAddr2) { this.ShipLoAddr2 = ShipLoAddr2; }
 
-    public String getGeofenceID() { return geofenceID; }
-    public void setGeofenceID(String geofenceID) { this.geofenceID = geofenceID; }
+    public String getShipLoStatus() {
+        return ShipLoStatus;
+    }
 
-    public String getGeofenceEvent() { return geofenceEvent; }
-    public void setGeofenceEvent(String geofenceEvent) { this.geofenceEvent = geofenceEvent; }
+    public void setShipLoStatus(String ShipLoStatus) {
+        this.ShipLoStatus = ShipLoStatus;
+    }
+
+    public Double getLatUpdateStatus() {
+        return LatUpdateStatus;
+    }
+
+    public void setLatUpdateStatus(Double LatUpdateStatus) {
+        this.LatUpdateStatus = LatUpdateStatus;
+    }
+
+    public Double getLongUpdateStatus() {
+        return LongUpdateStatus;
+    }
+
+    public void setLongUpdateStatus(Double LongUpdateStatus) {
+        this.LongUpdateStatus = LongUpdateStatus;
+    }
+
+    public String getLastUpdateStatus() {
+        return LastUpdateStatus;
+    }
+
+    public void setLastUpdateStatus(String LastUpdateStatus) {
+        this.LastUpdateStatus = LastUpdateStatus;
+    }
+
+    public String getGeofenceID() { return GeofenceID; }
+    public void setGeofenceID(String GeofenceID) { this.GeofenceID = GeofenceID; }
+
 }
 

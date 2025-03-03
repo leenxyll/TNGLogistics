@@ -9,10 +9,11 @@ public class SharedPreferencesHelper {
     private static final String KEY_LAST_ACTIVITY = "lastScreen";
     private static final String KEY_LAST_FRAGMENT = "lastFragment";
     private static final String KEY_USER_SESSION = "UserSession";
+    private static final String KEY_TRUCK = "TruckReg";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(KEY_USER_SESSION, true);  // Default to false
+        return sharedPreferences.getBoolean(KEY_USER_SESSION, false);  // Default to false
     }
 
     public static void setUserLoggedIn(Context context, boolean isLoggedIn) {
@@ -43,7 +44,19 @@ public class SharedPreferencesHelper {
 
     public static String getLastFragment(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "PlanFragment");
+        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "LoginDriverFragment");
+    }
+
+    public static void saveTruck(Context context, String truckReg){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();;
+        editor.putString(KEY_TRUCK, truckReg);
+        editor.apply();
+    }
+
+    public static String getTruck(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(KEY_TRUCK, "");
     }
 
 

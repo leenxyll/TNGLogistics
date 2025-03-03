@@ -1,11 +1,10 @@
 package com.example.tnglogistics.View;
-
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -18,18 +17,24 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 
+import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
+import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,6 +45,9 @@ public class PreviewPictureFragment extends Fragment {
     private static String TAG ="PreviewPictureFragment";
     private TextRecognitionHelper txtRecog;
     private OnBackPressedCallback callback;
+    private ShipLocationViewModel shipLocationViewModel;
+    private GeofenceHelper geofenceHelper;
+    private LocationService locationService;
 
     public static PreviewPictureFragment newInstance() {
         return new PreviewPictureFragment();
@@ -90,6 +98,8 @@ public class PreviewPictureFragment extends Fragment {
         LinearLayout container_milleage = view.findViewById(R.id.container_milleage);
         Button btn_confirm = view.findViewById(R.id.btn_confirm);
         Button btn_opencameara_agian = view.findViewById(R.id.btn_opencamera_again);
+        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+
         String imagePath;
         long imageTimestamp;
 
@@ -132,6 +142,18 @@ public class PreviewPictureFragment extends Fragment {
             }
         }
 
+//        // สังเกตตำแหน่งจาก LocationService
+//        locationService = new LocationService(); // หรือ bindService() ถ้าต้องการ bound service
+//        locationService.getLocationLiveData().observe(this, new Observer<Location>() {
+//            @Override
+//            public void onChanged(Location location) {
+//                // รับตำแหน่งที่อัปเดต
+//                if (location != null) {
+//                    Log.d("MainActivity", "Updated Location: " + location.getLatitude() + ", " + location.getLongitude());
+//                }
+//            }
+//        });
+
         imgview_edt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -160,6 +182,19 @@ public class PreviewPictureFragment extends Fragment {
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue();
+                if (shipLocationList != null) {
+                    for (int i = 0; i < shipLocationList.size(); i++) {
+                        String generatedId = UUID.randomUUID().toString();
+                        shipLocationViewModel.updateGeofenceID(i, generatedId, 0.0, 0.0);
+                        geofenceHelper = GeofenceHelper.getInstance(requireContext());
+                        geofenceHelper.addGeofence(generatedId, shipLocationViewModel.getLocation(i).getShipLoLat(), shipLocationViewModel.getLocation(i).getShipLoLong());
+//                        recycleAddrViewModel.updateItemId(i, generatedId); // อัปเดต ID ให้แต่ละตัว
+//                        geofenceHelper.addGeofence(generatedId, recycleAddrViewModel.getItem(i).getLatLng());
+                    }
+                }
+
                 // สร้าง Fragment ใหม่ที่ต้องการแสดง
                 StatusFragment frag_status = new StatusFragment();
 

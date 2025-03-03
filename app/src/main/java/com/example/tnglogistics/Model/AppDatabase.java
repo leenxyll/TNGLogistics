@@ -4,9 +4,13 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {ShipLocation.class}, version = 1)
+@Database(entities = {ShipLocation.class, Truck.class, Trip.class, ShipmentList.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ShipLocationDao shipLocationDao();
+    public abstract TruckDao truckDao();
+    public abstract TripDao tripDao();
+    public abstract ShipmentListDao shipmentListDao();
+
 
     private static volatile AppDatabase INSTANCE;
 
