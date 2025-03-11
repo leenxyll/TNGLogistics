@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,9 +21,12 @@ import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.TripViewModel;
+import com.example.tnglogistics.ViewModel.TruckViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private TruckViewModel truckViewModel;
 
     private ActivityResultLauncher<Intent> cameraLauncher;
 
@@ -72,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG +" onCreate");
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        ImageView imgview_logo_navbar = findViewById(R.id.imgview_logo_navbar);
 
         // เหมาะกับ Android 10++ ปรับขนาด padding ให้ UI ไม่ถูกซ้อนทับโดย status bar และ navigation bar
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -92,10 +99,21 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // ลงทะเบียน Permission Launcher
-        PermissionManager.registerPermissionLauncher(this);
-        // ขอสิทธิ์
-        PermissionManager.requestPermission(this);
+        truckViewModel = TruckViewModel.getInstance(getApplication());
+
+        truckViewModel.getTruckByRegFromSharedPreferences(this).observe(this, truck -> {
+            if (truck != null) {
+                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+//        // ลงทะเบียน Permission Launcher
+//        PermissionManager.registerPermissionLauncher(this);
+//        // ขอสิทธิ์
+//        PermissionManager.requestPermission(this);
 
         // เริ่มติดตามตำแหน่ง
         startLocationService();
@@ -127,6 +145,15 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
 
         }
+        imgview_logo_navbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferencesHelper.setUserLoggedIn(MainActivity.this, false);
+                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+                startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+                finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+            }
+        });
 //            finish();
     }
 

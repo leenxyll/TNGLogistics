@@ -11,31 +11,29 @@ public class ShipLocation {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("ShipLoCode")
     private int ShipLoCode;
+
     @SerializedName("ShipLoLat")
     private Double ShipLoLat;
+
     @SerializedName("ShipLoLong")
     private Double ShipLoLong;
+
     @SerializedName("ShipLoAddr")
     private String ShipLoAddr;
+
     @SerializedName("ShipLoAddr2")
     private String ShipLoAddr2;
-    @SerializedName("ShipLoStatus")
-    private String ShipLoStatus;
-    @SerializedName("LatUpdateStatus")
-    private Double LatUpdateStatus;
-    @SerializedName("LongUpdateStatus")
-    private Double LongUpdateStatus;
-    @SerializedName("LastUpdateStatus")
-    private String LastUpdateStatus;
-    private String GeofenceID; // ใช้เป็น ID อ้างอิงสำหรับ Geofencing
+
+    private long createdAt;
 
     public ShipLocation() {
     }
 
-    public ShipLocation(double ShipLoLat, double ShipLoLong, String ShipLoAddr) {
+    public ShipLocation(double ShipLoLat, double ShipLoLong, String ShipLoAddr, long createdAt) {
         this.ShipLoLat = ShipLoLat;
         this.ShipLoLong = ShipLoLong;
         this.ShipLoAddr = ShipLoAddr;
+        this.createdAt = createdAt;
     }
 
     // Getter และ Setter
@@ -66,40 +64,12 @@ public class ShipLocation {
     public String getShipLoAddr2() { return ShipLoAddr2; }
     public void setShipLoAddr2(String ShipLoAddr2) { this.ShipLoAddr2 = ShipLoAddr2; }
 
-    public String getShipLoStatus() {
-        return ShipLoStatus;
+    public long getCreatedAt() {
+        return createdAt;
     }
 
-    public void setShipLoStatus(String ShipLoStatus) {
-        this.ShipLoStatus = ShipLoStatus;
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
-
-    public Double getLatUpdateStatus() {
-        return LatUpdateStatus;
-    }
-
-    public void setLatUpdateStatus(Double LatUpdateStatus) {
-        this.LatUpdateStatus = LatUpdateStatus;
-    }
-
-    public Double getLongUpdateStatus() {
-        return LongUpdateStatus;
-    }
-
-    public void setLongUpdateStatus(Double LongUpdateStatus) {
-        this.LongUpdateStatus = LongUpdateStatus;
-    }
-
-    public String getLastUpdateStatus() {
-        return LastUpdateStatus;
-    }
-
-    public void setLastUpdateStatus(String LastUpdateStatus) {
-        this.LastUpdateStatus = LastUpdateStatus;
-    }
-
-    public String getGeofenceID() { return GeofenceID; }
-    public void setGeofenceID(String GeofenceID) { this.GeofenceID = GeofenceID; }
-
 }
 

@@ -32,6 +32,21 @@ public class ShipmentList {
     @SerializedName("ShipListShipLoCode")
     public int ShipListShipLoCode;
 
+    @SerializedName("ShipListStatus")
+    private String ShipListStatus;
+
+    @SerializedName("LatUpdateStatus")
+    private Double LatUpdateStatus;
+
+    @SerializedName("LongUpdateStatus")
+    private Double LongUpdateStatus;
+
+    @SerializedName("LastUpdateStatus")
+    private String LastUpdateStatus;
+
+    private String GeofenceID; // ใช้เป็น ID อ้างอิงสำหรับ Geofencing
+
+
     public ShipmentList() {
     }
 
@@ -63,5 +78,45 @@ public class ShipmentList {
 
     public void setShipListShipLoCode(int shipListShipLoCode) {
         ShipListShipLoCode = shipListShipLoCode;
+    }
+
+    public String getShipListStatus() {
+        return ShipListStatus;
+    }
+
+    public void setShipListStatus(String shipListStatus) {
+        ShipListStatus = shipListStatus;
+    }
+
+    public Double getLatUpdateStatus() {
+        return LatUpdateStatus;
+    }
+
+    public void setLatUpdateStatus(Double latUpdateStatus) {
+        LatUpdateStatus = latUpdateStatus;
+    }
+
+    public Double getLongUpdateStatus() {
+        return LongUpdateStatus;
+    }
+
+    public void setLongUpdateStatus(Double longUpdateStatus) {
+        LongUpdateStatus = longUpdateStatus;
+    }
+
+    public String getLastUpdateStatus() {
+        return LastUpdateStatus;
+    }
+
+    public void setLastUpdateStatus(String lastUpdateStatus) {
+        LastUpdateStatus = lastUpdateStatus;
+    }
+
+    public String getGeofenceID() {
+        return GeofenceID;
+    }
+
+    public void setGeofenceID(String geofenceID) {
+        GeofenceID = geofenceID;
     }
 }

@@ -33,6 +33,10 @@ public class Trip {
     public Trip(int tripTruckCode) {
         TripTruckCode = tripTruckCode;
     }
+    public Trip(int tripCode, int tripTruckCode) {
+        TripCode = tripCode;
+        TripTruckCode = tripTruckCode;
+    }
 
     public int getTripCode() {
         return TripCode;

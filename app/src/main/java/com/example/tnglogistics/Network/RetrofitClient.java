@@ -10,7 +10,7 @@ public class RetrofitClient {
 
     private RetrofitClient() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://9005-2001-fb1-a1-2cad-f007-4c20-b279-2de8.ngrok-free.app ") // เปลี่ยนเป็น URL ของ API จริง
+                .baseUrl("https://d66d-2001-fb1-a3-652e-37fe-16bb-4162-fcd.ngrok-free.app ") // เปลี่ยนเป็น URL ของ API จริง
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())) // รองรับค่า null
                 .build();
 

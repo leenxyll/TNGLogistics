@@ -23,7 +23,7 @@ public class GeofenceHelper {
     private static final String TAG = "GeofenceHelper";
 
     private float radius = 1000;
-    private int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER;
+    private int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL;
     private PendingIntent pendingIntent;
     private static GeofenceHelper instance;
     private Context context;
@@ -74,8 +74,10 @@ public class GeofenceHelper {
     }
 
     // ลบ geofence
-    public void removeGeofence(PendingIntent pendingIntent) {
-        geofencingClient.removeGeofences(pendingIntent)
+    public void removeGeofenceByID(String geofenceID) {
+        List<String> geofenceIDs = new ArrayList<>();
+        geofenceIDs.add(geofenceID);
+        geofencingClient.removeGeofences(geofenceIDs)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Geofence removed"))
                 .addOnFailureListener(e -> Log.e(TAG, "Error removing geofence", e));
     }

@@ -1,16 +1,23 @@
 package com.example.tnglogistics.Controller;
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
+import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.View.MainActivity;
+import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 //import okhttp3.Call;
 //import okhttp3.Callback;
@@ -19,80 +26,63 @@ import java.util.List;
 //import okhttp3.Response;
 
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
-
     private static final String TAG = "GeofenceBroadcastReceiver";
+    private ShipmentListViewModel shipmentListViewModel;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // TODO: This method is called when the BroadcastReceiver is receiving
-        // an Intent broadcast.
         Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Receiver called "+intent.getAction());
-        Log.d(TAG, "Intent Action: " + intent.getAction());
-        Log.d(TAG, "Intent Extras: " + intent.getExtras());
+        Log.d(TAG, "Receiver called " + intent.getAction());
 
+        shipmentListViewModel = ShipmentListViewModel.getInstance((Application) context.getApplicationContext());
         NotificationHelper notificationHelper = new NotificationHelper(context);
 
+        // ตรวจสอบ GeofencingEvent
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        Log.d(TAG, "Receiver geofence event "+geofencingEvent);
-        if (geofencingEvent.hasError()) {
+        if (geofencingEvent == null || geofencingEvent.hasError()) {
             Log.d(TAG, "onReceive: Error receiving geofence event...");
             return;
         }
 
+        // ดึง Geofence ที่ถูกทริกเกอร์
         List<Geofence> geofenceList = geofencingEvent.getTriggeringGeofences();
-        for (Geofence geofence: geofenceList) {
-            Log.d(TAG, "onReceive: " + geofence.getRequestId());
+        if (geofenceList == null || geofenceList.isEmpty()) {
+            Log.d(TAG, "onReceive: No geofences triggered");
+            return;
         }
-//        Location location = geofencingEvent.getTriggeringLocation();
+
         int transitionType = geofencingEvent.getGeofenceTransition();
 
-        switch (transitionType) {
-            case Geofence.GEOFENCE_TRANSITION_ENTER:
-                Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
-                Toast.makeText(context, "GEOFENCE_TRANSITION_ENTER", Toast.LENGTH_SHORT).show();
-                notificationHelper.sendHighPriorityNotification("GEOFENCE_TRANSITION_ENTER", "", MainActivity.class);
-//                callGeofenceEnterAPI();
-                break;
-            case Geofence.GEOFENCE_TRANSITION_DWELL:
-                Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
-                Toast.makeText(context, "GEOFENCE_TRANSITION_DWELL", Toast.LENGTH_SHORT).show();
-//                notificationHelper.sendHighPriorityNotification("GEOFENCE_TRANSITION_DWELL", "", ShowLog.class);
-                break;
-            case Geofence.GEOFENCE_TRANSITION_EXIT:
-                Log.d(TAG, "GEOFENCE_TRANSITION_EXIT");
-                Toast.makeText(context, "GEOFENCE_TRANSITION_EXIT", Toast.LENGTH_SHORT).show();
-//                notificationHelper.sendHighPriorityNotification("GEOFENCE_TRANSITION_EXIT", "", ShowLog.class);
-                break;
+        for (Geofence geofence : geofenceList) {
+            String geofenceId = geofence.getRequestId();
+            Log.d(TAG, "onReceive: " + geofenceId);
+
+            switch (transitionType) {
+                case Geofence.GEOFENCE_TRANSITION_ENTER:
+                    Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
+                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
+                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
+                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ใกล้ถึง");
+                    break;
+
+                case Geofence.GEOFENCE_TRANSITION_DWELL:
+                    Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
+                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ถึงแล้ว");
+
+                    GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
+                    if (geofenceHelper != null) {
+                        geofenceHelper.removeGeofenceByID(geofenceId);
+                    } else {
+                        Log.e(TAG, "GeofenceHelper instance is null, cannot remove geofence.");
+                    }
+                    break;
+
+                // กรณีถ้าต้องการใช้ EXIT ในอนาคต
+//                case Geofence.GEOFENCE_TRANSITION_EXIT:
+//                    Log.d(TAG, "GEOFENCE_TRANSITION_EXIT");
+//                    Toast.makeText(context, "ออกจากพื้นที่ Geofence", Toast.LENGTH_SHORT).show();
+//                    break;
+            }
         }
-
     }
-
-//    private void callGeofenceEnterAPI() {
-//        OkHttpClient client = new OkHttpClient();
-//
-//        // สร้าง Request
-//        Request request = new Request.Builder()
-//                .url("https://7ba5-2001-fb1-a1-7eee-150f-6a1d-72d0-8e43.ngrok-free.app/GeofenceEnter") // URL ของ API
-//                .get() // การเรียกแบบ GET
-//                .build();
-//
-//        // ส่งคำขอแบบ Asynchronous
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                Log.e(TAG, "API call failed: " + e.getMessage());
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                if (response.isSuccessful()) {
-//                    String responseData = response.body().string();
-//                    Log.d(TAG, "API Response: " + responseData);
-//                } else {
-//                    Log.e(TAG, "API Response Error: " + response.code());
-//                }
-//            }
-//        });
-//    }
 }

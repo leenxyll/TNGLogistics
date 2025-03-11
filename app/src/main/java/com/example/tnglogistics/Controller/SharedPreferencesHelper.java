@@ -10,6 +10,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_LAST_FRAGMENT = "lastFragment";
     private static final String KEY_USER_SESSION = "UserSession";
     private static final String KEY_TRUCK = "TruckReg";
+    private static final String KEY_TRIP = "TRIPCODE";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
@@ -57,6 +58,17 @@ public class SharedPreferencesHelper {
     public static String getTruck(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
         return sharedPreferences.getString(KEY_TRUCK, "");
+    }
+    public static void saveTrip(Context context, int tripCode){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();;
+        editor.putInt(KEY_TRIP, tripCode);
+        editor.apply();
+    }
+
+    public static int getTrip(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_TRIP, 0);
     }
 
 

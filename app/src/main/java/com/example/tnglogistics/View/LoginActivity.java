@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
 
@@ -26,7 +27,18 @@ public class LoginActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        // ลงทะเบียน Permission Launcher
+        PermissionManager.registerPermissionLauncher(this);
+        // ขอสิทธิ์
+        PermissionManager.requestPermission(this);
 
+
+        SharedPreferencesHelper.saveLastFragment(this, "LoginDriverFragment");
+        SharedPreferencesHelper.setUserLoggedIn(this, false);
+        SharedPreferencesHelper.saveLastActivity(this,"");
+        SharedPreferencesHelper.saveLastFragment(this,"");
+        SharedPreferencesHelper.saveTruck(this, "");
+        SharedPreferencesHelper.saveTrip(this, 0);
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
         Log.d(TAG, lastFragment + " is lastFragment");
         Fragment fragment = null;
@@ -45,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
                     break;
                 case "LoginDriverFragment":
                     fragment = LoginDriverFragment.newInstance();
+                    break;
                 default:
                     fragment = LoginDriverFragment.newInstance();
                     Log.d(TAG, "Call DefaultFragment");

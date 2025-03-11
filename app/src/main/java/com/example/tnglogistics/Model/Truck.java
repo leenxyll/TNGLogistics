@@ -17,6 +17,11 @@ public class Truck {
     public Truck() {
     }
 
+    public Truck(int truckCode, String truckReg){
+        TruckCode = truckCode;
+        TruckReg = truckReg;
+    }
+
     public Truck(String truckReg) {
         TruckReg = truckReg;
     }

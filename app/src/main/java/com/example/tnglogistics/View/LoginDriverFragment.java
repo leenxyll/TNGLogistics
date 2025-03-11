@@ -14,7 +14,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
 
 /**
@@ -24,6 +26,8 @@ import com.example.tnglogistics.ViewModel.TruckViewModel;
  */
 public class LoginDriverFragment extends Fragment {
     private TruckViewModel truckViewModel;
+    private TripViewModel tripViewModel;
+    private Truck aTruck;
     private static final String TAG = "LoginDriverFragment";
     public LoginDriverFragment() {
         // Required empty public constructor
@@ -45,6 +49,8 @@ public class LoginDriverFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login_driver, container, false);
 
         truckViewModel = TruckViewModel.getInstance(requireActivity().getApplication());
+        tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
+
         EditText edt_truckreg = view.findViewById(R.id.edt_truckreg);
         Button btn_start = view.findViewById(R.id.btn_start);
         btn_start.setOnClickListener(new View.OnClickListener() {
@@ -53,13 +59,34 @@ public class LoginDriverFragment extends Fragment {
                 String truckreg = edt_truckreg.getText().toString();
                 Log.d(TAG, ""+truckreg);
                 if (!truckreg.isEmpty()) {
-                    SharedPreferencesHelper.saveTruck(requireContext(), truckreg);
                     SharedPreferencesHelper.setUserLoggedIn(requireContext(), true);
-                    truckViewModel.addTruck(truckreg);
+                    truckViewModel.findOrCreateTruck(truckreg);
+                    SharedPreferencesHelper.saveTruck(requireContext(), truckreg);
                     Toast.makeText(getContext(), "ลงทะเบียนสำเร็จ", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+
+                    truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
+                        if (truck != null) {
+                            aTruck = truck;
+                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
+//                            tripViewModel.createTrip(aTruck.getTruckCode());
+                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
+                                if (tripCode != null ) {
+                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
+                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
+                                    Log.d(TAG, "Trip created: " + tripCode);
+                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
+                                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+                                } else {
+                                    Log.e(TAG, "Failed to create trip");
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 } else {
                     Toast.makeText(getContext(), "กรุณากรอกทะเบียนรถ", Toast.LENGTH_SHORT).show();
                 }

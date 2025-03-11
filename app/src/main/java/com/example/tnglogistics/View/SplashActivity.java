@@ -38,7 +38,7 @@ public class SplashActivity extends AppCompatActivity {
         Log.d(TAG, "Login " +SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this));
                 if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
                     Log.d(TAG, "Login call main " +SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this));
-                    // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง HomeActivity
+                    // ถ้ามีข้อมูลผู้ใช้ที่ล็อกอินแล้ว ไปยัง MainActivity
                     startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 } else {
                     Log.d(TAG, "Login call Login " +SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this));

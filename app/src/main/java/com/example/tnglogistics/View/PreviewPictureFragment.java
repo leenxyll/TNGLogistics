@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -27,12 +28,13 @@ import com.example.tnglogistics.Controller.LocationHelper;
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
-import com.example.tnglogistics.Model.ShipLocation;
+import com.example.tnglogistics.Model.ShipmentList;
+import com.example.tnglogistics.Model.Trip;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
-
+import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
+import com.example.tnglogistics.ViewModel.TripViewModel;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -44,19 +46,18 @@ import java.util.UUID;
 public class PreviewPictureFragment extends Fragment {
     private static String TAG ="PreviewPictureFragment";
     private TextRecognitionHelper txtRecog;
-    private OnBackPressedCallback callback;
     private ShipLocationViewModel shipLocationViewModel;
+    private ShipmentListViewModel shipmentListViewModel;
+    private TripViewModel tripViewModel;
     private GeofenceHelper geofenceHelper;
     private Location currentLocation;
-    private LocationService locationService;
+    private Trip aTrip;
+    private EditText edittxt_detectnum = null;
 
     public static PreviewPictureFragment newInstance() {
         return new PreviewPictureFragment();
     }
 
-    public OnBackPressedCallback getCallback() {
-        return callback;
-    }
 
     @Override
     public void onPause() {
@@ -100,6 +101,8 @@ public class PreviewPictureFragment extends Fragment {
         Button btn_confirm = view.findViewById(R.id.btn_confirm);
         Button btn_opencameara_agian = view.findViewById(R.id.btn_opencamera_again);
         shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
+        tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
 
         String imagePath;
         long imageTimestamp;
@@ -143,31 +146,19 @@ public class PreviewPictureFragment extends Fragment {
             }
         }
 
-//        // สังเกตตำแหน่งจาก LocationService
-//        locationService = new LocationService(); // หรือ bindService() ถ้าต้องการ bound service
-//        locationService.getLocationLiveData().observe(this, new Observer<Location>() {
-//            @Override
-//            public void onChanged(Location location) {
-//                // รับตำแหน่งที่อัปเดต
-//                if (location != null) {
-//                    Log.d("MainActivity", "Updated Location: " + location.getLatitude() + ", " + location.getLongitude());
-//                }
-//            }
-//        });
-
         imgview_edt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // เปลี่ยน TextView เป็น EditText
-                EditText editText = new EditText(v.getContext());
-                editText.setText(txtview_detectnum.getText());  // ใช้ข้อความจาก TextView
-                editText.setTextColor(txtview_detectnum.getCurrentTextColor());
-                editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);  // ใช้ขนาดตัวอักษรเดิม
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                edittxt_detectnum = new EditText(v.getContext());
+                edittxt_detectnum.setText(txtview_detectnum.getText());  // ใช้ข้อความจาก TextView
+                edittxt_detectnum.setTextColor(txtview_detectnum.getCurrentTextColor());
+                edittxt_detectnum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);  // ใช้ขนาดตัวอักษรเดิม
+                edittxt_detectnum.setInputType(InputType.TYPE_CLASS_NUMBER);
 
                 // ลบ TextView ออกและเพิ่ม EditText เข้าไปแทน
                 ((LinearLayout) v.getParent()).removeView(txtview_detectnum);
-                ((LinearLayout) v.getParent()).addView(editText, 1); // ใส่ที่ตำแหน่งที่ต้องการใน LinearLayout
+                ((LinearLayout) v.getParent()).addView(edittxt_detectnum, 2); // ใส่ที่ตำแหน่งที่ต้องการใน LinearLayout
                 imgview_edt.setVisibility(View.GONE);
             }
         });
@@ -194,38 +185,68 @@ public class PreviewPictureFragment extends Fragment {
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue();
-                if (shipLocationList != null & currentLocation != null) {
-                    for (int i = 0; i < shipLocationList.size(); i++) {
-                        String generatedId = UUID.randomUUID().toString();
-                        shipLocationViewModel.updateGeofenceID(i, generatedId, currentLocation.getLatitude(), currentLocation.getLongitude());
-                        geofenceHelper = GeofenceHelper.getInstance(requireContext());
-                        geofenceHelper.addGeofence(generatedId, shipLocationViewModel.getLocation(i).getShipLoLat(), shipLocationViewModel.getLocation(i).getShipLoLong());
-//                        recycleAddrViewModel.updateItemId(i, generatedId); // อัปเดต ID ให้แต่ละตัว
-//                        geofenceHelper.addGeofence(generatedId, recycleAddrViewModel.getItem(i).getLatLng());
-                    }
-                }
-
+                Log.d(TAG, "On Click");
                 // สร้าง Fragment ใหม่ที่ต้องการแสดง
                 StatusFragment frag_status = new StatusFragment();
 
                 // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
-//                transaction.addToBackStack(null);  // เพื่อให้สามารถกดปุ่ม back กลับไปยัง Fragment ก่อนหน้าได้
-                transaction.commit();
+
+                shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext())).observe(getViewLifecycleOwner(), shipmentLists -> {
+                    Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+                    if (shipmentLists != null && !shipmentLists.isEmpty()) {
+
+                        Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+                        for (ShipmentList shipment : shipmentLists) {
+                            String generatedId = UUID.randomUUID().toString();
+                            shipment.setGeofenceID(generatedId);
+                            Log.d(TAG,"updateGeofenceID : "+shipment.getShipListSeq() +" LoCode : "+shipment.getShipListShipLoCode()+" geofenceID : "+shipment.getGeofenceID());
+                            shipment.setShipListStatus("กำลังจัดส่ง");
+                            shipment.setLatUpdateStatus(currentLocation.getLatitude());
+                            shipment.setLongUpdateStatus(currentLocation.getLongitude());
+                            shipment.setLastUpdateStatus(txtview_time.getText().toString());
+                            if (shipment.getShipListStatus() != null){
+                                Log.d(TAG, ""+shipment.getShipListSeq()+" "+shipment.getShipListTripCode()+" "+shipment.getShipListShipLoCode()+" "+shipment.getShipListStatus());
+                                shipmentListViewModel.update(shipment);
+                                geofenceHelper = GeofenceHelper.getInstance(requireContext());
+                                shipLocationViewModel.getShipLocationByCode(shipment.getShipListShipLoCode()).observe(getViewLifecycleOwner(), shipLocation -> {
+                                    if (shipLocation != null) {
+                                        Log.d(TAG,"Add Geofence : "+shipment.getGeofenceID()+" "+shipLocation.getShipLoLat()+" "+shipLocation.getShipLoLong());
+                                        geofenceHelper.addGeofence(shipment.getGeofenceID(), shipLocation.getShipLoLat(), shipLocation.getShipLoLong());
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
+//                        Log.d(TAG, "trip : "+ trip.getTripCode());
+                        if (trip != null) {
+                            Log.d(TAG, "trip : " + trip.getTripCode());
+                            aTrip = trip;
+                            if(edittxt_detectnum != null){
+                                aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+                            }else{
+                                aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+                            }
+                            aTrip.setTripTimeOut(txtview_time.getText().toString());
+                            aTrip.setTripTimeOut(txtview_time.getText().toString());
+                            tripViewModel.update(aTrip);
+                        } else {
+                            Log.d(TAG, "Trip not found");
+                        }
+                    });
+                });
+
+
+                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+                new Handler().postDelayed(() -> {
+                    transaction.commit();
+                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
             }
         });
 
-//        Button btn_confirm = view.findViewById(R.id.btn_confirm);
-//        btn_confirm.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-////                if (listener != null) {
-////                    listener.onFragmentPreviewPictureButtonClicked();
-////                }
-//            }
-//        });
+
 
         return view;
     }

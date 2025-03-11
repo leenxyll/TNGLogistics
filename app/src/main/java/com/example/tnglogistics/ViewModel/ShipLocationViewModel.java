@@ -1,8 +1,12 @@
 package com.example.tnglogistics.ViewModel;
 import android.app.Application;
+import android.util.Log;
+
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
 import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.Model.ShipLocation;
@@ -10,17 +14,22 @@ import com.example.tnglogistics.Model.ShipLocationRepository;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ShipLocationViewModel extends AndroidViewModel {
     private static ShipLocationViewModel instance;
     private final ShipLocationRepository repository;
     private final MediatorLiveData<List<ShipLocation>> shipLocationList = new MediatorLiveData<>();
+//    private final MutableLiveData<List<ShipLocation>> filteredShipLocationList = new MutableLiveData<>();
+    private final MutableLiveData<Set<Integer>> filterCodes = new MutableLiveData<>(new HashSet<>()); // ใช้ Set เพื่อเก็บค่าหลายตัว
 
 
     public ShipLocationViewModel(Application application) {
         super(application);
         repository = new ShipLocationRepository(application);
+//        shipLocationList.addSource(repository.getNewLocations(System.currentTimeMillis()), shipLocationList::setValue);
         shipLocationList.addSource(repository.getAllLocations(), shipLocationList::setValue);
     }
 
@@ -35,49 +44,111 @@ public class ShipLocationViewModel extends AndroidViewModel {
         return shipLocationList;
     }
 
-    public void fetchLocationsFromServer() {
-        repository.fetchAndStoreLocations();
+    public void setNewLocations(long currentTime) {
+        // อัพเดต source ใหม่เมื่อมีการเปลี่ยนแปลงเวลา
+        shipLocationList.addSource(repository.getNewLocations(currentTime), shipLocationList::setValue);
     }
 
-    // Method สำหรับ Insert ข้อมูล
-    public void insertShipLocationToServer(ShipLocation shipLocation) {
-        repository.insertShipLocationToServer(shipLocation);
+    public LiveData<List<ShipLocation>> getNewLocations(long currentTime){
+        return repository.getNewLocations(currentTime);
     }
 
-    public void addLocation(String addr, LatLng latLng) {
+    public LiveData<ShipLocation> getShipLocationByCode(int shipLoCode) {
+        return Transformations.map(getShipLocationList(), shipLocations -> {
+            if (shipLocations == null) return null;
+            for (ShipLocation shipLocation : shipLocations) {
+                if (shipLocation.getShipLoCode() == shipLoCode) {
+                    Log.d("Repository", "Found ShipLocation with code: " + shipLoCode);
+                    return shipLocation;
+                }
+            }
+            return null; // ถ้าไม่พบ ShipLocation
+        });
+    }
+
+    // 📌 เพิ่มค่า shipLocationCode ที่ต้องการกรอง
+    public void addFilterCode(int shipLocationCode) {
+        Set<Integer> currentFilters = filterCodes.getValue();
+        if (currentFilters != null) {
+            currentFilters.add(shipLocationCode);
+            filterCodes.setValue(new HashSet<>(currentFilters)); // อัปเดตค่าใหม่
+        }
+    }
+
+    // 📌 ลบค่า shipLocationCode ออกจาก filter
+    public void removeFilterCode(int shipLocationCode) {
+        Set<Integer> currentFilters = filterCodes.getValue();
+        if (currentFilters != null && currentFilters.contains(shipLocationCode)) {
+            currentFilters.remove(shipLocationCode);
+            filterCodes.setValue(new HashSet<>(currentFilters)); // อัปเดตค่าใหม่
+        }
+    }
+
+    // ✅ ใช้ฟังก์ชันนี้แทนการ `addFilterCode()` ทีละรายการ
+    public void setFilterCodes(Set<Integer> shipLocationCodes) {
+        filterCodes.setValue(shipLocationCodes);
+    }
+
+
+    // 📌 กรองหลาย `shipLocationCode`
+    public LiveData<List<ShipLocation>> getFilteredShipLocationList() {
+        return Transformations.switchMap(filterCodes, codes ->
+                Transformations.map(shipLocationList, locations -> {
+                    if (locations == null || codes.isEmpty()) return new ArrayList<>();
+                    List<ShipLocation> filteredList = new ArrayList<>();
+                    for (ShipLocation location : locations) {
+                        if (codes.contains(location.getShipLoCode())) {
+                            filteredList.add(location);
+                        }
+                    }
+                    return filteredList;
+                })
+        );
+    }
+
+
+
+//    public void fetchLocationsFromServer() {
+//        repository.fetchAndStoreLocations();
+//    }
+
+//    // Method สำหรับ Insert ข้อมูล
+//    public void insertShipLocationToServer(ShipLocation shipLocation) {
+//        repository.insertShipLocationToServer(shipLocation);
+//    }
+
+    public void addLocation(String addr, LatLng latLng, long createdAt) {
         List<ShipLocation> updatedList = shipLocationList.getValue();
         if (updatedList != null) {
-            ShipLocation newLocation = new ShipLocation(latLng.latitude, latLng.longitude, addr);
+            ShipLocation newLocation = new ShipLocation(latLng.latitude, latLng.longitude, addr, createdAt);
             updatedList.add(newLocation);
             shipLocationList.setValue(updatedList);
-            repository.insert(newLocation);
+//            repository.insert(newLocation);
 //            updatedList.add(new AddrModel(name, latLng));
 //            itemList.setValue(updatedList);
         }
     }
 
-    public void updateGeofenceID(int index, String newId, double latitude, double longitude) {
+    public void removeLocation(ShipLocation shipLocation) {
         List<ShipLocation> updatedList = shipLocationList.getValue();
-        if (updatedList != null && index >= 0 && index < updatedList.size()) {
-            ShipLocation location = updatedList.get(index);
-            location.setGeofenceID(newId);
-            location.setShipLoStatus("พร้อมจัดส่ง");
-            location.setLatUpdateStatus(latitude);
-            location.setLongUpdateStatus(longitude);
+        if (updatedList != null) {
+            updatedList.remove(shipLocation);
             shipLocationList.setValue(updatedList);
-            repository.updateLatLong(index, latitude, longitude);
-            repository.updateGeofenceID(index, newId);
-            repository.insertShipLocationToServer(location);
+            // 📌 ถ้าต้องการให้ลบออกจาก Database ด้วย ให้เรียก repository.delete(shipLocation);
         }
     }
 
-    public ShipLocation getLocation(int index) {
-        ArrayList<ShipLocation> shipLocations = (ArrayList<ShipLocation>) shipLocationList.getValue();
-        if (shipLocations != null && index >= 0 && index < shipLocations.size()) {
-            return shipLocations.get(index);
-        } else {
-            return null; // คืนค่า null ถ้า index ไม่ถูกต้อง
-        }
+
+    public LiveData<Integer> findOrCreateShipLocation(ShipLocation shipLocation){
+        return repository.findOrCreateShipLocation(shipLocation);
     }
+
+
+//    public void removeLocation(ShipLocation shipLocation){
+//        repository.delete(shipLocation);
+//    }
+
+
+
 
 }

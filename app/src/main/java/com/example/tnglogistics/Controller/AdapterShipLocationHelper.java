@@ -23,7 +23,7 @@ public class AdapterShipLocationHelper extends RecyclerView.Adapter<AdapterShipL
     }
 
     public interface OnItemRemovedListener {
-        void onItemRemoved();
+        void onItemRemoved(int position);
     }
 
     public void setOnItemRemovedListener(OnItemRemovedListener listener) {
@@ -37,13 +37,13 @@ public class AdapterShipLocationHelper extends RecyclerView.Adapter<AdapterShipL
 
     public void removeItem(int position){
         if (position >= 0 && position < shipLocationList.size()) {
-            shipLocationList.remove(position);
+//            shipLocationList.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, shipLocationList.size()); // อัปเดตตำแหน่งที่เหลือ
 
             // แจ้งเตือนไปยัง Fragment
             if (itemRemovedListener != null) {
-                itemRemovedListener.onItemRemoved();
+                itemRemovedListener.onItemRemoved(position);
             }
         }
     }

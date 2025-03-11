@@ -31,11 +31,13 @@ import com.example.tnglogistics.Controller.AdapterShipLocationHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
 import com.example.tnglogistics.Controller.GeofenceHelper;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
-import com.example.tnglogistics.Model.AddrModel;
 import com.example.tnglogistics.Model.ShipLocation;
+import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
 import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
+import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
+import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -50,15 +52,13 @@ import java.util.UUID;
  */
 public class PlanFragment extends Fragment {
     private static final String TAG = "PlanFragment";
-    private GeofenceHelper geofenceHelper;
-    private RecycleAddrViewModel recycleAddrViewModel;
-    private AdapterAddrHelper adapter;
     private String addr;
     private LatLng tmpLatLng;
     private Button btn_opencamera;
-    private TruckViewModel truckViewModel;
+    private ShipmentListViewModel shipmentListViewModel;
     private ShipLocationViewModel shipLocationViewModel;
     private AdapterShipLocationHelper adapterShipLocationHelper;
+    private Truck aTruck;
 
     public static PlanFragment newInstance() {
         return new PlanFragment();
@@ -135,21 +135,31 @@ public class PlanFragment extends Fragment {
         adapterShipLocationHelper = new AdapterShipLocationHelper(new ArrayList<>(), true);
         recyclerView.setAdapter(adapterShipLocationHelper);
 
-        Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + SharedPreferencesHelper.getTruck(requireContext()), Toast.LENGTH_SHORT).show();
         shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
+
 //        shipLocationViewModel.fetchLocationsFromServer(); // ดึงข้อมูลจาก Server
 
-        shipLocationViewModel.getShipLocationList().observe(getViewLifecycleOwner(), shipLocations -> {
-            Log.d(TAG, ""+shipLocations);
+        shipLocationViewModel.getShipLocationList().observe(getViewLifecycleOwner(), shipLocations -> { //แก้ให้แสดงเฉพาะอันเรียกเมธอดใหม่
+            Log.d(TAG, "observe : "+shipLocations);
             adapterShipLocationHelper.updateList(shipLocations);
             checkItemList(shipLocations);
         });
 
+        shipLocationViewModel.setNewLocations(System.currentTimeMillis());
+
+
         adapterShipLocationHelper.setOnItemRemovedListener(new AdapterShipLocationHelper.OnItemRemovedListener() {
             @Override
-            public void onItemRemoved() {
+            public void onItemRemoved(int position) {
                 List<ShipLocation> currentList = shipLocationViewModel.getShipLocationList().getValue();
-                checkItemList(currentList);
+                if (currentList != null && position >= 0 && position < currentList.size()) {
+                    ShipLocation removedLocation = currentList.get(position);
+                    shipLocationViewModel.removeLocation(removedLocation);
+                    List<ShipLocation> updateList = shipLocationViewModel.getShipLocationList().getValue();
+                    adapterShipLocationHelper.updateList(updateList);
+                    checkItemList(updateList);
+                }
             }
         });
 
@@ -222,15 +232,6 @@ public class PlanFragment extends Fragment {
         TextView txtview_address = view.findViewById(R.id.txtview_address);
         btn_opencamera = view.findViewById(R.id.btn_opencamera);
 
-        // ตั้งค่า Listener เมื่อมีการลบไอเท็ม
-//        adapter.setOnItemRemovedListener(new AdapterAddrHelper.OnItemRemovedListener() {
-//            @Override
-//            public void onItemRemoved() {
-//                ArrayList<AddrModel> currentList = recycleAddrViewModel.getItemList().getValue();
-//                checkItemList(currentList); // เรียกเช็คข้อมูลใหม่
-//            }
-//        });
-
         edt_address.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -256,8 +257,7 @@ public class PlanFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (!addr.isEmpty()) {
-                    shipLocationViewModel.addLocation(addr, tmpLatLng); // insert In Room DB
-//                    recycleAddrViewModel.addItem(addr, tmpLatLng);
+                    shipLocationViewModel.addLocation(addr, tmpLatLng, System.currentTimeMillis()); // อยู่ใน viewModel เฉยๆ
                     edt_address.setText("");
                 }
                 btn_add.setVisibility(View.GONE);
@@ -321,18 +321,26 @@ public class PlanFragment extends Fragment {
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                ArrayList<AddrModel> addrList = recycleAddrViewModel.getItemList().getValue();
-//                Log.d(TAG, "Size Addr :"+addrList.size());
-//                List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue();
-//                if (shipLocationList != null) {
-//                    for (int i = 0; i < shipLocationList.size(); i++) {
+
+                List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue(); // ดึง viewModel
+                if (shipLocationList != null) {
+                    for (int i = 0; i < shipLocationList.size(); i++) {
+                        int seq = i+1;
+                        Log.d(TAG, "Call find Or create " + shipLocationList.get(i).getShipLoAddr());
+                        shipLocationViewModel.findOrCreateShipLocation(shipLocationList.get(i)).observe(getViewLifecycleOwner(), shipLoCode -> {
+                            // เมื่อค่าจาก LiveData ถูกอัพเดต
+                            Log.d(TAG, "ShipLoCode: " + shipLoCode); // แค่อันที่มีใน viewModel
+
+                            shipmentListViewModel.createShipmentList(seq, SharedPreferencesHelper.getTrip(requireContext()), shipLoCode); // ละถ้าใน room มีข้อมูลเดิมทำไง -> มันก็เก็บค่าไวแค่ไม่แสดง แต่ Shiplocation ก็แสดง
 //                        String generatedId = UUID.randomUUID().toString();
 //                        shipLocationViewModel.updateGeofenceID(i, generatedId);
 //                        geofenceHelper.addGeofence(generatedId, shipLocationViewModel.getLocation(i).getShipLoLat(), shipLocationViewModel.getLocation(i).getShipLoLong());
-////                        recycleAddrViewModel.updateItemId(i, generatedId); // อัปเดต ID ให้แต่ละตัว
-////                        geofenceHelper.addGeofence(generatedId, recycleAddrViewModel.getItem(i).getLatLng());
-//                    }
-//                }
+                        });
+//                        shipLocationViewModel.findOrCreateShipLocation(shipLocationList.get(i));
+
+
+                    }
+                }
                 Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
                 ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
