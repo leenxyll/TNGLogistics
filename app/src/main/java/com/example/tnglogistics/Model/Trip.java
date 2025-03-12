@@ -55,7 +55,11 @@ public class Trip {
     }
 
     public Double getTripMileageIn() {
-        return TripMileageIn;
+        if(TripMileageIn != null){
+            return TripMileageIn.doubleValue();
+        } else {
+            return 0.0;
+        }
     }
 
     public void setTripMileageIn(Double tripMileageIn) {
@@ -63,7 +67,11 @@ public class Trip {
     }
 
     public Double getTripMileageOut() {
-        return TripMileageOut;
+        if(TripMileageOut != null){
+            return TripMileageOut.doubleValue();
+        } else {
+            return 0.0;
+        }
     }
 
     public void setTripMileageOut(Double tripMileageOut) {

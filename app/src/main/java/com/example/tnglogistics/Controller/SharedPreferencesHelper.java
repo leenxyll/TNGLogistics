@@ -10,7 +10,8 @@ public class SharedPreferencesHelper {
     private static final String KEY_LAST_FRAGMENT = "lastFragment";
     private static final String KEY_USER_SESSION = "UserSession";
     private static final String KEY_TRUCK = "TruckReg";
-    private static final String KEY_TRIP = "TRIPCODE";
+    private static final String KEY_TRIP = "TripCode";
+    private static final String KEY_MILEIN = "MileIn";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
@@ -59,6 +60,7 @@ public class SharedPreferencesHelper {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
         return sharedPreferences.getString(KEY_TRUCK, "");
     }
+
     public static void saveTrip(Context context, int tripCode){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();;
@@ -70,6 +72,20 @@ public class SharedPreferencesHelper {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(KEY_TRIP, 0);
     }
+
+    public static void saveMileIn(Context context, boolean isMileIn){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILEIN, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();;
+        editor.putBoolean(KEY_MILEIN, isMileIn);
+        editor.apply();
+    }
+
+    public static boolean getMileIn(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILEIN, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_MILEIN, false);
+    }
+
+
 
 
 }

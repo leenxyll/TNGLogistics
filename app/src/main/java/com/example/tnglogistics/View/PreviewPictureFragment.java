@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -30,10 +32,13 @@ import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
 import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.Model.Trip;
+import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
 import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
 import com.example.tnglogistics.ViewModel.TripViewModel;
+import com.example.tnglogistics.ViewModel.TruckViewModel;
+
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
@@ -51,8 +56,10 @@ public class PreviewPictureFragment extends Fragment {
     private TripViewModel tripViewModel;
     private GeofenceHelper geofenceHelper;
     private Location currentLocation;
-    private Trip aTrip;
+//    private Trip aTrip;
     private EditText edittxt_detectnum = null;
+    private TruckViewModel truckViewModel;
+    private Truck aTruck;
 
     public static PreviewPictureFragment newInstance() {
         return new PreviewPictureFragment();
@@ -103,6 +110,7 @@ public class PreviewPictureFragment extends Fragment {
         shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
         shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
         tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
+        truckViewModel = TruckViewModel.getInstance(requireActivity().getApplication());
 
         String imagePath;
         long imageTimestamp;
@@ -126,11 +134,12 @@ public class PreviewPictureFragment extends Fragment {
                         txtview_detectnum.setText("0");
                         // for test
                         btn_confirm.setVisibility(View.VISIBLE);
+                        imgview_edt.setVisibility(View.VISIBLE);
                     } else {
                         txtview_detectnum.setText(result);
                         btn_confirm.setVisibility(View.VISIBLE);
                         imgview_edt.setVisibility(View.VISIBLE);
-                        btn_opencameara_agian.setVisibility(View.GONE);
+//                        btn_opencameara_agian.setVisibility(View.GONE);
                     }
                 }
             });
@@ -186,63 +195,144 @@ public class PreviewPictureFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "On Click");
-                // สร้าง Fragment ใหม่ที่ต้องการแสดง
-                StatusFragment frag_status = new StatusFragment();
 
-                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
+                if(SharedPreferencesHelper.getMileIn(requireContext())){
+                    //ขาเข้า
 
-                shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext())).observe(getViewLifecycleOwner(), shipmentLists -> {
-                    Log.d(TAG, "Shipment Data: " + shipmentLists.size());
-                    if (shipmentLists != null && !shipmentLists.isEmpty()) {
+                    PlanFragment frag_plan = PlanFragment.newInstance();
+                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, frag_plan);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
 
-                        Log.d(TAG, "Shipment Data: " + shipmentLists.size());
-                        for (ShipmentList shipment : shipmentLists) {
-                            String generatedId = UUID.randomUUID().toString();
-                            shipment.setGeofenceID(generatedId);
-                            Log.d(TAG,"updateGeofenceID : "+shipment.getShipListSeq() +" LoCode : "+shipment.getShipListShipLoCode()+" geofenceID : "+shipment.getGeofenceID());
-                            shipment.setShipListStatus("กำลังจัดส่ง");
-                            shipment.setLatUpdateStatus(currentLocation.getLatitude());
-                            shipment.setLongUpdateStatus(currentLocation.getLongitude());
-                            shipment.setLastUpdateStatus(txtview_time.getText().toString());
-                            if (shipment.getShipListStatus() != null){
-                                Log.d(TAG, ""+shipment.getShipListSeq()+" "+shipment.getShipListTripCode()+" "+shipment.getShipListShipLoCode()+" "+shipment.getShipListStatus());
-                                shipmentListViewModel.update(shipment);
-                                geofenceHelper = GeofenceHelper.getInstance(requireContext());
-                                shipLocationViewModel.getShipLocationByCode(shipment.getShipListShipLoCode()).observe(getViewLifecycleOwner(), shipLocation -> {
-                                    if (shipLocation != null) {
-                                        Log.d(TAG,"Add Geofence : "+shipment.getGeofenceID()+" "+shipLocation.getShipLoLat()+" "+shipLocation.getShipLoLong());
-                                        geofenceHelper.addGeofence(shipment.getGeofenceID(), shipLocation.getShipLoLat(), shipLocation.getShipLoLong());
-                                    }
-                                });
-                            }
-                        }
-                    }
                     tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
-//                        Log.d(TAG, "trip : "+ trip.getTripCode());
+                        //                        Log.d(TAG, "trip : "+ trip.getTripCode());
                         if (trip != null) {
                             Log.d(TAG, "trip : " + trip.getTripCode());
-                            aTrip = trip;
+                            Trip aTrip = trip;
                             if(edittxt_detectnum != null){
-                                aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+                                aTrip.setTripMileageIn(Double.parseDouble(edittxt_detectnum.getText().toString()));
                             }else{
-                                aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+                                aTrip.setTripMileageIn(Double.parseDouble(txtview_detectnum.getText().toString()));
                             }
-                            aTrip.setTripTimeOut(txtview_time.getText().toString());
-                            aTrip.setTripTimeOut(txtview_time.getText().toString());
+                            aTrip.setTripTimeIn(txtview_time.getText().toString());
                             tripViewModel.update(aTrip);
                         } else {
                             Log.d(TAG, "Trip not found");
                         }
                     });
+
+                    truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
+                        if (truck != null) {
+                            aTruck = truck;
+                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
+                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
+                                if (tripCode != null ) {
+                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
+                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
+                                    Log.d(TAG, "Trip created: " + tripCode);
+                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
+                                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+                                } else {
+                                    Log.e(TAG, "Failed to create trip");
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+                    new Handler().postDelayed(() -> {
+                        transaction.commit();
+                    }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+                    SharedPreferencesHelper.saveMileIn(requireContext(), false);
+
+                } else {
+
+                    // สร้าง Fragment ใหม่ที่ต้องการแสดง
+                    StatusFragment frag_status = new StatusFragment();
+
+                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
+
+                    shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()))
+                            .observe(getViewLifecycleOwner(), shipmentLists -> {
+                    if (shipmentLists != null && !shipmentLists.isEmpty()) {
+                        Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+
+                        for (ShipmentList shipment : shipmentLists) {
+                            Log.d(TAG, "updateGeofenceID : " + shipment.getShipListSeq() +
+                                    " LoCode : " + shipment.getShipListShipLoCode() +
+                                    " geofenceID : " + shipment.getGeofenceID());
+
+                            shipment.setShipListStatus("กำลังจัดส่ง");
+                            shipment.setLatUpdateStatus(currentLocation.getLatitude());
+                            shipment.setLongUpdateStatus(currentLocation.getLongitude());
+                            shipment.setLastUpdateStatus(txtview_time.getText().toString());
+
+                            // ตรวจสอบว่า GeofenceID มีค่าอยู่แล้วหรือไม่
+                            if (shipment.getGeofenceID() == null || shipment.getGeofenceID().isEmpty()) {
+                                String generatedId = UUID.randomUUID().toString();
+                                shipment.setGeofenceID(generatedId);
+                                Log.d(TAG, "New GeofenceID assigned: " + generatedId);
+                                shipmentListViewModel.update(shipment); // อัปเดตข้อมูลใหม่
+                            } else {
+                                Log.d(TAG, "GeofenceID already exists: " + shipment.getGeofenceID());
+                            }
+
+                            // ตรวจสอบว่าต้องเพิ่ม Geofence หรือไม่ (เช็คค่า isGeofenceAdded)
+                            if (shipment.getGeofenceID() != null && !shipment.isGeofenceAdded()) {
+                                geofenceHelper = GeofenceHelper.getInstance(requireContext());
+                                shipLocationViewModel.getShipLocationByCode(shipment.getShipListShipLoCode())
+                                        .observe(getViewLifecycleOwner(), shipLocation -> {
+                                if (shipLocation != null) {
+                                    Log.d(TAG, "Add Geofence : " + shipment.getGeofenceID() +
+                                            " " + shipLocation.getShipLoLat() +
+                                            " " + shipLocation.getShipLoLong());
+
+                                    // เพิ่ม Geofence
+                                    geofenceHelper.addGeofence(shipment.getGeofenceID(),
+                                            shipLocation.getShipLoLat(),
+                                            shipLocation.getShipLoLong());
+
+                                    // อัปเดตค่า isGeofenceAdded เป็น true
+                                    shipment.setGeofenceAdded(true);
+                                    shipmentListViewModel.update(shipment);
+                                }
+                                        });
+                            } else {
+                                Log.d(TAG, "Geofence already added, skipping...");
+                            }
+                        }
+                    }
+
+                                tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
+                                    //                        Log.d(TAG, "trip : "+ trip.getTripCode());
+                                if (trip != null) {
+                                    Log.d(TAG, "trip : " + trip.getTripCode());
+                                    Trip aTrip = trip;
+                                    if(edittxt_detectnum != null){
+                                        aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+                                    }else{
+                                        aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+                                    }
+                                    aTrip.setTripTimeOut(txtview_time.getText().toString());
+                                    tripViewModel.update(aTrip);
+                                } else {
+                                    Log.d(TAG, "Trip not found");
+                                }
+                                });
                 });
 
 
-                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
-                new Handler().postDelayed(() -> {
-                    transaction.commit();
+                    // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+                    new Handler().postDelayed(() -> {
+                        transaction.commit();
                 }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+                }
             }
         });
 

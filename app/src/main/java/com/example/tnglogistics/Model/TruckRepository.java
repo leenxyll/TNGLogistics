@@ -71,6 +71,7 @@ public class TruckRepository {
                     executorService.execute(() -> truckDao.insertTruck(newTruck));
                     Log.d(TAG, "Insert Success! TruckCode: " + newTruck.getTruckCode() +", "+newTruck.getTruckReg());
                 } else {
+                    Log.e(TAG, "Failed with status:"+ response);
                     Log.d(TAG,"Insert Truck Failed: " + response.errorBody());
                 }
             }

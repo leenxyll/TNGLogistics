@@ -62,15 +62,16 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
                     Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
                     notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
-                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ใกล้ถึง");
+                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
                     break;
 
                 case Geofence.GEOFENCE_TRANSITION_DWELL:
                     Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
-                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ถึงแล้ว");
+                    shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
 
                     GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
                     if (geofenceHelper != null) {
+                        Log.e(TAG, "GeofenceHelper remove geofence.");
                         geofenceHelper.removeGeofenceByID(geofenceId);
                     } else {
                         Log.e(TAG, "GeofenceHelper instance is null, cannot remove geofence.");

@@ -49,9 +49,9 @@ public class ShipLocationViewModel extends AndroidViewModel {
         shipLocationList.addSource(repository.getNewLocations(currentTime), shipLocationList::setValue);
     }
 
-    public LiveData<List<ShipLocation>> getNewLocations(long currentTime){
-        return repository.getNewLocations(currentTime);
-    }
+//    public LiveData<List<ShipLocation>> getNewLocations(long currentTime){
+//        return repository.getNewLocations(currentTime);
+//    }
 
     public LiveData<ShipLocation> getShipLocationByCode(int shipLoCode) {
         return Transformations.map(getShipLocationList(), shipLocations -> {

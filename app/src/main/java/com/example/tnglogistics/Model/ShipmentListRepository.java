@@ -51,6 +51,7 @@ public class ShipmentListRepository {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 Log.d(TAG, "Update ShipmentList Success : "+shipmentList.getShipListSeq()+" Trip "+shipmentList.getShipListTripCode()+" : "+shipmentList.getLastUpdateStatus()+" : "+shipmentList.getLatUpdateStatus());
+                executorService.execute(() -> shipmentListDao.update(shipmentList));
             }
 
             @Override

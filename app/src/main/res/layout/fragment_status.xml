@@ -132,7 +132,7 @@
             android:id="@+id/btn_camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="เริ่มต้นจัดส่ง"
+            android:text="จัดส่งสำเร็จ"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:background="@drawable/rounded_main"

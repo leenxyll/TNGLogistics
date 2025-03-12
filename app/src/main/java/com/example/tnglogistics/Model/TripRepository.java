@@ -65,7 +65,11 @@ public class TripRepository {
         RetrofitClient.getInstance().getApiService().updateTrip(trip).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+//                void update(int TripTruckCode, double TripMileageIn, double TripMileageOut, String TripTimeIn, String TripTimeOut, int TripCode);
+//                executorService.execute(() -> tripDao.update(trip.getTripTruckCode(), trip.getTripMileageIn(), trip.getTripMileageOut(), trip.getTripTimeIn(), trip.getTripTimeOut(), trip.getTripCode()));
+                executorService.execute(() -> tripDao.update(trip));
                 Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" Out "+trip.getTripTimeOut()+", "+trip.getTripMileageOut());
+                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
             }
 
             @Override

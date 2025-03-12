@@ -16,27 +16,27 @@ import retrofit2.http.Query;
 import java.util.List;
 
 public interface ApiService {
-    @POST("/CreateTruck")
+    @POST("/mobile/CreateTruck")
     Call<JsonObject> insertTruck(@Body JsonObject params);
 
-    @POST("/CreateTrip")
+    @POST("/mobile/CreateTrip")
     Call<JsonObject> insertTrip(@Body JsonObject params);
 
-    @GET("/GetTruck")
+    @GET("/mobile/GetTruck")
     Call<Truck> getTruck(@Query("TruckReg") String truckReg);
 
-    @GET("/GetShipLocation")
+    @GET("/mobile/GetShipLocation")
     Call<ShipLocation> getShipLocation(@Query("ShipLoAddr") String shipLoAddr);
 
-    @POST("/CreateShipLocation") // URL ตาม API ที่ Server กำหนด
+    @POST("/mobile/CreateShipLocation") // URL ตาม API ที่ Server กำหนด
     Call<JsonObject> insertShipLocation(@Body ShipLocation shipLocation);
 
-    @POST("/CreateShipmentList")
+    @POST("/mobile/CreateShipmentList")
     Call<Void> insertShipmentList(@Body ShipmentList shipmentList);
 
-    @PATCH("/UpdateShipmentList")
+    @PATCH("/mobile/UpdateShipmentList")
     Call<Void> updateShipmentList(@Body ShipmentList shipmentList);
 
-    @PATCH("/UpdateTrip")
+    @PATCH("/mobile/UpdateTrip")
     Call<Void> updateTrip(@Body Trip trip);
 }

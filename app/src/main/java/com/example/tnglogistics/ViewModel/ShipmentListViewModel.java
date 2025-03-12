@@ -9,6 +9,7 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.Model.ShipmentListRepository;
 import com.example.tnglogistics.Model.Truck;
@@ -57,14 +58,42 @@ public class ShipmentListViewModel extends AndroidViewModel {
             return filteredList;
         });
     }
-    public LiveData<Integer> getNearArrivalCount() {
+
+    // ใกล้ถึงแล้ว
+    public LiveData<List<ShipmentList>> getNearArrival() {
         return Transformations.map(shipmentList, shipments -> {
-            return (int) shipments.stream()
-                    .filter(shipment -> "ใกล้ถึง".equals(shipment.getShipListStatus()))
-                    .count();
-        });
+                    if (shipments == null ) return new ArrayList<>();
+                    List<ShipmentList> filteredList = new ArrayList<>();
+                    for (ShipmentList shipment : shipments) {
+                        if ("ENTER".equals(shipment.getShipListStatus())) {
+                            filteredList.add(shipment);
+                        }
+                    }
+                    return filteredList;
+                });
     }
 
+    // 📌 กรองหลาย `shipLocationCode`
+    public LiveData<List<ShipmentList>> getShipped() {
+        return Transformations.map(shipmentList, shipments -> {
+                    if (shipments == null ) return new ArrayList<>();
+                    List<ShipmentList> filteredList = new ArrayList<>();
+                    for (ShipmentList shipment : shipments) {
+                        if ("DWELL".equals(shipment.getShipListStatus())) {
+                            filteredList.add(shipment);
+                        }
+                    }
+                    return filteredList;
+                });
+    }
+//    public LiveData<Integer> getNearArrivalCount() {
+//        return Transformations.map(shipmentList, shipments -> {
+//            return (int) shipments.stream()
+//                    .filter(shipment -> "ใกล้ถึง".equals(shipment.getShipListStatus()))
+//                    .count();
+//        });
+//    }
+//
     public LiveData<Integer> getShippedCount() {
         return Transformations.map(shipmentList, shipments -> {
             return (int) shipments.stream()
@@ -73,9 +102,22 @@ public class ShipmentListViewModel extends AndroidViewModel {
         });
     }
 
-    public void update(ShipmentList shipmentList){
-        repository.update(shipmentList);
+    public void update(ShipmentList shipment){
+        repository.update(shipment);
+        List<ShipmentList> currentList = this.shipmentList.getValue();
+        if (currentList != null) {
+            List<ShipmentList> updatedList = new ArrayList<>(currentList);
+            shipmentList.setValue(updatedList); // 🔥 บังคับให้ LiveData เปลี่ยนค่า
+        }
     }
+
+//    public void update(ShipmentList shipment){
+//        repository.update(shipment);
+//        List<ShipmentList> currentList = this.shipmentList.getValue();
+//        if (currentList != null) {
+//            shipmentList.setValue(currentList); // 🔥 บังคับให้ LiveData เปลี่ยนค่า
+//        }
+//    }
 
     // ฟังก์ชันนี้จะทำการอัปเดตสถานะของ shipment โดยใช้ geofenceId
     public void updateShipmentStatus(String geofenceId, String status) {
@@ -84,7 +126,10 @@ public class ShipmentListViewModel extends AndroidViewModel {
             for (ShipmentList shipment : currentList) {
                 if (shipment.getGeofenceID().equals(geofenceId)) {
                     shipment.setShipListStatus(status); // อัปเดตสถานะของ shipment
-                    Log.d("Repository", "Status Update : "+shipment.getShipListStatus());
+                    if(status.equals("DWELL")){
+                        shipment.setGeofenceAdded(false);
+                    }
+                    Log.d("Repository", "By Geofence Status Update : "+shipment.getShipListStatus());
                     break;
                 }
             }

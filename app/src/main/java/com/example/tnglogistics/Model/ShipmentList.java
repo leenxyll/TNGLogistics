@@ -46,6 +46,8 @@ public class ShipmentList {
 
     private String GeofenceID; // ใช้เป็น ID อ้างอิงสำหรับ Geofencing
 
+    private boolean isGeofenceAdded;
+
 
     public ShipmentList() {
     }
@@ -118,5 +120,13 @@ public class ShipmentList {
 
     public void setGeofenceID(String geofenceID) {
         GeofenceID = geofenceID;
+    }
+
+    public boolean isGeofenceAdded() {
+        return isGeofenceAdded;
+    }
+
+    public void setGeofenceAdded(boolean geofenceAdded) {
+        isGeofenceAdded = geofenceAdded;
     }
 }
