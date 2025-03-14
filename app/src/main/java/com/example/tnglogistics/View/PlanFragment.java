@@ -145,13 +145,12 @@ public class PlanFragment extends Fragment {
 
 //        shipLocationViewModel.fetchLocationsFromServer(); // ดึงข้อมูลจาก Server
 
+        shipLocationViewModel.setNewLocations(System.currentTimeMillis());
         shipLocationViewModel.getShipLocationList().observe(getViewLifecycleOwner(), shipLocations -> { //แก้ให้แสดงเฉพาะอันเรียกเมธอดใหม่
             Log.d(TAG, "observe : "+shipLocations);
             adapterShipLocationHelper.updateList(shipLocations);
             checkItemList(shipLocations);
         });
-
-        shipLocationViewModel.setNewLocations(System.currentTimeMillis());
 
 
         adapterShipLocationHelper.setOnItemRemovedListener(new AdapterShipLocationHelper.OnItemRemovedListener() {
@@ -257,21 +256,6 @@ public class PlanFragment extends Fragment {
             public void afterTextChanged(Editable s) {}
         });
 
-
-        btn_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!addr.isEmpty()) {
-                    shipLocationViewModel.addLocation(addr, tmpLatLng, System.currentTimeMillis()); // อยู่ใน viewModel เฉยๆ
-                    edt_address.setText("");
-                }
-                btn_add.setVisibility(View.GONE);
-                btn_check.setVisibility(View.VISIBLE);
-                txtview_address.setVisibility(View.GONE);
-                edt_address.setVisibility(View.VISIBLE);
-            }
-        });
-
         btn_check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -306,6 +290,20 @@ public class PlanFragment extends Fragment {
             }
         });
 
+        btn_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!addr.isEmpty()) {
+                    shipLocationViewModel.addLocation(addr, tmpLatLng, System.currentTimeMillis()); // อยู่ใน viewModel เฉยๆ
+                    edt_address.setText("");
+                }
+                btn_add.setVisibility(View.GONE);
+                btn_check.setVisibility(View.VISIBLE);
+                txtview_address.setVisibility(View.GONE);
+                edt_address.setVisibility(View.VISIBLE);
+            }
+        });
+
         txtview_address.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -322,7 +320,6 @@ public class PlanFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Log.d(TAG, TAG +" onViewCreated");
 
-//        geofenceHelper = GeofenceHelper.getInstance(requireContext());
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -337,12 +334,7 @@ public class PlanFragment extends Fragment {
                             Log.d(TAG, "ShipLoCode: " + shipLoCode); // แค่อันที่มีใน viewModel
 
                             shipmentListViewModel.createShipmentList(seq, SharedPreferencesHelper.getTrip(requireContext()), shipLoCode); // ละถ้าใน room มีข้อมูลเดิมทำไง -> มันก็เก็บค่าไวแค่ไม่แสดง แต่ Shiplocation ก็แสดง
-//                        String generatedId = UUID.randomUUID().toString();
-//                        shipLocationViewModel.updateGeofenceID(i, generatedId);
-//                        geofenceHelper.addGeofence(generatedId, shipLocationViewModel.getLocation(i).getShipLoLat(), shipLocationViewModel.getLocation(i).getShipLoLong());
                         });
-//                        shipLocationViewModel.findOrCreateShipLocation(shipLocationList.get(i));
-
 
                     }
                 }

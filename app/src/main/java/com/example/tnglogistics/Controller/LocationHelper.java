@@ -14,6 +14,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 
 public class LocationHelper {
     private static LocationHelper instance;
@@ -48,10 +49,15 @@ public class LocationHelper {
     }
 
     private void requestNewLocation(LocationListener listener) {
-        LocationRequest locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10000)
-                .setFastestInterval(5000);
+//        LocationRequest locationRequest = LocationRequest.create()
+//                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+//                .setInterval(10000)
+//                .setFastestInterval(5000);
+
+        LocationRequest locationRequest = new LocationRequest.Builder(30000)  // อัปเดตทุกๆ 30 วินาที
+                .setMinUpdateIntervalMillis(30000)  // ความถี่สูงสุดที่สามารถอัปเดตได้
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)  // ตำแหน่งที่มีความแม่นยำสูง
+                .build();
 
         LocationCallback locationCallback = new LocationCallback(){
             @Override

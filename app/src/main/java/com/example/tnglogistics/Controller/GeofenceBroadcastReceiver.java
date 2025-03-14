@@ -61,14 +61,14 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 case Geofence.GEOFENCE_TRANSITION_ENTER:
                     Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
 //                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
-//                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
+                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
                     shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
                     break;
 
                 case Geofence.GEOFENCE_TRANSITION_DWELL:
                     Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
 //                    Toast.makeText(context, "ถึงแล้ว", Toast.LENGTH_SHORT).show();
-//                    notificationHelper.sendHighPriorityNotification("ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
+                    notificationHelper.sendHighPriorityNotification("ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
                     shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
 
                     GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);

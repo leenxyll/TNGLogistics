@@ -74,7 +74,7 @@ public class TripRepository {
                 executorService.execute(() -> tripDao.update(trip));
                 Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" Out "+trip.getTripTimeOut()+", "+trip.getTripMileageOut()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
 //                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
-                Log.e(TAG, response.message() + ", " + response.body() + ", " +response.raw()+ " ::: " +  response.toString());
+                Log.d(TAG, response.message() + ", " + response.body() + ", " +response.raw()+ " ::: " +  response.toString());
             }
 
             @Override

@@ -31,7 +31,7 @@ public class ShipmentListRepository {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 executorService.execute(() -> shipmentListDao.insertShipmentList(newShipmentList));
-                Log.d(TAG,"Insert ShipmentList Success! : Seq: "+newShipmentList.getShipListSeq() + " Trip: " + newShipmentList.getShipListTripCode() + "ShipLoCode: " + newShipmentList.getShipListShipLoCode() );
+                Log.d(TAG,"Insert ShipmentList Success! : Seq: "+newShipmentList.getShipListSeq() + " Trip: " + newShipmentList.getShipListTripCode() + " ShipLoCode: " + newShipmentList.getShipListShipLoCode() );
             }
 
             @Override
