@@ -137,6 +137,10 @@ public class ShipmentListViewModel extends AndroidViewModel {
         }
     }
 
+    public LiveData<Integer> getLocationByGeofenceID(String geofenceID){
+        return repository.getLocationByGeofenceID(geofenceID);
+    }
+
 
 //    public void updateGeofenceID(int position, String geofenceID) {
 //        List<ShipmentList> currentList = shipmentList.getValue();

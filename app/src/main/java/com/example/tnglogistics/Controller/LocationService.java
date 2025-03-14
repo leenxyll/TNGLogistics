@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
@@ -78,10 +79,15 @@ public class LocationService extends Service {
     }
 
     private void startLocationUpdates() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000); // อัปเดตทุกๆ 10 วินาที
-        locationRequest.setFastestInterval(10000); // ความถี่สูงสุดที่สามารถอัปเดตได้
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // ตำแหน่งที่มีความแม่นยำสูง
+//        LocationRequest locationRequest = LocationRequest.create();
+//        locationRequest.setInterval(30000); // อัปเดตทุกๆ 30 วินาที
+//        locationRequest.setFastestInterval(30000); // ความถี่สูงสุดที่สามารถอัปเดตได้
+//        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // ตำแหน่งที่มีความแม่นยำสูง
+
+        LocationRequest locationRequest = new LocationRequest.Builder(30000)  // อัปเดตทุกๆ 30 วินาที
+                .setMinUpdateIntervalMillis(30000)  // ความถี่สูงสุดที่สามารถอัปเดตได้
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)  // ตำแหน่งที่มีความแม่นยำสูง
+                .build();
 
         // ตรวจสอบว่าได้รับสิทธิ์การเข้าถึงตำแหน่งหรือไม่ (สำหรับ Android 6.0 ขึ้นไป)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&

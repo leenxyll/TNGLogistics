@@ -65,7 +65,7 @@ public class ShipmentListRepository {
         executorService.execute(() -> shipmentListDao.updateGeofenceID(shipListSeq, shipListShipLoCode, geofenceID));
     }
 
-    public LiveData<List<ShipmentList>> getLocationByGeofenceID(String geofenceID){
+    public LiveData<Integer> getLocationByGeofenceID(String geofenceID){
         return shipmentListDao.getLocationByGeofenceID(geofenceID);
     }
 

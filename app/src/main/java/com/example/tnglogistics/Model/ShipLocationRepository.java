@@ -132,4 +132,8 @@ public class ShipLocationRepository {
             }
         });
     }
+
+    public LiveData<ShipLocation> getLocationByShipLoCode(int shipLocode){
+        return shipLocationDao.getLocationByShipLoCode(shipLocode);
+    }
 }

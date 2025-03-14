@@ -17,8 +17,8 @@ public interface ShipmentListDao {
     @Update
     void update(ShipmentList shipmentList);
 
-    @Query("SELECT * FROM shipment_list WHERE geofenceID = :geofenceID")
-    LiveData<List<ShipmentList>> getLocationByGeofenceID(String geofenceID);
+    @Query("SELECT ShipListShipLoCode FROM shipment_list WHERE geofenceID = :geofenceID")
+    LiveData<Integer> getLocationByGeofenceID(String geofenceID);
 
     @Query("SELECT * FROM shipment_list")
     LiveData<List<ShipmentList>> getAllShipList();

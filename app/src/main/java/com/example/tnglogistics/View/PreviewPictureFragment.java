@@ -24,6 +24,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.tnglogistics.Controller.GeofenceHelper;
 import com.example.tnglogistics.Controller.LocationHelper;
@@ -197,55 +199,84 @@ public class PreviewPictureFragment extends Fragment {
                 Log.d(TAG, "On Click");
 
                 if(SharedPreferencesHelper.getMileIn(requireContext())){
-                    //ขาเข้า
+//                    //ขาเข้า
+//
+//                    PlanFragment frag_plan = PlanFragment.newInstance();
+//                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                    transaction.replace(R.id.fragment_container, frag_plan);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
+//
+                    stopLocationService();
 
-                    PlanFragment frag_plan = PlanFragment.newInstance();
-                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragment_container, frag_plan);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
-
-                    tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
-                        //                        Log.d(TAG, "trip : "+ trip.getTripCode());
-                        if (trip != null) {
-                            Log.d(TAG, "trip : " + trip.getTripCode());
-                            Trip aTrip = trip;
-                            if(edittxt_detectnum != null){
-                                aTrip.setTripMileageIn(Double.parseDouble(edittxt_detectnum.getText().toString()));
-                            }else{
-                                aTrip.setTripMileageIn(Double.parseDouble(txtview_detectnum.getText().toString()));
-                            }
-                            aTrip.setTripTimeIn(txtview_time.getText().toString());
-                            tripViewModel.update(aTrip);
-                        } else {
-                            Log.d(TAG, "Trip not found");
-                        }
-                    });
-
-                    truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
-                        if (truck != null) {
-                            aTruck = truck;
-                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
-                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
-                                if (tripCode != null ) {
-                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
-                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
-                                    Log.d(TAG, "Trip created: " + tripCode);
-                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
-                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+//                    tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
+//                        //                        Log.d(TAG, "trip : "+ trip.getTripCode());
+//                        if (trip != null) {
+//                            Log.d(TAG, "trip : " + trip.getTripCode());
+//                            Trip aTrip = trip;
+//                            if(edittxt_detectnum != null){
+//                                aTrip.setTripMileageIn(Double.parseDouble(edittxt_detectnum.getText().toString()));
+//                            }else{
+//                                aTrip.setTripMileageIn(Double.parseDouble(txtview_detectnum.getText().toString()));
+//                            }
+//                            aTrip.setTripTimeIn(txtview_time.getText().toString());
+//                            tripViewModel.update(aTrip);
+//                        } else {
+//                            Log.d(TAG, "Trip not found");
+//                        }
+//                    });
+                    LiveData<Trip> tripLiveData = tripViewModel.getTripByCodeFromSharedPreferences(requireContext());
+                    tripLiveData.observe(getViewLifecycleOwner(), new Observer<Trip>() {
+                        @Override
+                        public void onChanged(Trip trip) {
+                            if (trip != null) {
+                                Log.d(TAG, "trip : " + trip.getTripCode());
+                                Trip aTrip = trip;
+                                if (edittxt_detectnum != null) {
+                                    Log.d(TAG, "trip : " + trip.getTripCode());
+                                    aTrip.setTripMileageIn(Double.parseDouble(edittxt_detectnum.getText().toString()));
                                 } else {
-                                    Log.e(TAG, "Failed to create trip");
+                                    aTrip.setTripMileageIn(Double.parseDouble(txtview_detectnum.getText().toString()));
                                 }
-                            });
-                        } else {
-                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+                                aTrip.setTripTimeIn(txtview_time.getText().toString());
+                                tripViewModel.update(aTrip);
+                            } else {
+                                Log.d(TAG, "Trip not found");
+                            }
+                            // 🛑 ลบ Observer หลังทำงาน ✅
+                            tripLiveData.removeObserver(this);
                         }
                     });
-
+//
+//                    truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
+//                        if (truck != null) {
+//                            aTruck = truck;
+//                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
+//                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
+//                                if (tripCode != null ) {
+//                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
+//                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
+//                                    Log.d(TAG, "Trip created: " + tripCode);
+//                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
+//                                    Intent intent = new Intent(getActivity(), MainActivity.class);
+//                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+//                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+//                                } else {
+//                                    Log.e(TAG, "Failed to create trip");
+//                                }
+//                            });
+//                        } else {
+//                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                     new Handler().postDelayed(() -> {
-                        transaction.commit();
+//                        transaction.commit();
+                        SharedPreferencesHelper.saveLastFragment(requireContext(),"");
+                        SharedPreferencesHelper.setUserLoggedIn(requireContext(),false);
+                        Intent intent = new Intent(getActivity(), SplashActivity.class);
+                        startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+                        requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
                     }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
                     SharedPreferencesHelper.saveMileIn(requireContext(), false);
 
@@ -257,6 +288,8 @@ public class PreviewPictureFragment extends Fragment {
                     // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
+
+                    startLocationService();
 
                     shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()))
                             .observe(getViewLifecycleOwner(), shipmentLists -> {
@@ -309,23 +342,47 @@ public class PreviewPictureFragment extends Fragment {
                         }
                     }
 
-                                tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
-                                    //                        Log.d(TAG, "trip : "+ trip.getTripCode());
-                                if (trip != null) {
-                                    Log.d(TAG, "trip : " + trip.getTripCode());
-                                    Trip aTrip = trip;
-                                    if(edittxt_detectnum != null){
-                                        aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
-                                    }else{
-                                        aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+//                                tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
+//                                    //                        Log.d(TAG, "trip : "+ trip.getTripCode());
+//                                if (trip != null) {
+//                                    Log.d(TAG, "trip : " + trip.getTripCode());
+//                                    Trip aTrip = trip;
+//                                    if(edittxt_detectnum != null){
+//                                        aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+//                                    }else{
+//                                        aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+//                                    }
+//                                    aTrip.setTripTimeOut(txtview_time.getText().toString());
+//                                    tripViewModel.update(aTrip);
+//                                } else {
+//                                    Log.d(TAG, "Trip not found");
+//                                }
+//                                });
+
+                                LiveData<Trip> tripLiveData = tripViewModel.getTripByCodeFromSharedPreferences(requireContext());
+                                tripLiveData.observe(getViewLifecycleOwner(), new Observer<Trip>() {
+                                    @Override
+                                    public void onChanged(Trip trip) {
+                                        if (trip != null) {
+                                            Log.d(TAG, "trip : " + trip.getTripCode());
+                                            Trip aTrip = trip;
+                                            if (edittxt_detectnum != null) {
+                                                Log.d(TAG, "trip : " + trip.getTripCode());
+                                                aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+                                            } else {
+                                                aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+                                            }
+                                            aTrip.setTripTimeOut(txtview_time.getText().toString());
+                                            tripViewModel.update(aTrip);
+                                        } else {
+                                            Log.d(TAG, "Trip not found");
+                                        }
+                                        // 🛑 ลบ Observer หลังทำงาน ✅
+                                        tripLiveData.removeObserver(this);
                                     }
-                                    aTrip.setTripTimeOut(txtview_time.getText().toString());
-                                    tripViewModel.update(aTrip);
-                                } else {
-                                    Log.d(TAG, "Trip not found");
-                                }
                                 });
-                });
+
+                            });
 
 
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
@@ -340,4 +397,23 @@ public class PreviewPictureFragment extends Fragment {
 
         return view;
     }
+
+    private void startLocationService() {
+        // เริ่ม startForegroundService เพื่อเริ่ม LocationService
+        Intent serviceIntent = new Intent(requireContext(), LocationService.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.d(TAG, "🚫 LocationService startForegroundService");
+            requireContext().startForegroundService(serviceIntent); // ใช้ startForegroundService สำหรับ Android 8.0 (API 26) ขึ้นไป
+        } else {
+            Log.d(TAG, "🚫 LocationService startService");
+            requireContext().startService(serviceIntent); // ใช้ startService สำหรับเวอร์ชันเก่ากว่า
+        }
+    }
+
+    private void stopLocationService() {
+        Intent serviceIntent = new Intent(requireContext(), LocationService.class);
+        requireContext().stopService(serviceIntent);
+        Log.d(TAG, "🚫 LocationService Stopped");
+    }
+
 }

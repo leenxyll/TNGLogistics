@@ -31,6 +31,10 @@ public class TripRepository {
         return  tripDao.getAllTrip();
     }
 
+    public Trip getTripByTripCode(int tripCode){
+        return tripDao.getTripByTripcode(tripCode);
+    }
+
     public LiveData<Integer> createTrip(int tripTruckCode){
         MutableLiveData<Integer> tripCodeLiveData = new MutableLiveData<>();
 
@@ -68,8 +72,9 @@ public class TripRepository {
 //                void update(int TripTruckCode, double TripMileageIn, double TripMileageOut, String TripTimeIn, String TripTimeOut, int TripCode);
 //                executorService.execute(() -> tripDao.update(trip.getTripTruckCode(), trip.getTripMileageIn(), trip.getTripMileageOut(), trip.getTripTimeIn(), trip.getTripTimeOut(), trip.getTripCode()));
                 executorService.execute(() -> tripDao.update(trip));
-                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" Out "+trip.getTripTimeOut()+", "+trip.getTripMileageOut());
-                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
+                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" Out "+trip.getTripTimeOut()+", "+trip.getTripMileageOut()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
+//                Log.d(TAG, "Update Trip Success : "+trip.getTripCode()+" In "+trip.getTripTimeIn()+", "+trip.getTripMileageIn());
+                Log.e(TAG, response.message() + ", " + response.body() + ", " +response.raw()+ " ::: " +  response.toString());
             }
 
             @Override

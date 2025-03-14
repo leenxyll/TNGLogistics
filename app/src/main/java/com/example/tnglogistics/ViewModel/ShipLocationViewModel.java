@@ -148,7 +148,9 @@ public class ShipLocationViewModel extends AndroidViewModel {
 //        repository.delete(shipLocation);
 //    }
 
-
-
-
+    public LiveData<ShipLocation> getLocationByShipLoCode(int shipLocode){
+        return repository.getLocationByShipLoCode(shipLocode);
+    }
 }
+
+

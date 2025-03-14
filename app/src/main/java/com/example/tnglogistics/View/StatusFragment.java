@@ -1,11 +1,15 @@
 package com.example.tnglogistics.View;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +25,10 @@ import android.widget.Toast;
 import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.AdapterShipLocationHelper;
 import com.example.tnglogistics.Controller.LocationHelper;
+import com.example.tnglogistics.Controller.NotificationHelper;
+import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
@@ -49,6 +56,7 @@ public class StatusFragment extends Fragment {
     private String formattedTime;
     private long timestamp;
     private int allqueue;
+    private NotificationHelper notificationHelper;
 
     public static StatusFragment newInstance() {
         return new StatusFragment();
@@ -98,7 +106,7 @@ public class StatusFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-
+        notificationHelper = new NotificationHelper(requireContext());
         adapterShipLocationHelper = new AdapterShipLocationHelper(new ArrayList<>(), false);
         recyclerView.setAdapter(adapterShipLocationHelper);
 
@@ -177,10 +185,26 @@ public class StatusFragment extends Fragment {
                 shipment.setLongUpdateStatus(currentLocation.getLongitude());
                 shipment.setLastUpdateStatus(formattedTime);
                 shipment.setGeofenceID("");
-
+                Toast.makeText(requireContext(), "ถึงแล้ว", Toast.LENGTH_SHORT).show();
+//                notificationHelper.sendHighPriorityNotification("ถึงแล้ว", "ถึงแล้ว : " + shipment.getShipListShipLoCode(), MainActivity.class);
+                shipLocationViewModel.getLocationByShipLoCode(shipment.getShipListShipLoCode()).observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
+                    @Override
+                    public void onChanged(ShipLocation shipLocation) {
+                        // เมื่อข้อมูลพร้อมใช้งานแล้ว ทำการส่ง Notification
+                        if (shipLocation != null) {
+                            notificationHelper.sendHighPriorityNotification(
+                                    "ถึงแล้ว",
+                                    shipLocation.getShipLoAddr(),
+                                    MainActivity.class
+                            );
+                            shipmentListViewModel.update(shipment);
+//                            shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
+                        }
+                    }
+                });
                 Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + shipment.getLastUpdateStatus());
 
-                shipmentListViewModel.update(shipment);
+//                shipmentListViewModel.update(shipment);
             }
         });
 
@@ -202,6 +226,26 @@ public class StatusFragment extends Fragment {
                 shipment.setLatUpdateStatus(currentLocation.getLatitude());
                 shipment.setLongUpdateStatus(currentLocation.getLongitude());
                 shipment.setLastUpdateStatus(formattedTime);
+
+                Toast.makeText(requireContext(), "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
+//                notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "ใกล้ถึงแล้ว : " + shipment.getShipListShipLoCode(), MainActivity.class);
+
+                shipLocationViewModel.getLocationByShipLoCode(shipment.getShipListShipLoCode()).observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
+                    @Override
+                    public void onChanged(ShipLocation shipLocation) {
+                        // เมื่อข้อมูลพร้อมใช้งานแล้ว ทำการส่ง Notification
+                        if (shipLocation != null) {
+                            notificationHelper.sendHighPriorityNotification(
+                                    "ใกล้ถึงแล้ว",
+                                    shipLocation.getShipLoAddr(),
+                                    MainActivity.class
+                            );
+                            shipmentListViewModel.update(shipment);
+//                            shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
+                        }
+                    }
+                });
+
                 Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is NEAR ARRIVAL." + shipment.getLastUpdateStatus());
 
                 shipmentListViewModel.update(shipment);
@@ -241,4 +285,7 @@ public class StatusFragment extends Fragment {
 
         return view;
     }
+
+
+
 }

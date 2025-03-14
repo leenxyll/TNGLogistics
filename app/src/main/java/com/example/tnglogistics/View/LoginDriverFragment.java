@@ -69,21 +69,30 @@ public class LoginDriverFragment extends Fragment {
                             aTruck = truck;
                             Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
 //                            tripViewModel.createTrip(aTruck.getTruckCode());
-                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
-                                if (tripCode != null ) {
-                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
-                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
-                                    Log.d(TAG, "Trip created: " + tripCode);
-                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
-                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
-                                } else {
-                                    Log.e(TAG, "Failed to create trip");
-                                }
-                            });
+
+                            if (SharedPreferencesHelper.getTrip(requireContext()) == 0) {
+                                tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
+                                    if (tripCode != null) {
+                                        // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
+                                        SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
+                                        Log.d(TAG, "Trip created: " + tripCode);
+                                        SharedPreferencesHelper.saveLastFragment(requireContext(), "");
+                                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                                        requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+                                        startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+                                    } else {
+                                        Log.e(TAG, "Failed to create trip");
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Trip already exists");
+                            // ถ้า tripCode มีแล้ว สามารถข้ามการสร้าง trip ได้
+                            Intent intent = new Intent(getActivity(), MainActivity.class);
+                            requireActivity().finish();
+                            startActivity(intent);
                         }
                     });
 

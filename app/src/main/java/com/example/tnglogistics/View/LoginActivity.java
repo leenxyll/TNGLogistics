@@ -30,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         // ลงทะเบียน Permission Launcher
         PermissionManager.registerPermissionLauncher(this);
         // ขอสิทธิ์
-        PermissionManager.requestPermission(this);
+        PermissionManager.requestPermissions(this);
 
 
         SharedPreferencesHelper.saveLastFragment(this, "LoginDriverFragment");

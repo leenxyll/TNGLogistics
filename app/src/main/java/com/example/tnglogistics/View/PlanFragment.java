@@ -1,7 +1,9 @@
 package com.example.tnglogistics.View;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.AdapterShipLocationHelper;
 import com.example.tnglogistics.Controller.GeocodeHelper;
 import com.example.tnglogistics.Controller.GeofenceHelper;
+import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.Model.Truck;
@@ -108,6 +111,7 @@ public class PlanFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PermissionManager.registerPermissionLauncher(requireActivity());
         Log.d(TAG, TAG +" onCreate");
     }
 
@@ -128,6 +132,7 @@ public class PlanFragment extends Fragment {
                              Bundle savedInstanceState) {
         Log.d(TAG, TAG +" onCreateView");
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
+
 
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -321,7 +326,7 @@ public class PlanFragment extends Fragment {
         btn_opencamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                checkAndRequestPermissions();
                 List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue(); // ดึง viewModel
                 if (shipLocationList != null) {
                     for (int i = 0; i < shipLocationList.size(); i++) {
@@ -341,12 +346,25 @@ public class PlanFragment extends Fragment {
 
                     }
                 }
-                Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getActivity(), CameraXActivity.class);
-                ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+
 
             }
         });
+    }
+
+    private void checkAndRequestPermissions() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+            // ถ้าสิทธิ์ยังไม่ได้รับ ให้ขอใหม่
+            PermissionManager.requestPermissions(requireActivity());
+        } else {
+            // ถ้าได้รับแล้ว ทำงานต่อได้เลย
+            Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getActivity(), CameraXActivity.class);
+            ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+        }
     }
 
     // ฟังก์ชันเช็คว่ามีไอเท็มเหลือหรือไม่

@@ -31,7 +31,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Receiver called " + intent.getAction());
 
         shipmentListViewModel = ShipmentListViewModel.getInstance((Application) context.getApplicationContext());
@@ -60,13 +60,15 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             switch (transitionType) {
                 case Geofence.GEOFENCE_TRANSITION_ENTER:
                     Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
-                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
-                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
+//                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
+//                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
                     shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
                     break;
 
                 case Geofence.GEOFENCE_TRANSITION_DWELL:
                     Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
+//                    Toast.makeText(context, "ถึงแล้ว", Toast.LENGTH_SHORT).show();
+//                    notificationHelper.sendHighPriorityNotification("ถึงแล้ว", "Shipment ID: " + geofenceId, MainActivity.class);
                     shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
 
                     GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);

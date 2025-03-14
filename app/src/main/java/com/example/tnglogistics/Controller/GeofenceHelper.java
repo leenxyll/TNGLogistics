@@ -22,7 +22,7 @@ import java.util.List;
 public class GeofenceHelper {
     private static final String TAG = "GeofenceHelper";
 
-    private float radius = 1000;
+    private float radius = 5000; // 5 km.
     private int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL;
     private PendingIntent pendingIntent;
     private static GeofenceHelper instance;
@@ -48,7 +48,8 @@ public class GeofenceHelper {
                 .setCircularRegion(latitude, longitude, radius)
                 .setRequestId(ID)
                 .setTransitionTypes(transitionTypes)
-                .setLoiteringDelay(10000)
+                .setLoiteringDelay(30000) // ทดสอบ 30 วินาที
+//                .setLoiteringDelay(600000) // คงอยู่ 10 นาที
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
         geofenceList.add(geofence);

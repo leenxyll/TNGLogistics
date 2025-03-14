@@ -21,6 +21,10 @@ public interface TripDao {
     @Update
     void update(Trip trip);
 
+    @Query("SELECT * FROM trip WHERE TripCode = :TripCode")
+    Trip getTripByTripcode(int TripCode);
+
+
 //    @Query("UPDATE TRIP SET TripTruckCode = :TripTruckCode, TripMileageIn = :TripMileageIn, TripMileageOut = :TripMileageOut, TripTimeIn = :TripTimeIn, TripTimeOut = :TripTimeOut WHERE TripCode = :TripCode")
 //    void update(int TripTruckCode, double TripMileageIn, double TripMileageOut, String TripTimeIn, String TripTimeOut, int TripCode);
 
