@@ -211,6 +211,9 @@ public class StatusFragment extends Fragment {
         shipmentListViewModel.getShippedCount().observe(getViewLifecycleOwner(), count -> {
             Log.d(TAG, "Update Shipments shipped: " + count);
             txtview_shipped.setText(String.valueOf(count));
+            int queue = allqueue - count;
+            Log.d(TAG, "Update Shipments queue: " + queue);
+            txtview_inqueue.setText(String.valueOf(queue));
             if(count == allqueue){
                 SharedPreferencesHelper.saveMileIn(requireContext(), true);
                 btn_camera.setVisibility(View.VISIBLE);

@@ -200,30 +200,7 @@ public class PreviewPictureFragment extends Fragment {
 
                 if(SharedPreferencesHelper.getMileIn(requireContext())){
 //                    //ขาเข้า
-//
-//                    PlanFragment frag_plan = PlanFragment.newInstance();
-//                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
-//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.fragment_container, frag_plan);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
-//
                     stopLocationService();
-
-//                    tripViewModel.getTripByCodeFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), trip -> {
-//                        //                        Log.d(TAG, "trip : "+ trip.getTripCode());
-//                        if (trip != null) {
-//                            Log.d(TAG, "trip : " + trip.getTripCode());
-//                            Trip aTrip = trip;
-//                            if(edittxt_detectnum != null){
-//                                aTrip.setTripMileageIn(Double.parseDouble(edittxt_detectnum.getText().toString()));
-//                            }else{
-//                                aTrip.setTripMileageIn(Double.parseDouble(txtview_detectnum.getText().toString()));
-//                            }
-//                            aTrip.setTripTimeIn(txtview_time.getText().toString());
-//                            tripViewModel.update(aTrip);
-//                        } else {
-//                            Log.d(TAG, "Trip not found");
-//                        }
-//                    });
                     LiveData<Trip> tripLiveData = tripViewModel.getTripByCodeFromSharedPreferences(requireContext());
                     tripLiveData.observe(getViewLifecycleOwner(), new Observer<Trip>() {
                         @Override
@@ -246,29 +223,7 @@ public class PreviewPictureFragment extends Fragment {
                             tripLiveData.removeObserver(this);
                         }
                     });
-//
-//                    truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
-//                        if (truck != null) {
-//                            aTruck = truck;
-//                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
-//                            tripViewModel.createTrip(aTruck.getTruckCode()).observe(getViewLifecycleOwner(), tripCode -> {
-//                                if (tripCode != null ) {
-//                                    // บันทึก tripCode ลง SharedPreferences หรือทำการอัพเดท UI
-//                                    SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
-//                                    Log.d(TAG, "Trip created: " + tripCode);
-//                                    SharedPreferencesHelper.saveLastFragment(requireContext(),"");
-//                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-//                                    startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-//                                    requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
-//                                } else {
-//                                    Log.e(TAG, "Failed to create trip");
-//                                }
-//                            });
-//                        } else {
-//                            Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//
+
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                     new Handler().postDelayed(() -> {
 //                        transaction.commit();
@@ -282,6 +237,7 @@ public class PreviewPictureFragment extends Fragment {
 
                 } else {
 
+                    // ขาออก
                     // สร้าง Fragment ใหม่ที่ต้องการแสดง
                     StatusFragment frag_status = new StatusFragment();
 
@@ -297,7 +253,7 @@ public class PreviewPictureFragment extends Fragment {
                         Log.d(TAG, "Shipment Data: " + shipmentLists.size());
 
                         for (ShipmentList shipment : shipmentLists) {
-                            Log.d(TAG, "updateGeofenceID : " + shipment.getShipListSeq() +
+                            Log.d(TAG, "Loop in ShipmentList : " + shipment.getShipListSeq() +
                                     " LoCode : " + shipment.getShipListShipLoCode() +
                                     " geofenceID : " + shipment.getGeofenceID());
 

@@ -56,7 +56,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="จองคิว"
+                    android:text="จุดส่งทั้งหมด"
                     android:textSize="14sp"
                     android:textColor="@color/neutral1" />
             </LinearLayout>
@@ -132,7 +132,7 @@
             android:id="@+id/btn_camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="จัดส่งสำเร็จ"
+            android:text="ถึงสาขาเรียบร้อยแล้ว"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:background="@drawable/rounded_main"
