@@ -25,8 +25,10 @@ public interface ApiService {
     @GET("/mobile/GetTruck")
     Call<Truck> getTruck(@Query("TruckReg") String truckReg);
 
-    @GET("/mobile/GetShipLocation")
-    Call<ShipLocation> getShipLocation(@Query("ShipLoAddr") String shipLoAddr);
+    @GET("/mobile/GetShipLocationByAddr")
+    Call<ShipLocation> getShipLocationByAddr(@Query("ShipLoAddr") String shipLoAddr);
+    @GET("/mobile/GetShipLocationByCode")
+    Call<ShipLocation> getShipLocationByCode(@Query("ShipLoCode") int ShipLoCode);
 
     @POST("/mobile/CreateShipLocation") // URL ตาม API ที่ Server กำหนด
     Call<JsonObject> insertShipLocation(@Body ShipLocation shipLocation);

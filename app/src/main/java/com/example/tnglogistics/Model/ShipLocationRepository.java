@@ -83,7 +83,7 @@ public class ShipLocationRepository {
     public LiveData<Integer>  findOrCreateShipLocation(ShipLocation shipLocation){
         MutableLiveData<Integer> shipLoCodeLiveData = new MutableLiveData<>();
 
-        RetrofitClient.getInstance().getApiService().getShipLocation(shipLocation.getShipLoAddr()).enqueue(new Callback<ShipLocation>() {
+        RetrofitClient.getInstance().getApiService().getShipLocationByAddr(shipLocation.getShipLoAddr()).enqueue(new Callback<ShipLocation>() {
             @Override
             public void onResponse(Call<ShipLocation> call, Response<ShipLocation> response) {
                 if(response.isSuccessful() && response.body() != null){
@@ -134,6 +134,23 @@ public class ShipLocationRepository {
     }
 
     public LiveData<ShipLocation> getLocationByShipLoCode(int shipLocode){
-        return shipLocationDao.getLocationByShipLoCode(shipLocode);
+        MutableLiveData<ShipLocation> shipLocationLiveData = new MutableLiveData<>();
+        RetrofitClient.getInstance().getApiService().getShipLocationByCode(shipLocode).enqueue(new Callback<ShipLocation>() {
+            @Override
+            public void onResponse(Call<ShipLocation> call, Response<ShipLocation> response) {
+                ShipLocation shipLocation = response.body();
+                Log.d(TAG, "Found Ship: " + shipLocation.getShipLoCode() + " - " + shipLocation.getShipLoAddr());
+                // อัปเดต LiveData
+                shipLocationLiveData.postValue(shipLocation);
+            }
+
+            @Override
+            public void onFailure(Call<ShipLocation> call, Throwable t) {
+
+            }
+        });
+
+        return shipLocationLiveData;
+
     }
 }

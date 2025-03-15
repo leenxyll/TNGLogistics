@@ -141,7 +141,7 @@ public class ShipmentListViewModel extends AndroidViewModel {
                     break;
                 }
             }
-            shipmentList.postValue(currentList); // อัปเดต LiveData
+            shipmentList.setValue(new ArrayList<>(currentList)); // อัปเดต LiveData
         }
     }
 
