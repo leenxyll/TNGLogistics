@@ -73,7 +73,6 @@ public class ShipmentListViewModel extends AndroidViewModel {
                 });
     }
 
-    // 📌 กรองหลาย `shipLocationCode`
     public LiveData<List<ShipmentList>> getShipped() {
         return Transformations.map(shipmentList, shipments -> {
                     if (shipments == null ) return new ArrayList<>();
@@ -86,19 +85,28 @@ public class ShipmentListViewModel extends AndroidViewModel {
                     return filteredList;
                 });
     }
-//    public LiveData<Integer> getNearArrivalCount() {
-//        return Transformations.map(shipmentList, shipments -> {
-//            return (int) shipments.stream()
-//                    .filter(shipment -> "ใกล้ถึง".equals(shipment.getShipListStatus()))
-//                    .count();
-//        });
-//    }
-//
-    public LiveData<Integer> getShippedCount() {
+    public LiveData<Integer> getNearArrivalCount() {
         return Transformations.map(shipmentList, shipments -> {
             return (int) shipments.stream()
-                    .filter(shipment -> "ถึงแล้ว".equals(shipment.getShipListStatus()))
+                    .filter(shipment -> "ใกล้ถึงแล้ว".equals(shipment.getShipListStatus()))
                     .count();
+        });
+    }
+
+    public LiveData<Integer> getShippedCount() {
+//        return Transformations.map(shipmentList, shipments -> {
+//            return (int) shipments.stream()
+//                    .filter(shipment -> "ถึงแล้ว".equals(shipment.getShipListStatus()))
+//                    .count();
+//        });
+        return Transformations.map(shipmentList, shipments -> {
+            int count = 0;
+            for (ShipmentList shipment : shipments) {
+                if ("ถึงแล้ว".equals(shipment.getShipListStatus())) {
+                    count++;
+                }
+            }
+            return count;
         });
     }
 
@@ -129,11 +137,11 @@ public class ShipmentListViewModel extends AndroidViewModel {
                     if(status.equals("DWELL")){
                         shipment.setGeofenceAdded(false);
                     }
-                    Log.d("Repository", "By Geofence Status Update : "+shipment.getShipListStatus());
+                    Log.d("Repository", "By Geofence Status Update : "+shipment.getShipListStatus()+" for shipLoCode : "+shipment.getShipListShipLoCode());
                     break;
                 }
             }
-            shipmentList.setValue(currentList); // อัปเดต LiveData
+            shipmentList.postValue(currentList); // อัปเดต LiveData
         }
     }
 

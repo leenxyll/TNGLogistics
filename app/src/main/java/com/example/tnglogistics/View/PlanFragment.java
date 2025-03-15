@@ -45,7 +45,9 @@ import com.example.tnglogistics.ViewModel.TruckViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -324,16 +326,22 @@ public class PlanFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 checkAndRequestPermissions();
+
                 List<ShipLocation> shipLocationList = shipLocationViewModel.getShipLocationList().getValue(); // ดึง viewModel
                 if (shipLocationList != null) {
+                    Map<String, Integer> seqMap = new HashMap<>();
                     for (int i = 0; i < shipLocationList.size(); i++) {
-                        int seq = i+1;
-                        Log.d(TAG, "Call find Or create " + shipLocationList.get(i).getShipLoAddr());
-                        shipLocationViewModel.findOrCreateShipLocation(shipLocationList.get(i)).observe(getViewLifecycleOwner(), shipLoCode -> {
+                        ShipLocation shipLocation = shipLocationList.get(i);
+                        final int seq = i+1;
+                        seqMap.put(shipLocation.getShipLoAddr(), seq);
+                        Log.d(TAG, "Call find Or create & Map" + shipLocation.getShipLoAddr() + " seq " + seq);
+                        shipLocationViewModel.findOrCreateShipLocation(shipLocation).observe(getViewLifecycleOwner(), shipLoCode -> {
                             // เมื่อค่าจาก LiveData ถูกอัพเดต
-                            Log.d(TAG, "ShipLoCode: " + shipLoCode); // แค่อันที่มีใน viewModel
 
-                            shipmentListViewModel.createShipmentList(seq, SharedPreferencesHelper.getTrip(requireContext()), shipLoCode); // ละถ้าใน room มีข้อมูลเดิมทำไง -> มันก็เก็บค่าไวแค่ไม่แสดง แต่ Shiplocation ก็แสดง
+                            Integer correctSeq = seqMap.get(shipLocation.getShipLoAddr());
+                            Log.d(TAG, "For Create ShipList ShipLoCode: " + shipLoCode + " seq: " + correctSeq + " Addr: "+shipLocation.getShipLoAddr()); // แค่อันที่มีใน viewModel
+
+                            shipmentListViewModel.createShipmentList(correctSeq, SharedPreferencesHelper.getTrip(requireContext()), shipLoCode); // ละถ้าใน room มีข้อมูลเดิมทำไง -> มันก็เก็บค่าไวแค่ไม่แสดง แต่ Shiplocation ก็แสดง
                         });
 
                     }
@@ -342,6 +350,7 @@ public class PlanFragment extends Fragment {
 
             }
         });
+
     }
 
     private void checkAndRequestPermissions() {

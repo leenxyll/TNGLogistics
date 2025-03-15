@@ -9,9 +9,12 @@ import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,6 +46,8 @@ import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -57,7 +62,6 @@ public class StatusFragment extends Fragment {
     private ShipmentListViewModel shipmentListViewModel;
     private ShipLocationViewModel shipLocationViewModel;
     private AdapterShipLocationHelper adapterShipLocationHelper;
-    private Location currentLocation;
     private String formattedTime;
     private long timestamp;
     private int allqueue;
@@ -66,6 +70,11 @@ public class StatusFragment extends Fragment {
     private boolean isBound = false;
     private double latitude = 0.0;
     private double longitude = 0.0;
+    private MediatorLiveData<Integer> totalShippedCount = new MediatorLiveData<>();
+    private MediatorLiveData<Integer> totalNearArrivalCount = new MediatorLiveData<>();
+    private TextView txtview_shipped;
+    private TextView txtview_inqueue;
+    private Button btn_camera;
 
 
     // เชื่อมต่อกับ LocationService
@@ -153,9 +162,9 @@ public class StatusFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_status, container, false);
 
         TextView txtview_allqueue = view.findViewById(R.id.txtview_allqueue);
-        TextView txtview_inqueue = view.findViewById(R.id.txtview_queue);
-        TextView txtview_shipped = view.findViewById(R.id.txtview_shipped);
-        Button btn_camera = view.findViewById(R.id.btn_camera);
+        txtview_inqueue = view.findViewById(R.id.txtview_queue);
+        txtview_shipped = view.findViewById(R.id.txtview_shipped);
+        btn_camera = view.findViewById(R.id.btn_camera);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -167,23 +176,15 @@ public class StatusFragment extends Fragment {
         shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
         shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
 
-//        // พิกัดเดียวใช้ทั้งคลาส ?
-//        LocationHelper.getInstance(requireContext()).getCurrentLocation(requireContext(), new LocationHelper.LocationListener() {
-//            @Override
-//            public void onLocationResult(Location location) {
-//                if(location != null){
-//                    Log.d(TAG, "Current Location:" + location.getLatitude()+ " " + location.getLongitude());
-//                    currentLocation = location;
-//                }
-//            }
-//        });
-
 
         LiveData<List<ShipmentList>> shipmentLiveData =
                 shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()));
         shipmentLiveData.observe(getViewLifecycleOwner(), new Observer<List<ShipmentList>>() {
             @Override
             public void onChanged(List<ShipmentList> shipmentLists) {
+                // เรียงลำดับตาม ShipListSeq
+                Collections.sort(shipmentLists, Comparator.comparingInt(ShipmentList::getShipListSeq));
+
                 Log.d(TAG, "Shipment Data: " + shipmentLists.size());
                 txtview_allqueue.setText(String.valueOf(shipmentLists.size()));
                 allqueue = shipmentLists.size();
@@ -207,6 +208,20 @@ public class StatusFragment extends Fragment {
                         Log.d(TAG, ""+shipLocation.getShipLoAddr());
                     }
                 });
+
+//        MediatorLiveData<ShipmentList> shipmentLiveDataUpdate = new MediatorLiveData<>();
+//
+//        shipmentLiveDataUpdate.addSource(shipmentListViewModel.getShipped(), shipmentLists -> {
+//            for (ShipmentList shipment : shipmentLists) {
+//                updateShipmentStatus(shipment, "ถึงแล้ว");
+//            }
+//        });
+//
+//        shipmentLiveDataUpdate.addSource(shipmentListViewModel.getNearArrival(), shipmentLists -> {
+//            for (ShipmentList shipment : shipmentLists) {
+//                updateShipmentStatus(shipment, "ใกล้ถึงแล้ว");
+//            }
+//        });
 
         shipmentListViewModel.getShipped().observe(getViewLifecycleOwner(), shipmentLists -> {
             Log.d(TAG, "Shipments shipped: " + shipmentLists.size());
@@ -303,4 +318,62 @@ public class StatusFragment extends Fragment {
         });
         return view;
     }
+
+//    @Override
+//    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+//        setupObservers();
+//    }
+//
+//    // ฟังก์ชันอัปเดตสถานะ
+//    private void updateShipmentStatus(ShipmentList shipment, String status) {
+//        timestamp = System.currentTimeMillis();
+//        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+//        formattedTime = sdf.format(new Date(timestamp));
+//
+//        shipment.setShipListStatus(status);
+//        shipment.setLatUpdateStatus(latitude);
+//        shipment.setLongUpdateStatus(longitude);
+//        shipment.setLastUpdateStatus(formattedTime);
+//
+//        shipLocationViewModel.getLocationByShipLoCode(shipment.getShipListShipLoCode()).observe(getViewLifecycleOwner(), shipLocation -> {
+//            if (shipLocation != null) {
+//                notificationHelper.sendHighPriorityNotification(
+//                        status,
+//                        shipLocation.getShipLoAddr(),
+//                        MainActivity.class
+//                );
+//            }
+//            shipmentListViewModel.update(shipment);
+//        });
+//    }
+//
+//    public void setupObservers() {
+//        totalShippedCount.addSource(shipmentListViewModel.getShippedCount(), count -> {
+//            totalShippedCount.setValue(count);
+//            updateUI();
+//        });
+//
+//        totalNearArrivalCount.addSource(shipmentListViewModel.getNearArrivalCount(), count -> {
+//            totalNearArrivalCount.setValue(count);
+//            updateUI();
+//        });
+//    }
+//
+//    private void updateUI() {
+//        int shipped = totalShippedCount.getValue() != null ? totalShippedCount.getValue() : 0;
+//        int nearArrival = totalNearArrivalCount.getValue() != null ? totalNearArrivalCount.getValue() : 0;
+//        int queue = allqueue - shipped;
+//
+//        txtview_shipped.setText(String.valueOf(shipped));
+//        txtview_inqueue.setText(String.valueOf(queue));
+//
+//        if (shipped == allqueue) {
+//            SharedPreferencesHelper.saveMileIn(requireContext(), true);
+//            btn_camera.setVisibility(View.VISIBLE);
+//        }
+//
+//        Log.d(TAG, "Shipped: " + shipped + ", Near Arrival: " + nearArrival + ", In Queue: " + queue);
+//    }
+
 }

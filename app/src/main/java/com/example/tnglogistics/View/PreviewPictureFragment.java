@@ -45,8 +45,10 @@ import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -282,94 +284,99 @@ public class PreviewPictureFragment extends Fragment {
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, frag_status);  // R.id.fragment_container คือ ID ของ ViewGroup ที่ใช้สำหรับแสดง Fragment
 
+                    Map<Integer, String> geofenceMap = new HashMap<>();
 
                     LiveData<List<ShipmentList>> shipmentLiveData =
                             shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()));
                     shipmentLiveData                    .observe(getViewLifecycleOwner(), new Observer<List<ShipmentList>>() {
-                                @Override
-                                public void onChanged(List<ShipmentList> shipmentLists) {
-                                    getLocationFromService(); // อัปเดตค่าพิกัดก่อนใช้งาน
+                        @Override
+                        public void onChanged(List<ShipmentList> shipmentLists) {
+                            getLocationFromService(); // อัปเดตค่าพิกัดก่อนใช้งาน
 
-                                    if (shipmentLists != null && !shipmentLists.isEmpty()) {
-                                        Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+                            if (shipmentLists != null && !shipmentLists.isEmpty()) {
+                                Log.d(TAG, "Shipment Data: " + shipmentLists.size());
 
-                                        for (ShipmentList shipment : shipmentLists) {
-                                            Log.d(TAG, "Loop in ShipmentList : " + shipment.getShipListSeq() +
-                                                    " LoCode : " + shipment.getShipListShipLoCode() +
-                                                    " geofenceID : " + shipment.getGeofenceID());
+                                for (ShipmentList shipment : shipmentLists) {
+                                    int shipLoCode = shipment.getShipListShipLoCode();
+                                    Log.d(TAG, "Loop in ShipmentList : " + shipment.getShipListSeq() +
+                                            " LoCode : " + shipment.getShipListShipLoCode() + "("+shipLoCode+")"+
+                                            " geofenceID : " + shipment.getGeofenceID());
 
-                                            shipment.setShipListStatus("กำลังจัดส่ง");
-                                            shipment.setLatUpdateStatus(latitude);
-                                            shipment.setLongUpdateStatus(longitude);
-                                            shipment.setLastUpdateStatus(txtview_time.getText().toString());
+                                    shipment.setShipListStatus("กำลังจัดส่ง");
+                                    shipment.setLatUpdateStatus(latitude);
+                                    shipment.setLongUpdateStatus(longitude);
+                                    shipment.setLastUpdateStatus(txtview_time.getText().toString());
 
-                                            // ตรวจสอบว่า GeofenceID มีค่าอยู่แล้วหรือไม่
-                                            if (shipment.getGeofenceID() == null || shipment.getGeofenceID().isEmpty()) {
-                                                String generatedId = UUID.randomUUID().toString();
-                                                shipment.setGeofenceID(generatedId);
-                                                Log.d(TAG, "New GeofenceID assigned: " + generatedId);
-                                                shipmentListViewModel.update(shipment); // อัปเดตข้อมูลใหม่
-                                            } else {
-                                                Log.d(TAG, "GeofenceID already exists: " + shipment.getGeofenceID());
-                                            }
-
-                                            // ตรวจสอบว่าต้องเพิ่ม Geofence หรือไม่ (เช็คค่า isGeofenceAdded)
-                                            if (shipment.getGeofenceID() != null && !shipment.isGeofenceAdded()) {
-                                                geofenceHelper = GeofenceHelper.getInstance(requireContext());
-                                                shipLocationViewModel.getShipLocationByCode(shipment.getShipListShipLoCode())
-                                                        .observe(getViewLifecycleOwner(), shipLocation -> {
-                                                            if (shipLocation != null) {
-                                                                Log.d(TAG, "Add Geofence : " + shipment.getGeofenceID() +
-                                                                        " " + shipLocation.getShipLoLat() +
-                                                                        " " + shipLocation.getShipLoLong());
-
-                                                                // เพิ่ม Geofence
-                                                                geofenceHelper.addGeofence(shipment.getGeofenceID(),
-                                                                        shipLocation.getShipLoLat(),
-                                                                        shipLocation.getShipLoLong());
-
-                                                                // อัปเดตค่า isGeofenceAdded เป็น true
-                                                                shipment.setGeofenceAdded(true);
-                                                                shipmentListViewModel.update(shipment);
-                                                            }
-                                                        });
-                                            } else {
-                                                Log.d(TAG, "Geofence already added, skipping...");
-                                            }
-                                        }
+                                    // ตรวจสอบว่า GeofenceID มีค่าอยู่แล้วหรือไม่
+                                    if (shipment.getGeofenceID() == null || shipment.getGeofenceID().isEmpty()) {
+                                        String generatedId = UUID.randomUUID().toString();
+                                        shipment.setGeofenceID(generatedId);
+                                        geofenceMap.put(shipLoCode, generatedId);
+                                        Log.d(TAG, "New GeofenceID assigned: " + generatedId + " to shipcode: "+shipLoCode);
+                                        shipmentListViewModel.update(shipment); // อัปเดตข้อมูลใหม่
+                                    } else {
+                                        geofenceMap.put(shipLoCode, shipment.getGeofenceID());
+                                        Log.d(TAG, "GeofenceID already exists: " + shipment.getGeofenceID()+ " to shipcode: "+shipLoCode);
                                     }
 
-                                    LiveData<Trip> tripLiveData = tripViewModel.getTripByCodeFromSharedPreferences(requireContext());
-                                    tripLiveData.observe(getViewLifecycleOwner(), new Observer<Trip>() {
-                                        @Override
-                                        public void onChanged(Trip trip) {
-                                            if (trip != null) {
-                                                Log.d(TAG, "trip : " + trip.getTripCode());
-                                                Trip aTrip = trip;
-                                                if (edittxt_detectnum != null) {
-                                                    Log.d(TAG, "trip : " + trip.getTripCode());
-                                                    aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
-                                                } else {
-                                                    aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
-                                                }
-                                                aTrip.setTripTimeOut(txtview_time.getText().toString());
-                                                tripViewModel.update(aTrip);
-                                            } else {
-                                                Log.d(TAG, "Trip not found");
-                                            }
-                                            //ลบ Observer หลังทำงาน
-                                            tripLiveData.removeObserver(this);
-                                        }
-                                    });
-                                    shipmentLiveData.removeObserver(this);
+                                    // ตรวจสอบว่าต้องเพิ่ม Geofence หรือไม่ (เช็คค่า isGeofenceAdded)
+                                    if (shipment.getGeofenceID() != null && !shipment.isGeofenceAdded()) {
+                                        geofenceHelper = GeofenceHelper.getInstance(requireContext());
+                                        shipLocationViewModel.getShipLocationByCode(shipment.getShipListShipLoCode())
+                                                .observe(getViewLifecycleOwner(), shipLocation -> {
+                                                    if (shipLocation != null & shipLoCode == shipLocation.getShipLoCode()) {
+                                                        String geofenceID = geofenceMap.get(shipLoCode);
+                                                        Log.d(TAG, "Add Geofence : " + shipment.getGeofenceID() + "("+geofenceID+")"+
+                                                                " " + shipLocation.getShipLoLat() +
+                                                                " " + shipLocation.getShipLoLong());
+
+                                                        // เพิ่ม Geofence
+                                                        geofenceHelper.addGeofence(geofenceID,
+                                                                shipLocation.getShipLoLat(),
+                                                                shipLocation.getShipLoLong());
+
+                                                        // อัปเดตค่า isGeofenceAdded เป็น true
+                                                        shipment.setGeofenceAdded(true);
+                                                        shipmentListViewModel.update(shipment);
+                                                    }
+                                                });
+                                    } else {
+                                        Log.d(TAG, "Geofence already added, skipping...");
+                                    }
                                 }
-                            });
+                            }
+                            shipmentLiveData.removeObserver(this);
+                        }
+                    });
+
+                    LiveData<Trip> tripLiveData = tripViewModel.getTripByCodeFromSharedPreferences(requireContext());
+                    tripLiveData.observe(getViewLifecycleOwner(), new Observer<Trip>() {
+                        @Override
+                        public void onChanged(Trip trip) {
+                            if (trip != null) {
+                                Log.d(TAG, "trip : " + trip.getTripCode());
+                                Trip aTrip = trip;
+                                if (edittxt_detectnum != null) {
+                                    Log.d(TAG, "trip : " + trip.getTripCode());
+                                    aTrip.setTripMileageOut(Double.parseDouble(edittxt_detectnum.getText().toString()));
+                                } else {
+                                    aTrip.setTripMileageOut(Double.parseDouble(txtview_detectnum.getText().toString()));
+                                }
+                                aTrip.setTripTimeOut(txtview_time.getText().toString());
+                                tripViewModel.update(aTrip);
+                            } else {
+                                Log.d(TAG, "Trip not found");
+                            }
+                            //ลบ Observer หลังทำงาน
+                            tripLiveData.removeObserver(this);
+                        }
+                    });
 
 
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                     new Handler().postDelayed(() -> {
                         transaction.commit();
-                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+                    }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
                 }
             }
         });
