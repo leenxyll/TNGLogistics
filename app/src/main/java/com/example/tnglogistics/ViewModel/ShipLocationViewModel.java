@@ -130,14 +130,14 @@ public class ShipLocationViewModel extends AndroidViewModel {
     }
 
     public void removeLocation(ShipLocation shipLocation) {
-        List<ShipLocation> updatedList = shipLocationList.getValue();
-        if (updatedList != null) {
+        List<ShipLocation> currentList = shipLocationList.getValue();
+        if (currentList != null) {
+            List<ShipLocation> updatedList = new ArrayList<>(currentList); // สร้าง List ใหม่
             updatedList.remove(shipLocation);
-            shipLocationList.setValue(updatedList);
+            shipLocationList.setValue(updatedList); // อัปเดตค่าใหม่เข้าไป
             // 📌 ถ้าต้องการให้ลบออกจาก Database ด้วย ให้เรียก repository.delete(shipLocation);
         }
     }
-
 
     public LiveData<Integer> findOrCreateShipLocation(ShipLocation shipLocation){
         return repository.findOrCreateShipLocation(shipLocation);

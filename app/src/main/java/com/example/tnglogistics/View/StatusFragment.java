@@ -207,17 +207,31 @@ public class StatusFragment extends Fragment {
 
         shipLocationViewModel.getFilteredShipLocationList()
                 .observe(getViewLifecycleOwner(), shipLocations -> {
-                    // เรียงลำดับ shipLocations โดยใช้ข้อมูลจาก shipListSeqMap
-                    Collections.sort(shipLocations, (s1, s2) -> {
-                        Integer seq1 = shipListSeqMap.get(s1.getShipLoCode());
-                        Integer seq2 = shipListSeqMap.get(s2.getShipLoCode());
-                        return Integer.compare(seq1, seq2); // เปรียบเทียบค่าของ ShipListSeq
-                    });
+                    // ตรวจสอบว่า shipLocations ไม่เป็น null และมีข้อมูลมากกว่าหนึ่งรายการ
+                    if (shipLocations != null && !shipLocations.isEmpty()) {
+                        // เรียงลำดับ shipLocations โดยใช้ข้อมูลจาก shipListSeqMap
+                        Collections.sort(shipLocations, (s1, s2) -> {
+                            Integer seq1 = shipListSeqMap.get(s1.getShipLoCode());
+                            Integer seq2 = shipListSeqMap.get(s2.getShipLoCode());
+
+                            // ถ้า seq1 หรือ seq2 เป็น null ให้กำหนดค่าเริ่มต้นเป็น Integer.MAX_VALUE หรือค่าที่เหมาะสม
+                            if (seq1 == null) seq1 = Integer.MAX_VALUE;
+                            if (seq2 == null) seq2 = Integer.MAX_VALUE;
+
+                            return Integer.compare(seq1, seq2); // เปรียบเทียบค่าของ ShipListSeq
+                        });
+
+                    }
+
+                    // อัพเดทข้อมูลใน adapter
                     adapterShipLocationHelper.updateList(shipLocations);
-                    for(ShipLocation shipLocation: shipLocations){
-                        Log.d(TAG, ""+shipLocation.getShipLoAddr());
+
+                    // ล็อกข้อมูลของแต่ละ ShipLocation
+                    for (ShipLocation shipLocation : shipLocations) {
+                        Log.d(TAG, "" + shipLocation.getShipLoAddr());
                     }
                 });
+
 
 //        MediatorLiveData<ShipmentList> shipmentLiveDataUpdate = new MediatorLiveData<>();
 //

@@ -269,6 +269,7 @@ public class PreviewPictureFragment extends Fragment {
 //                        transaction.commit();
                         SharedPreferencesHelper.saveLastFragment(requireContext(),"");
                         SharedPreferencesHelper.setUserLoggedIn(requireContext(),false);
+                        SharedPreferencesHelper.saveTrip(requireContext(), 0);
                         Intent intent = new Intent(getActivity(), SplashActivity.class);
                         startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
                         requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)

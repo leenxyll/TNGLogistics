@@ -77,9 +77,9 @@ public class LoginDriverFragment extends Fragment {
                                         SharedPreferencesHelper.saveTrip(requireContext(), tripCode);
                                         Log.d(TAG, "Trip created: " + tripCode);
                                         SharedPreferencesHelper.saveLastFragment(requireContext(), "");
-                                        Intent intent = new Intent(getActivity(), MainActivity.class);
-                                        requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
-                                        startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+//                                        Intent intent = new Intent(getActivity(), MainActivity.class);
+//                                        requireActivity().finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+//                                        startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
                                     } else {
                                         Log.e(TAG, "Failed to create trip");
                                     }
@@ -90,11 +90,15 @@ public class LoginDriverFragment extends Fragment {
                         } else {
                             Log.d(TAG, "Trip already exists");
                             // ถ้า tripCode มีแล้ว สามารถข้ามการสร้าง trip ได้
-                            Intent intent = new Intent(getActivity(), MainActivity.class);
-                            requireActivity().finish();
-                            startActivity(intent);
+//                            Intent intent = new Intent(getActivity(), MainActivity.class);
+//                            requireActivity().finish();
+//                            startActivity(intent);
                         }
                     });
+
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    requireActivity().finish();
+                    startActivity(intent);
 
                 } else {
                     Toast.makeText(getContext(), "กรุณากรอกทะเบียนรถ", Toast.LENGTH_SHORT).show();

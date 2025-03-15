@@ -51,7 +51,7 @@ public class TripViewModel extends AndroidViewModel {
     // ฟังก์ชันดึง Trip ที่ตรงกับ Trip ที่เก็บใน SharedPreferences
     public LiveData<Trip> getTripByCodeFromSharedPreferences(Context context) {
         int tripCode = SharedPreferencesHelper.getTrip(context); // ดึง TripCode จาก SharedPreferences
-        Log.d("Repository", "tripCode: " + tripCode);
+        Log.d("Repository", "tripCode on sharepref: " + tripCode);
 
         return Transformations.map(getTripList(), trips -> {
             if (trips == null) return null;
