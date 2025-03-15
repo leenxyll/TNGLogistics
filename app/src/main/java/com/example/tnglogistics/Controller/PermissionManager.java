@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultCallback;
@@ -103,30 +104,79 @@ public class PermissionManager {
         }
     }
 
+//    private static void requestBackgroundLocation(Activity activity) {
+//        if (activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+//            // แสดง Dialog อธิบายก่อนขอ
+//            new AlertDialog.Builder(activity)
+//                    .setTitle("ต้องการสิทธิ์ตำแหน่งพื้นหลัง")
+//                    .setMessage("แอปต้องการสิทธิ์ตำแหน่งพื้นหลังเพื่อให้การติดตามการส่งสินค้าได้ หากคุณปฏิเสธจะไม่สามารถติดตามการส่งสินค้าได้")
+//                    .setPositiveButton("อนุญาต", (dialog, which) -> {
+//                        backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+//                    })
+//                    .setNegativeButton("ปฏิเสธ", (dialog, which) -> Log.d(TAG, "User denied background location"))
+//                    .show();
+//        } else {
+//            // ถ้าเคยโดนปฏิเสธมาก่อน ให้พาไปที่ Settings
+//            new AlertDialog.Builder(activity)
+//                    .setTitle("ต้องเปิดสิทธิ์ในการตั้งค่า")
+//                    .setMessage("คุณต้องไปที่การตั้งค่าเพื่อเปิดสิทธิ์ตำแหน่งพื้นหลัง")
+//                    .setPositiveButton("ไปที่การตั้งค่า", (dialog, which) -> {
+//                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                        intent.setData(Uri.fromParts("package", activity.getPackageName(), null));
+//                        activity.startActivity(intent);
+//                    })
+//                    .setNegativeButton("ยกเลิก", (dialog, which) -> dialog.dismiss())
+//                    .show();
+//        }
+//    }
+
     private static void requestBackgroundLocation(Activity activity) {
         if (activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-            // แสดง Dialog อธิบายก่อนขอ
+            // แสดงไดอะล็อกอธิบายสำหรับคนขับรถส่งสินค้า
             new AlertDialog.Builder(activity)
-                    .setTitle("ต้องการสิทธิ์ตำแหน่งพื้นหลัง")
-                    .setMessage("แอปต้องการสิทธิ์ตำแหน่งพื้นหลังเพื่อให้การติดตามการส่งสินค้าได้ หากคุณปฏิเสธจะไม่สามารถติดตามการส่งสินค้าได้")
-                    .setPositiveButton("อนุญาต", (dialog, which) -> {
+                    .setTitle("ต้องการสิทธิ์การเข้าถึงตำแหน่งในพื้นหลัง")
+//                    .setMessage("เพื่อให้ระบบติดตามการส่งสินค้าทำงานได้อย่างถูกต้อง และช่วยให้คุณส่งสินค้าได้อย่างมีประสิทธิภาพ แอปจำเป็นต้องติดตามตำแหน่งของคุณแม้ในขณะที่แอปทำงานในพื้นหลัง\n\nการอนุญาตนี้ช่วยให้:\n- บริษัทติดตามสถานะการจัดส่งได้แบบเรียลไทม์\n- ลูกค้าทราบเวลาการจัดส่งที่แม่นยำ\n- คุณได้รับแจ้งเตือนเส้นทางและข้อมูลการจัดส่งโดยอัตโนมัติ")
+                    .setMessage("เพื่อให้ระบบติดตามการส่งสินค้าทำงานได้อย่างถูกต้อง และช่วยให้คุณส่งสินค้าได้อย่างมีประสิทธิภาพ แอปจำเป็นต้องติดตามตำแหน่งของคุณแม้ในขณะที่แอปทำงานในพื้นหลัง\n\nกรุณาเปิดสิทธิ์ \"อนุญาตตลอดเวลา\" ในการตั้งค่าแอป เพื่อให้ระบบติดตามการจัดส่งสินค้าทำงานได้อย่างต่อเนื่อง")
+                    .setPositiveButton("อนุญาตการใช้งาน", (dialog, which) -> {
                         backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
                     })
-                    .setNegativeButton("ปฏิเสธ", (dialog, which) -> Log.d(TAG, "User denied background location"))
+                    .setNegativeButton("ไม่อนุญาต", (dialog, which) -> {
+                        Log.d(TAG, "Driver denied background location");
+                        // แสดงข้อความเตือนเพิ่มเติม
+                        Toast.makeText(activity, "หากไม่อนุญาต คุณจะไม่สามารถใช้ฟีเจอร์การติดตามการส่งสินค้าได้", Toast.LENGTH_LONG).show();
+                    })
+                    .setCancelable(false) // ป้องกันการปิดไดอะล็อกโดยกดพื้นที่ว่าง
                     .show();
         } else {
-            // ถ้าเคยโดนปฏิเสธมาก่อน ให้พาไปที่ Settings
+            // กรณีเคยปฏิเสธสิทธิ์มาก่อน พาไปที่หน้าตั้งค่า
             new AlertDialog.Builder(activity)
-                    .setTitle("ต้องเปิดสิทธิ์ในการตั้งค่า")
-                    .setMessage("คุณต้องไปที่การตั้งค่าเพื่อเปิดสิทธิ์ตำแหน่งพื้นหลัง")
+                    .setTitle("จำเป็นต้องเปิดสิทธิ์ตำแหน่งในการตั้งค่า")
+                    .setMessage("เพื่อให้คุณสามารถทำงานจัดส่งสินค้าได้อย่างมีประสิทธิภาพ จำเป็นต้องเปิดสิทธิ์การเข้าถึงตำแหน่งในพื้นหลัง\n\nกรุณาเปิดสิทธิ์ \"อนุญาตตลอดเวลา\" ในการตั้งค่าแอป เพื่อให้ระบบติดตามการจัดส่งสินค้าทำงานได้อย่างต่อเนื่อง")
                     .setPositiveButton("ไปที่การตั้งค่า", (dialog, which) -> {
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                         intent.setData(Uri.fromParts("package", activity.getPackageName(), null));
                         activity.startActivity(intent);
                     })
-                    .setNegativeButton("ยกเลิก", (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton("ภายหลัง", (dialog, which) -> {
+                        dialog.dismiss();
+                        // แสดงข้อความเตือนเพิ่มเติม
+                        Toast.makeText(activity, "คุณจำเป็นต้องเปิดสิทธิ์เพื่อใช้งานระบบติดตามการส่งสินค้า", Toast.LENGTH_LONG).show();
+                    })
+                    .setCancelable(false) // ป้องกันการปิดไดอะล็อกโดยกดพื้นที่ว่าง
                     .show();
         }
+    }
+
+    // เพิ่มฟังก์ชันสำหรับแสดงหน้าแนะนำประโยชน์ก่อนขอสิทธิ์ (แนะนำให้เรียกก่อน requestBackgroundLocation)
+    private static void showLocationBenefitsDialog(Activity activity) {
+        new AlertDialog.Builder(activity)
+                .setTitle("ประโยชน์ของการแชร์ตำแหน่ง")
+                .setMessage("สวัสดีคุณคนขับ!\n\nการแชร์ตำแหน่งของคุณจะช่วยให้:\n\n1. คุณได้รับคำแนะนำเส้นทางที่ดีที่สุดตลอดการเดินทาง\n2. ลูกค้าทราบเวลาจัดส่งที่แม่นยำ\n3. ระบบส่งงานใกล้เคียงให้คุณโดยอัตโนมัติ\n4. มีหลักฐานยืนยันการส่งสินค้าถึงจุดหมาย\n\nเราใช้ข้อมูลตำแหน่งเฉพาะเพื่อการจัดส่งสินค้าเท่านั้น")
+                .setPositiveButton("ตกลง ดำเนินการต่อ", (dialog, which) -> {
+                    requestBackgroundLocation(activity);
+                })
+                .setCancelable(false)
+                .show();
     }
 }
 

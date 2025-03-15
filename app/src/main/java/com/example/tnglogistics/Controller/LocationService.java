@@ -121,8 +121,10 @@ public class LocationService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, "LocationServiceChannel")
-                .setContentTitle("Location Service")
-                .setContentText("Tracking location...")
+//                .setContentTitle("Location Service")
+//                .setContentText("Tracking location...")
+                .setContentTitle("กำลังติดตามตำแหน่งการส่งสินค้า")
+//                .setContentText("ระบบกำลังติดตามตำแหน่งของคุณเพื่อช่วยในการส่งสินค้า")
                 .setSmallIcon(R.drawable.logo)
                 .setContentIntent(pendingIntent)
                 .build();

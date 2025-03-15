@@ -103,10 +103,10 @@ public class MainActivity extends AppCompatActivity {
 
         truckViewModel.getTruckByRegFromSharedPreferences(this).observe(this, truck -> {
             if (truck != null) {
-                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
             }
         });
 

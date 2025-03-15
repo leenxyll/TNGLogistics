@@ -179,6 +179,7 @@ public class StatusFragment extends Fragment {
         shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
 
 
+        Map<Integer, Integer> shipListSeqMap = new HashMap<>();
         LiveData<List<ShipmentList>> shipmentLiveData =
                 shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()));
         shipmentLiveData.observe(getViewLifecycleOwner(), new Observer<List<ShipmentList>>() {
@@ -194,6 +195,7 @@ public class StatusFragment extends Fragment {
                     Log.d(TAG, "Shipment Data: " + shipmentLists.size());
 
                     for (ShipmentList shipment : shipmentLists) {
+                        shipListSeqMap.put(shipment.getShipListShipLoCode(), shipment.getShipListSeq());
                         Log.d(TAG, "Status: [" + shipment.getShipListStatus() + "]");
                         shipLocationViewModel.addFilterCode(shipment.getShipListShipLoCode());
                         Log.d(TAG, "addFilterCode: " + shipment.getShipListShipLoCode());
@@ -205,6 +207,12 @@ public class StatusFragment extends Fragment {
 
         shipLocationViewModel.getFilteredShipLocationList()
                 .observe(getViewLifecycleOwner(), shipLocations -> {
+                    // เรียงลำดับ shipLocations โดยใช้ข้อมูลจาก shipListSeqMap
+                    Collections.sort(shipLocations, (s1, s2) -> {
+                        Integer seq1 = shipListSeqMap.get(s1.getShipLoCode());
+                        Integer seq2 = shipListSeqMap.get(s2.getShipLoCode());
+                        return Integer.compare(seq1, seq2); // เปรียบเทียบค่าของ ShipListSeq
+                    });
                     adapterShipLocationHelper.updateList(shipLocations);
                     for(ShipLocation shipLocation: shipLocations){
                         Log.d(TAG, ""+shipLocation.getShipLoAddr());
@@ -425,50 +433,58 @@ public class StatusFragment extends Fragment {
             }
         });
 
-//        shipmentListViewModel.getNearArrival().observe(getViewLifecycleOwner(), shipmentLists -> {
-//            Log.d(TAG, "Shipments ENTER: " + shipmentLists.size());
-//            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
-////            Map<Integer, ShipmentList> shipmentMap = new HashMap<>(); // ใช้ WeakHashMap แทน HashMap
-//            for (ShipmentList shipment : shipmentLists) {
-//                final ShipmentList currentShipment = shipment; // คัดลอก shipment ปัจจุบัน
-//                int shipLoCode = currentShipment.getShipListShipLoCode();
-////                shipmentMap.put(shipLoCode, shipment); // เก็บ shipLoCode ไว้กับ ShipmentList
-//                Log.d(TAG, "Locode "+shipLoCode);
-//                timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
-//                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-//                formattedTime = sdf.format(new Date(timestamp));
-//                currentShipment.setShipListStatus("ใกล้ถึงแล้ว");
-//                currentShipment.setLatUpdateStatus(latitude);
-//                currentShipment.setLongUpdateStatus(longitude);
-//                currentShipment.setLastUpdateStatus(formattedTime);
-//
-////                Toast.makeText(requireContext(), "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
-////                notificationHelper.sendHighPriorityNotification("ใกล้ถึงแล้ว", "ใกล้ถึงแล้ว : " + shipment.getShipListShipLoCode(), MainActivity.class);
-//                LiveData<ShipLocation> shipLocationLiveData =
-//                        shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
-//                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
-//                    @Override
-//                    public void onChanged(ShipLocation shipLocation) {
-//                        // เมื่อข้อมูลพร้อมใช้งานแล้ว ทำการส่ง Notification
-//                        if (shipLocation != null) {
-//                            Log.d(TAG, "Locode "+shipLocation.getShipLoCode()+" "+shipLocation.getShipLoAddr());
-//                            notificationHelper.sendHighPriorityNotification(
-//                                    "ใกล้ถึงแล้ว",
-//                                    shipLocation.getShipLoAddr(),
-//                                    MainActivity.class
-//                            );
-//                            shipmentListViewModel.update(currentShipment);
-////                            shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
-//                        }
-//                        shipLocationLiveData.removeObserver(this);
-//                    }
-//                });
-//
-//                Log.d(TAG, "Shipment with seq " + currentShipment.getShipListSeq() + " ("+ shipLoCode+")"+" is NEAR ARRIVAL." + currentShipment.getLastUpdateStatus());
-//
-////                shipmentListViewModel.update(currentShipment);
-//            }
-//        });
+        shipmentListViewModel.getNearArrival().observe(getViewLifecycleOwner(), shipmentLists -> {
+            Log.d(TAG, "Shipments ENTER: " + shipmentLists.size());
+            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
+
+            for (ShipmentList shipment : shipmentLists) {
+                int shipLoCode = shipment.getShipListShipLoCode();
+                Log.d(TAG, "Locode ที่ได้จาก Shipment: " + shipLoCode);
+
+                long timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+                String formattedTime = sdf.format(new Date(timestamp));
+
+                LiveData<ShipLocation> shipLocationLiveData = shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
+                Log.d(TAG, "ค้นหา Location ด้วย shipLoCode: " + shipLoCode);
+
+                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
+                    @Override
+                    public void onChanged(ShipLocation shipLocation) {
+                        if (shipLocation != null) {
+                            Log.d(TAG, "ได้ค่า Locode: " + shipLocation.getShipLoCode() + " ที่อยู่: " + shipLocation.getShipLoAddr());
+
+                            if (shipLocation.getShipLoCode() == shipLoCode) {
+                                // อัปเดต Shipment หลังจากที่มีข้อมูลแล้ว
+                                shipment.setShipListStatus("ใกล้ถึงแล้ว");
+                                shipment.setLatUpdateStatus(latitude);
+                                shipment.setLongUpdateStatus(longitude);
+                                shipment.setLastUpdateStatus(formattedTime);
+//                                shipment.setGeofenceID("");
+
+                                shipmentListViewModel.update(shipment);
+
+                                // ส่ง Notification หลังจากได้ข้อมูลที่อยู่แล้ว
+//                                notificationHelper.sendHighPriorityNotification(
+//                                        "ใกล้ถึง",
+//                                        shipLocation.getShipLoAddr(),
+//                                        MainActivity.class
+//                                );
+
+                                // ลบ Observer เพื่อป้องกันการทำงานซ้ำ
+                                shipLocationLiveData.removeObserver(this);
+                            } else {
+                                Log.e(TAG, "ERROR: shipLoCode ที่คืนค่าไม่ตรงกัน! ควรได้: " + shipLoCode + " แต่ได้: " + shipLocation.getShipLoCode());
+                            }
+                        } else {
+                            Log.e(TAG, "ERROR: ไม่พบข้อมูล Location สำหรับ shipLoCode: " + shipLoCode);
+                        }
+                    }
+                });
+
+                Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + formattedTime);
+            }
+        });
 
         // ไว้เทส
 //        btn_camera.setVisibility(View.VISIBLE);

@@ -67,7 +67,7 @@ public class LoginDriverFragment extends Fragment {
                     truckViewModel.getTruckByRegFromSharedPreferences(requireContext()).observe(getViewLifecycleOwner(), truck -> {
                         if (truck != null) {
                             aTruck = truck;
-                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getContext(), "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg() + " : " + truck.getTruckCode(), Toast.LENGTH_SHORT).show();
 //                            tripViewModel.createTrip(aTruck.getTruckCode());
 
                             if (SharedPreferencesHelper.getTrip(requireContext()) == 0) {

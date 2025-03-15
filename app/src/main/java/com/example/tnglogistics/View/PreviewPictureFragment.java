@@ -262,6 +262,8 @@ public class PreviewPictureFragment extends Fragment {
                         }
                     });
 
+                    Toast.makeText(getContext(), "สินสุดการจัดส่ง", Toast.LENGTH_SHORT).show();
+
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                     new Handler().postDelayed(() -> {
 //                        transaction.commit();
