@@ -13,6 +13,7 @@ import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.Model.TruckRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TruckViewModel extends AndroidViewModel {
@@ -32,6 +33,16 @@ public class TruckViewModel extends AndroidViewModel {
             instance = new TruckViewModel(application);
         }
         return instance;
+    }
+
+    public static void resetInstance() {
+        instance.truckList.setValue(new ArrayList<>());
+        instance = null;
+    }
+
+    // ใน TruckViewModel.java
+    public void resetData() {
+        truckList.setValue(new ArrayList<>());
     }
 
     public LiveData<List<Truck>> getTruckList() {

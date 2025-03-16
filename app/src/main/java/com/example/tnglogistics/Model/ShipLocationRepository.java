@@ -37,6 +37,15 @@ public class ShipLocationRepository {
         return shipLocationDao.getNewLocations(lastUpdateTime);
     }
 
+    // ใน ShipLocationRepository.java
+    public void clearAllData() {
+        // ล้างข้อมูลในฐานข้อมูล
+        executorService.execute(() -> shipLocationDao.deleteAll());// สมมติว่าคุณมี DAO ที่มีเมธอด deleteAll()
+
+        // หรือถ้าคุณมีการเชื่อมต่อกับ API
+        // อาจจะต้องล้างข้อมูล cache หรือข้อมูลที่เก็บไว้ชั่วคราว
+    }
+
 //    // INSERT ข้อมูลเข้า Room Database
 //    public void insert(ShipLocation shipLocation) {
 //        executorService.execute(() -> shipLocationDao.insert(shipLocation));

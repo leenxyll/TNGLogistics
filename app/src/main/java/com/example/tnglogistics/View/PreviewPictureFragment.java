@@ -267,6 +267,10 @@ public class PreviewPictureFragment extends Fragment {
                     // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                     new Handler().postDelayed(() -> {
 //                        transaction.commit();
+                        ShipLocationViewModel.resetInstance();
+                        ShipmentListViewModel.resetInstance();
+                        TripViewModel.resetInstance();
+                        TruckViewModel.resetInstance();
                         SharedPreferencesHelper.saveLastFragment(requireContext(),"");
                         SharedPreferencesHelper.setUserLoggedIn(requireContext(),false);
                         SharedPreferencesHelper.saveTrip(requireContext(), 0);

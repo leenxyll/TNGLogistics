@@ -14,6 +14,7 @@ import com.example.tnglogistics.Model.Trip;
 import com.example.tnglogistics.Model.TripRepository;
 import com.example.tnglogistics.Model.Truck;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TripViewModel extends AndroidViewModel {
@@ -34,6 +35,17 @@ public class TripViewModel extends AndroidViewModel {
             instance = new TripViewModel(application);
         }
         return instance;
+    }
+
+    // เพิ่มเมธอดนี้เพื่อรีเซ็ต singleton
+    public static void resetInstance() {
+        instance.tripList.setValue(new ArrayList<>());
+        instance = null;
+    }
+
+    // ใน TripViewModel.java
+    public void resetData() {
+        tripList.setValue(new ArrayList<>());
     }
 
     public LiveData<List<Trip>> getTripList() {

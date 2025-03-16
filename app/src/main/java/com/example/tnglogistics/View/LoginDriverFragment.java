@@ -85,7 +85,7 @@ public class LoginDriverFragment extends Fragment {
                                     }
                                 });
                             } else {
-                                Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(getContext(), "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Log.d(TAG, "Trip already exists");

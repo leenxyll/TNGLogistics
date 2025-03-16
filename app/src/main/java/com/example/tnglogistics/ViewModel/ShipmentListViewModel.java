@@ -37,6 +37,17 @@ public class ShipmentListViewModel extends AndroidViewModel {
         return instance;
     }
 
+    // เพิ่มเมธอดนี้เพื่อรีเซ็ต singleton
+    public static void resetInstance() {
+        instance.shipmentList.setValue(new ArrayList<>());
+        instance = null;
+    }
+
+    public void resetData() {
+        shipmentList.setValue(new ArrayList<>());
+    }
+
+
     public void createShipmentList(int shipListSeq, int shipListTripCode, int shipListShipLoCode){
         repository.createShipmentList(shipListSeq, shipListTripCode, shipListShipLoCode);
     }

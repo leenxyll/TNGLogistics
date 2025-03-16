@@ -40,6 +40,23 @@ public class ShipLocationViewModel extends AndroidViewModel {
         return instance;
     }
 
+    // ใน ShipLocationViewModel
+    public void resetData() {
+        shipLocationList.setValue(new ArrayList<>());
+        filterCodes.setValue(new HashSet<>());
+    }
+
+    // เพิ่มเมธอดนี้เพื่อรีเซ็ต singleton
+    public static void resetInstance() {
+        instance.shipLocationList.setValue(new ArrayList<>());
+        instance.filterCodes.setValue(new HashSet<>());
+        // ล้างข้อมูลในฐานข้อมูลผ่าน repository
+        instance.repository.clearAllData();
+        instance = null;
+    }
+
+// เมธอดแบบเดียวกันในอีก ViewModel
+
     public LiveData<List<ShipLocation>> getShipLocationList() {
         return shipLocationList;
     }

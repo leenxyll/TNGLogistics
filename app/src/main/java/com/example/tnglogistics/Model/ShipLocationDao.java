@@ -27,6 +27,9 @@ public interface ShipLocationDao {
     @Query("SELECT * FROM ship_location WHERE ShipLoCode > :ShipLoCode")
     LiveData<ShipLocation> getLocationByShipLoCode(int ShipLoCode);
 
+    @Query("DELETE FROM ship_location")
+    void deleteAll();
+
 //    @Query("UPDATE ship_location SET geofenceID = :geofenceID WHERE shipLoCode = :shipLoCode")
 //    void updateGeofenceID(int shipLoCode, String geofenceID);
 //
