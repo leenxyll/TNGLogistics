@@ -32,10 +32,10 @@ public class ShipLocationRepository {
         return shipLocationDao.getAllLocations();
     }
 
-    // ดึงเฉพาะข้อมูลที่ถูกสร้างใหม่
-    public LiveData<List<ShipLocation>> getNewLocations(long lastUpdateTime) {
-        return shipLocationDao.getNewLocations(lastUpdateTime);
-    }
+//    // ดึงเฉพาะข้อมูลที่ถูกสร้างใหม่
+//    public LiveData<List<ShipLocation>> getNewLocations(long lastUpdateTime) {
+//        return shipLocationDao.getNewLocations(lastUpdateTime);
+//    }
 
     // ใน ShipLocationRepository.java
     public void clearAllData() {

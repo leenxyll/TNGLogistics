@@ -61,10 +61,10 @@ public class ShipLocationViewModel extends AndroidViewModel {
         return shipLocationList;
     }
 
-    public void setNewLocations(long currentTime) {
-        // อัพเดต source ใหม่เมื่อมีการเปลี่ยนแปลงเวลา
-        shipLocationList.addSource(repository.getNewLocations(currentTime), shipLocationList::setValue);
-    }
+//    public void setNewLocations(long currentTime) {
+//        // อัพเดต source ใหม่เมื่อมีการเปลี่ยนแปลงเวลา
+//        shipLocationList.addSource(repository.getNewLocations(currentTime), shipLocationList::setValue);
+//    }
 
 //    public LiveData<List<ShipLocation>> getNewLocations(long currentTime){
 //        return repository.getNewLocations(currentTime);
@@ -122,8 +122,6 @@ public class ShipLocationViewModel extends AndroidViewModel {
                 })
         );
     }
-
-
 
 //    public void fetchLocationsFromServer() {
 //        repository.fetchAndStoreLocations();

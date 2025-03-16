@@ -147,7 +147,7 @@ public class PlanFragment extends Fragment {
 
 //        shipLocationViewModel.fetchLocationsFromServer(); // ดึงข้อมูลจาก Server
 
-        shipLocationViewModel.setNewLocations(System.currentTimeMillis());
+//        shipLocationViewModel.setNewLocations(System.currentTimeMillis());
         shipLocationViewModel.getShipLocationList().observe(getViewLifecycleOwner(), shipLocations -> { //แก้ให้แสดงเฉพาะอันเรียกเมธอดใหม่
             Log.d(TAG, "observe : "+shipLocations);
             adapterShipLocationHelper.updateList(shipLocations);

@@ -21,8 +21,8 @@ public interface ShipLocationDao {
     @Query("SELECT * FROM ship_location")
     LiveData<List<ShipLocation>> getAllLocations();
 
-    @Query("SELECT * FROM ship_location WHERE createdAt > :lastUpdateTime")
-    LiveData<List<ShipLocation>> getNewLocations(long lastUpdateTime);
+//    @Query("SELECT * FROM ship_location WHERE createdAt > :lastUpdateTime")
+//    LiveData<List<ShipLocation>> getNewLocations(long lastUpdateTime);
 
     @Query("SELECT * FROM ship_location WHERE ShipLoCode > :ShipLoCode")
     LiveData<ShipLocation> getLocationByShipLoCode(int ShipLoCode);
