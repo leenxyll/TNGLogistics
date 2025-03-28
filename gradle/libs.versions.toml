@@ -17,6 +17,7 @@ cameraView = "1.4.1"
 visionCommon = "17.3.0"
 playServicesMlkitTextRecognitionCommon = "19.1.0"
 playServicesMlkitTextRecognition = "19.0.1"
+recyclerview = "1.4.0"
 
 [libraries]
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCoreVersion" }
@@ -38,6 +39,7 @@ play-services-maps = { module = "com.google.android.gms:play-services-maps", ver
 vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
 play-services-mlkit-text-recognition-common = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-common", version.ref = "playServicesMlkitTextRecognitionCommon" }
 play-services-mlkit-text-recognition = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "playServicesMlkitTextRecognition" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

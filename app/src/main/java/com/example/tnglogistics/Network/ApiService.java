@@ -11,6 +11,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 import java.util.List;
@@ -41,4 +42,13 @@ public interface ApiService {
 
     @PATCH("/mobile/UpdateTrip")
     Call<Void> updateTrip(@Body Trip trip);
+
+    @POST("/auth/login")
+    Call<JsonObject> login(@Body JsonObject credentials); // เพิ่ม method login
+
+    @GET("/auth/branches/location") // เพิ่ม endpoint นี้
+    Call<JsonObject> getBranchLocation(@Query("BrchCode") String branchCode);
+
+    @GET("/driver/trip/shipmentList")
+    Call<JsonObject> getInvoice(@Query("EmpCode") int EmpCode);
 }

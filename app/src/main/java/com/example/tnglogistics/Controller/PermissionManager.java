@@ -2,15 +2,18 @@ package com.example.tnglogistics.Controller;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -29,6 +32,10 @@ public class PermissionManager {
     private static boolean isBackgroundLocationGranted = false;
     private static boolean isCameraGranted = false;
     private static boolean isNotificationGranted = false;
+    private static boolean isDialogShowing = false; // ป้องกัน Dialog ซ้ำ
+
+    private static Handler gpsHandler;
+    private static Runnable gpsRunnable;
 
     public static void registerPermissionLauncher(ComponentActivity activity) {
         Log.d(TAG, "Registering permission launchers");
@@ -104,6 +111,7 @@ public class PermissionManager {
         }
     }
 
+
 //    private static void requestBackgroundLocation(Activity activity) {
 //        if (activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
 //            // แสดง Dialog อธิบายก่อนขอ
@@ -178,156 +186,61 @@ public class PermissionManager {
                 .setCancelable(false)
                 .show();
     }
+
+
+    public static boolean checkGPS(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    public static void startGPSMonitoring(Context context, Activity activity) {
+        gpsHandler = new Handler();
+        gpsRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!PermissionManager.checkGPS(context)) {
+                    PermissionManager.showEnableGPSDialog(activity);
+                }
+                gpsHandler.postDelayed(this, 10*1000); // เช็คทุก 3 วินาที
+            }
+        };
+        gpsHandler.post(gpsRunnable);
+    }
+
+    public static void stopGPSMonitoring() {
+        if (gpsHandler != null && gpsRunnable != null) {
+            gpsHandler.removeCallbacks(gpsRunnable);
+        }
+    }
+
+    public static void showEnableGPSDialog(Activity activity) {
+        if (isDialogShowing) return; // ✅ ถ้า Dialog เปิดอยู่ ไม่ต้องเปิดใหม่
+
+        isDialogShowing = true; // ✅ ตั้งค่าให้รู้ว่ากำลังเปิด Dialog
+
+        new AlertDialog.Builder(activity)
+                .setTitle("ต้องการเข้าถึงตำแหน่ง")
+                .setMessage("จำเป็นต้องเปิด GPS เพื่อใช้งานแอปพลิเคชัน หากไม่เปิด GPS จะไม่สามารถใช้งานแอปได้")
+                .setCancelable(false) // ✅ ไม่ให้ปิด Dialog ด้วยการกดข้างนอก
+                .setPositiveButton("เปิด GPS", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        isDialogShowing = false; // ✅ ปิด Dialog แล้วรีเซ็ตค่า
+                    }
+                })
+                .setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        isDialogShowing = false; // ✅ ปิด Dialog แล้วรีเซ็ตค่า
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        isDialogShowing = false; // ✅ ป้องกัน Dialog ค้าง
+                    }
+                })
+                .show();
+    }
 }
-
-
-
-//package com.example.tnglogistics.Controller;
-//
-//import android.Manifest;
-//import android.app.Activity;
-//import android.content.pm.PackageManager;
-//import android.util.Log;
-//
-//import androidx.activity.ComponentActivity;
-//import androidx.activity.result.ActivityResultCallback;
-//import androidx.activity.result.ActivityResultLauncher;
-//import androidx.activity.result.contract.ActivityResultContracts;
-//import androidx.appcompat.app.AlertDialog;
-//import androidx.core.app.ActivityCompat;
-//import androidx.core.content.ContextCompat;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Map;
-//
-//public class PermissionManager {
-//    private static final String TAG = "PermissionManager";
-//
-//    //    ขอ Permission แบบใหม่ แทน requestPermissions() เพื่อขอหลายๆสิทธิ์พร้อมกัน
-//    private static ActivityResultLauncher<String[]> mPermissionResultLancher;
-//    private static boolean isFineLocationPermissionGranted = false;
-//    private static boolean isBackgroundLocationPermissionGranted = false;
-//    private static boolean isCameraPermissionGranted = false;
-//    private static boolean isPostNotificationPermissionGranted = false;
-//
-//    public static void registerPermissionLauncher(ComponentActivity activity){
-//        Log.d(TAG, "Call registerPermissionLauncher");
-//        mPermissionResultLancher = activity.registerForActivityResult(
-//                new ActivityResultContracts.RequestMultiplePermissions(),
-//                new ActivityResultCallback<Map<String, Boolean>>() {
-//                    @Override
-//                    public void onActivityResult(Map<String, Boolean> result) {
-//                        if(result.get(Manifest.permission.ACCESS_FINE_LOCATION) != null){
-//                            isFineLocationPermissionGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
-//                            Log.d(TAG, "FINE " + result.get(Manifest.permission.ACCESS_FINE_LOCATION));
-//                        }
-//                        if(result.get(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != null){
-//                            isBackgroundLocationPermissionGranted = result.get(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-//                            Log.d(TAG, "BACKGROUND " + result.get(Manifest.permission.ACCESS_BACKGROUND_LOCATION));
-//                        }
-//                        if(result.get(Manifest.permission.CAMERA) != null){
-//                            isCameraPermissionGranted = result.get(Manifest.permission.CAMERA);
-//                            Log.d(TAG, "CAMERA " + result.get(Manifest.permission.CAMERA));
-//                        }
-//                        if(result.get(Manifest.permission.POST_NOTIFICATIONS) != null){
-//                            isPostNotificationPermissionGranted = result.get(Manifest.permission.POST_NOTIFICATIONS);
-//                            Log.d(TAG, "POST NOTI " + result.get(Manifest.permission.POST_NOTIFICATIONS));
-//                        }
-//
-//                        // หลังจากขอ Foreground Location แล้ว ถ้ายังไม่ได้ Background Location ให้ขอแยก
-//                        if (isFineLocationPermissionGranted && !isBackgroundLocationPermissionGranted
-//                                && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-//                            showBackgroundLocationDialog(activity);
-//                        }
-//
-//                    }
-//                });
-//    }
-//
-//    public static void requestPermission(Activity activity){
-//        Log.d(TAG, "Call requestPermissions");
-//        isFineLocationPermissionGranted = ContextCompat.checkSelfPermission(
-//                activity,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        isBackgroundLocationPermissionGranted = ContextCompat.checkSelfPermission(
-//                activity,
-//                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        isCameraPermissionGranted = ContextCompat.checkSelfPermission(
-//                activity,
-//                Manifest.permission.CAMERA
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        isPostNotificationPermissionGranted = ContextCompat.checkSelfPermission(
-//                activity,
-//                Manifest.permission.POST_NOTIFICATIONS
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        //เพิ่มลิสต์เพื่อขอ
-//        List<String> permissionRequest = new ArrayList<String>();
-//
-//        if(!isFineLocationPermissionGranted){
-//            permissionRequest.add(Manifest.permission.ACCESS_FINE_LOCATION);
-//        }
-//
-//        if(!isCameraPermissionGranted){
-//            permissionRequest.add(Manifest.permission.CAMERA);
-//        }
-//
-//        if(!isPostNotificationPermissionGranted){
-//            permissionRequest.add(Manifest.permission.POST_NOTIFICATIONS);
-//        }
-//
-////        if (!isFineLocationPermissionGranted && retryCount < MAX_RETRY_COUNT) {
-////            retryCount++;
-////            new Handler(Looper.getMainLooper()).postDelayed(this::requestPermission, 2000); // ลองใหม่ทุก 2 วินาที
-////        } else if (retryCount >= MAX_RETRY_COUNT) {
-////            Log.e(TAG, "ขอสิทธิ์ FINE_LOCATION ไม่สำเร็จหลังจากลอง " + MAX_RETRY_COUNT + " ครั้ง");
-////        }
-//
-//        if(!permissionRequest.isEmpty()){
-//            //เรียกใช้ launch เพื่อขอสิทธิ์
-//            mPermissionResultLancher.launch(permissionRequest.toArray(new String[0]));
-//        } else {
-//            // ถ้า Foreground Location ได้รับอนุญาตแล้ว ค่อยขอ Background Location แยก
-//            // ขอ Background Location เฉพาะ Android 10+ เท่านั้น
-//            if (!isBackgroundLocationPermissionGranted && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-//                showBackgroundLocationDialog(activity);
-//            }
-//        }
-//    }
-//
-////            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-////        // TODO: Consider calling
-////        //    ActivityCompat#requestPermissions
-////        // here to request the missing permissions, and then overriding
-////        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-////        //                                          int[] grantResults)
-////        // to handle the case where the user grants the permission. See the documentation
-////        // for ActivityCompat#requestPermissions for more details.
-////        return;
-////    }
-//
-////    public static vo
-//
-//    public static void showBackgroundLocationDialog(Activity activity) {
-//        new AlertDialog.Builder(activity)
-////                .setTitle("ต้องการสิทธิ์การเข้าถึงตำแหน่งพื้นหลัง")
-////                .setMessage("แอปต้องการสิทธิ์เข้าถึงตำแหน่งของคุณในพื้นหลังเพื่อให้การติดตามตำแหน่งทำงานได้อย่างถูกต้อง")
-//                .setTitle("ต้องการสิทธิ์การเข้าถึงตำแหน่งพื้นหลัง")
-//                .setMessage("แอปนี้ต้องการสิทธิ์เข้าถึงตำแหน่งพื้นหลังเพื่อให้การติดตามตำแหน่งการส่งสินค้าได้อย่างถูกต้องเท่านั้น")
-//                .setPositiveButton("อนุญาต", (dialog, which) -> {
-//                    if (activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-//                        // ขอสิทธิ์ Background Location ถ้าผู้ใช้ยังไม่ได้เลือก "Don't ask again"
-//                        mPermissionResultLancher.launch(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION});
-//                    } else {
-//                        // ถ้าผู้ใช้เคยปฏิเสธก่อนหน้านี้ก็ขอ
-//                        showBackgroundLocationDialog(activity);
-//                    }
-//                })
-//                .show();
-//    }
-//}

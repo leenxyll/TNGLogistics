@@ -42,6 +42,7 @@ dependencies {
     implementation libs.vision.common
     implementation libs.play.services.mlkit.text.recognition.common
     implementation libs.play.services.mlkit.text.recognition
+    implementation libs.recyclerview
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
@@ -57,4 +58,5 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.5.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.8.8' // หรือเวอร์ชันที่คุณต้องการ
 }

@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,15 +31,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tnglogistics.Controller.AdapterAddrHelper;
+import com.example.tnglogistics.Controller.AdapterInvoiceHelper;
 import com.example.tnglogistics.Controller.AdapterShipLocationHelper;
 import com.example.tnglogistics.Controller.LocationHelper;
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.NotificationHelper;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.Invoice;
 import com.example.tnglogistics.Model.ShipLocation;
 import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.InvoiceViewModel;
 import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
 import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
 import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
@@ -63,7 +67,9 @@ public class StatusFragment extends Fragment {
     private static final String TAG = "StatusFragment";
     private ShipmentListViewModel shipmentListViewModel;
     private ShipLocationViewModel shipLocationViewModel;
+    private InvoiceViewModel invoiceViewModel;
     private AdapterShipLocationHelper adapterShipLocationHelper;
+    private AdapterInvoiceHelper adapterInvoiceHelper;
     private String formattedTime;
     private long timestamp;
     private int allqueue;
@@ -102,22 +108,29 @@ public class StatusFragment extends Fragment {
         requireContext().bindService(intent, serviceConnection, requireContext().BIND_AUTO_CREATE);
     }
 
-    // ดึงพิกัดล่าสุดจาก LocationService
-    private void getLocationFromService() {
-        if (isBound && locationService != null) {
-            Location currentLocation = locationService.getCurrentLocation();
-            if (currentLocation != null) {
-                latitude = currentLocation.getLatitude();
-                longitude = currentLocation.getLongitude();
-                Log.d(TAG, "Current Location: Lat = " + latitude + ", Lng = " + longitude);
-//                Toast.makeText(requireContext(), "Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_LONG).show();
-            } else {
-                Log.e(TAG, "Location not available yet.");
-            }
-        } else {
-            Log.e(TAG, "LocationService is not bound.");
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        PermissionManager.startGPSMonitoring(requireContext(), requireActivity());
     }
+
+
+    // ดึงพิกัดล่าสุดจาก LocationService
+//    private void getLocationFromService() {
+//        if (isBound && locationService != null) {
+//            Location currentLocation = locationService.getCurrentLocation();
+//            if (currentLocation != null) {
+//                latitude = currentLocation.getLatitude();
+//                longitude = currentLocation.getLongitude();
+//                Log.d(TAG, "Current Location: Lat = " + latitude + ", Lng = " + longitude);
+////                Toast.makeText(requireContext(), "Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_LONG).show();
+//            } else {
+//                Log.e(TAG, "Location not available yet.");
+//            }
+//        } else {
+//            Log.e(TAG, "LocationService is not bound.");
+//        }
+//    }
 
     public static StatusFragment newInstance() {
         return new StatusFragment();
@@ -127,6 +140,7 @@ public class StatusFragment extends Fragment {
     public void onPause() {
         super.onPause();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "StatusFragment");
+        PermissionManager.stopGPSMonitoring();
     }
 
     @Override
@@ -163,6 +177,7 @@ public class StatusFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_status, container, false);
 
+        PermissionManager.registerPermissionLauncher(requireActivity());
         TextView txtview_allqueue = view.findViewById(R.id.txtview_allqueue);
         txtview_inqueue = view.findViewById(R.id.txtview_queue);
         txtview_shipped = view.findViewById(R.id.txtview_shipped);
@@ -170,67 +185,108 @@ public class StatusFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        invoiceViewModel = InvoiceViewModel.getInstance(requireActivity().getApplication());
 
-        notificationHelper = new NotificationHelper(requireContext());
-        adapterShipLocationHelper = new AdapterShipLocationHelper(new ArrayList<>(), false);
-        recyclerView.setAdapter(adapterShipLocationHelper);
+        invoiceViewModel.getInvoice(SharedPreferencesHelper.getEmployee(getContext()), getContext());
 
-        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
-        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
+//        adapterInvoiceHelper = new AdapterInvoiceHelper(new ArrayList<>());
+//        recyclerView.setAdapter(adapterInvoiceHelper);
 
+//        LiveData<List<Invoice>> invoiceLiveData = invoiceViewModel.getInvoiceList();
+//        invoiceLiveData.observe(getViewLifecycleOwner(), new Observer<List<Invoice>>() {
+//            @Override
+//            public void onChanged(List<Invoice> invoices) {
+//                txtview_allqueue.setText(String.valueOf(invoices.size()));
+//                adapterInvoiceHelper.updateList(invoices);
+//            }
+//        });
 
-        Map<Integer, Integer> shipListSeqMap = new HashMap<>();
-        LiveData<List<ShipmentList>> shipmentLiveData =
-                shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()));
-        shipmentLiveData.observe(getViewLifecycleOwner(), new Observer<List<ShipmentList>>() {
-            @Override
-            public void onChanged(List<ShipmentList> shipmentLists) {
-                // เรียงลำดับตาม ShipListSeq
-                Collections.sort(shipmentLists, Comparator.comparingInt(ShipmentList::getShipListSeq));
+//        invoiceViewModel.getInvoicesGroupedByLocation().observe(getViewLifecycleOwner(), invoices -> {
+//            adapterInvoiceHelper.updateList(invoices);
+//        });
 
-                Log.d(TAG, "Shipment Data: " + shipmentLists.size());
-                txtview_allqueue.setText(String.valueOf(shipmentLists.size()));
-                allqueue = shipmentLists.size();
-                if (shipmentLists != null && !shipmentLists.isEmpty()) {
-                    Log.d(TAG, "Shipment Data: " + shipmentLists.size());
-
-                    for (ShipmentList shipment : shipmentLists) {
-                        shipListSeqMap.put(shipment.getShipListShipLoCode(), shipment.getShipListSeq());
-                        Log.d(TAG, "Status: [" + shipment.getShipListStatus() + "]");
-                        shipLocationViewModel.addFilterCode(shipment.getShipListShipLoCode());
-                        Log.d(TAG, "addFilterCode: " + shipment.getShipListShipLoCode());
-                    }
-                }
-                shipmentLiveData.removeObserver(this);
+        // Observe ข้อมูลที่จัดกลุ่มตาม Location
+        invoiceViewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
+            if (invoices != null) {
+                txtview_allqueue.setText(String.valueOf(invoices.size()));
+                Map<String, List<Invoice>> groupedInvoices = groupInvoicesByLocation(invoices);
+                adapterInvoiceHelper = new AdapterInvoiceHelper(groupedInvoices);
+                recyclerView.setAdapter(adapterInvoiceHelper);
+                btn_camera.setText("เริ่มต้นจัดส่ง");
+                checkItemList(invoices);
             }
         });
 
-        shipLocationViewModel.getFilteredShipLocationList()
-                .observe(getViewLifecycleOwner(), shipLocations -> {
-                    // ตรวจสอบว่า shipLocations ไม่เป็น null และมีข้อมูลมากกว่าหนึ่งรายการ
-                    if (shipLocations != null && !shipLocations.isEmpty()) {
-                        // เรียงลำดับ shipLocations โดยใช้ข้อมูลจาก shipListSeqMap
-                        Collections.sort(shipLocations, (s1, s2) -> {
-                            Integer seq1 = shipListSeqMap.get(s1.getShipLoCode());
-                            Integer seq2 = shipListSeqMap.get(s2.getShipLoCode());
+        btn_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "on Click");
+                checkAndRequestPermissions();
+            }
+        });
 
-                            // ถ้า seq1 หรือ seq2 เป็น null ให้กำหนดค่าเริ่มต้นเป็น Integer.MAX_VALUE หรือค่าที่เหมาะสม
-                            if (seq1 == null) seq1 = Integer.MAX_VALUE;
-                            if (seq2 == null) seq2 = Integer.MAX_VALUE;
 
-                            return Integer.compare(seq1, seq2); // เปรียบเทียบค่าของ ShipListSeq
-                        });
+//
+//        notificationHelper = new NotificationHelper(requireContext());
+//        adapterShipLocationHelper = new AdapterShipLocationHelper(new ArrayList<>(), false);
+//        recyclerView.setAdapter(adapterShipLocationHelper);
+//
+//        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+//        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
 
-                    }
 
-                    // อัพเดทข้อมูลใน adapter
-                    adapterShipLocationHelper.updateList(shipLocations);
+//        Map<Integer, Integer> shipListSeqMap = new HashMap<>();
+//        LiveData<List<ShipmentList>> shipmentLiveData =
+//                shipmentListViewModel.getShipmentListByTrip(SharedPreferencesHelper.getTrip(requireContext()));
+//        shipmentLiveData.observe(getViewLifecycleOwner(), new Observer<List<ShipmentList>>() {
+//            @Override
+//            public void onChanged(List<ShipmentList> shipmentLists) {
+//                // เรียงลำดับตาม ShipListSeq
+//                Collections.sort(shipmentLists, Comparator.comparingInt(ShipmentList::getShipListSeq));
+//
+//                Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+//                txtview_allqueue.setText(String.valueOf(shipmentLists.size()));
+//                allqueue = shipmentLists.size();
+//                if (shipmentLists != null && !shipmentLists.isEmpty()) {
+//                    Log.d(TAG, "Shipment Data: " + shipmentLists.size());
+//
+//                    for (ShipmentList shipment : shipmentLists) {
+//                        shipListSeqMap.put(shipment.getShipListShipLoCode(), shipment.getShipListSeq());
+//                        Log.d(TAG, "Status: [" + shipment.getShipListStatus() + "]");
+//                        shipLocationViewModel.addFilterCode(shipment.getShipListShipLoCode());
+//                        Log.d(TAG, "addFilterCode: " + shipment.getShipListShipLoCode());
+//                    }
+//                }
+//                shipmentLiveData.removeObserver(this);
+//            }
+//        });
 
-                    // ล็อกข้อมูลของแต่ละ ShipLocation
-                    for (ShipLocation shipLocation : shipLocations) {
-                        Log.d(TAG, "" + shipLocation.getShipLoAddr());
-                    }
-                });
+//        shipLocationViewModel.getFilteredShipLocationList()
+//                .observe(getViewLifecycleOwner(), shipLocations -> {
+//                    // ตรวจสอบว่า shipLocations ไม่เป็น null และมีข้อมูลมากกว่าหนึ่งรายการ
+//                    if (shipLocations != null && !shipLocations.isEmpty()) {
+//                        // เรียงลำดับ shipLocations โดยใช้ข้อมูลจาก shipListSeqMap
+//                        Collections.sort(shipLocations, (s1, s2) -> {
+//                            Integer seq1 = shipListSeqMap.get(s1.getShipLoCode());
+//                            Integer seq2 = shipListSeqMap.get(s2.getShipLoCode());
+//
+//                            // ถ้า seq1 หรือ seq2 เป็น null ให้กำหนดค่าเริ่มต้นเป็น Integer.MAX_VALUE หรือค่าที่เหมาะสม
+//                            if (seq1 == null) seq1 = Integer.MAX_VALUE;
+//                            if (seq2 == null) seq2 = Integer.MAX_VALUE;
+//
+//                            return Integer.compare(seq1, seq2); // เปรียบเทียบค่าของ ShipListSeq
+//                        });
+//
+//                    }
+//
+//                    // อัพเดทข้อมูลใน adapter
+//                    adapterShipLocationHelper.updateList(shipLocations);
+//
+//                    // ล็อกข้อมูลของแต่ละ ShipLocation
+//                    for (ShipLocation shipLocation : shipLocations) {
+//                        Log.d(TAG, "" + shipLocation.getShipLoAddr());
+//                    }
+//                });
 
 
 //        MediatorLiveData<ShipmentList> shipmentLiveDataUpdate = new MediatorLiveData<>();
@@ -379,140 +435,178 @@ public class StatusFragment extends Fragment {
 //            }
 //        });
 
-        shipmentListViewModel.getShipped().observe(getViewLifecycleOwner(), shipmentLists -> {
-            Log.d(TAG, "Shipments DWELL: " + shipmentLists.size());
-            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
-
-            for (ShipmentList shipment : shipmentLists) {
-                int shipLoCode = shipment.getShipListShipLoCode();
-                Log.d(TAG, "Locode ที่ได้จาก Shipment: " + shipLoCode);
-
-                long timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-                String formattedTime = sdf.format(new Date(timestamp));
-
-                LiveData<ShipLocation> shipLocationLiveData = shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
-                Log.d(TAG, "ค้นหา Location ด้วย shipLoCode: " + shipLoCode);
-
-                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
-                    @Override
-                    public void onChanged(ShipLocation shipLocation) {
-                        if (shipLocation != null) {
-                            Log.d(TAG, "ได้ค่า Locode: " + shipLocation.getShipLoCode() + " ที่อยู่: " + shipLocation.getShipLoAddr());
-
-                            if (shipLocation.getShipLoCode() == shipLoCode) {
-                                // อัปเดต Shipment หลังจากที่มีข้อมูลแล้ว
-                                shipment.setShipListStatus("ถึงแล้ว");
-                                shipment.setLatUpdateStatus(latitude);
-                                shipment.setLongUpdateStatus(longitude);
-                                shipment.setLastUpdateStatus(formattedTime);
-                                shipment.setGeofenceID("");
-
-                                shipmentListViewModel.update(shipment);
-
-                                // ส่ง Notification หลังจากได้ข้อมูลที่อยู่แล้ว
-                                notificationHelper.sendHighPriorityNotification(
-                                        "ถึงแล้ว",
-                                        shipLocation.getShipLoAddr(),
-                                        MainActivity.class
-                                );
-
-                                // ลบ Observer เพื่อป้องกันการทำงานซ้ำ
-                                shipLocationLiveData.removeObserver(this);
-                            } else {
-                                Log.e(TAG, "ERROR: shipLoCode ที่คืนค่าไม่ตรงกัน! ควรได้: " + shipLoCode + " แต่ได้: " + shipLocation.getShipLoCode());
-                            }
-                        } else {
-                            Log.e(TAG, "ERROR: ไม่พบข้อมูล Location สำหรับ shipLoCode: " + shipLoCode);
-                        }
-                    }
-                });
-
-                Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + formattedTime);
-            }
-        });
-
-
-
-
-        shipmentListViewModel.getShippedCount().observe(getViewLifecycleOwner(), count -> {
-            Log.d(TAG, "Update Shipments shipped: " + count);
-            txtview_shipped.setText(String.valueOf(count));
-            int queue = allqueue - count;
-            Log.d(TAG, "Update Shipments queue: " + queue);
-            txtview_inqueue.setText(String.valueOf(queue));
-            if(count == allqueue){
-                SharedPreferencesHelper.saveMileIn(requireContext(), true);
-                btn_camera.setVisibility(View.VISIBLE);
-            }
-        });
-
-        shipmentListViewModel.getNearArrival().observe(getViewLifecycleOwner(), shipmentLists -> {
-            Log.d(TAG, "Shipments ENTER: " + shipmentLists.size());
-            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
-
-            for (ShipmentList shipment : shipmentLists) {
-                int shipLoCode = shipment.getShipListShipLoCode();
-                Log.d(TAG, "Locode ที่ได้จาก Shipment: " + shipLoCode);
-
-                long timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-                String formattedTime = sdf.format(new Date(timestamp));
-
-                LiveData<ShipLocation> shipLocationLiveData = shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
-                Log.d(TAG, "ค้นหา Location ด้วย shipLoCode: " + shipLoCode);
-
-                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
-                    @Override
-                    public void onChanged(ShipLocation shipLocation) {
-                        if (shipLocation != null) {
-                            Log.d(TAG, "ได้ค่า Locode: " + shipLocation.getShipLoCode() + " ที่อยู่: " + shipLocation.getShipLoAddr());
-
-                            if (shipLocation.getShipLoCode() == shipLoCode) {
-                                // อัปเดต Shipment หลังจากที่มีข้อมูลแล้ว
-                                shipment.setShipListStatus("ใกล้ถึงแล้ว");
-                                shipment.setLatUpdateStatus(latitude);
-                                shipment.setLongUpdateStatus(longitude);
-                                shipment.setLastUpdateStatus(formattedTime);
+//        shipmentListViewModel.getShipped().observe(getViewLifecycleOwner(), shipmentLists -> {
+//            Log.d(TAG, "Shipments DWELL: " + shipmentLists.size());
+//            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
+//
+//            for (ShipmentList shipment : shipmentLists) {
+//                int shipLoCode = shipment.getShipListShipLoCode();
+//                Log.d(TAG, "Locode ที่ได้จาก Shipment: " + shipLoCode);
+//
+//                long timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
+//                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+//                String formattedTime = sdf.format(new Date(timestamp));
+//
+//                LiveData<ShipLocation> shipLocationLiveData = shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
+//                Log.d(TAG, "ค้นหา Location ด้วย shipLoCode: " + shipLoCode);
+//
+//                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
+//                    @Override
+//                    public void onChanged(ShipLocation shipLocation) {
+//                        if (shipLocation != null) {
+//                            Log.d(TAG, "ได้ค่า Locode: " + shipLocation.getShipLoCode() + " ที่อยู่: " + shipLocation.getShipLoAddr());
+//
+//                            if (shipLocation.getShipLoCode() == shipLoCode) {
+//                                // อัปเดต Shipment หลังจากที่มีข้อมูลแล้ว
+//                                shipment.setShipListStatus("ถึงแล้ว");
+//                                shipment.setLatUpdateStatus(latitude);
+//                                shipment.setLongUpdateStatus(longitude);
+//                                shipment.setLastUpdateStatus(formattedTime);
 //                                shipment.setGeofenceID("");
-
-                                shipmentListViewModel.update(shipment);
-
-                                // ส่ง Notification หลังจากได้ข้อมูลที่อยู่แล้ว
+//
+//                                shipmentListViewModel.update(shipment);
+//
+//                                // ส่ง Notification หลังจากได้ข้อมูลที่อยู่แล้ว
 //                                notificationHelper.sendHighPriorityNotification(
-//                                        "ใกล้ถึง",
+//                                        "ถึงแล้ว",
 //                                        shipLocation.getShipLoAddr(),
 //                                        MainActivity.class
 //                                );
+//
+//                                // ลบ Observer เพื่อป้องกันการทำงานซ้ำ
+//                                shipLocationLiveData.removeObserver(this);
+//                            } else {
+//                                Log.e(TAG, "ERROR: shipLoCode ที่คืนค่าไม่ตรงกัน! ควรได้: " + shipLoCode + " แต่ได้: " + shipLocation.getShipLoCode());
+//                            }
+//                        } else {
+//                            Log.e(TAG, "ERROR: ไม่พบข้อมูล Location สำหรับ shipLoCode: " + shipLoCode);
+//                        }
+//                    }
+//                });
+//
+//                Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + formattedTime);
+//            }
+//        });
 
-                                // ลบ Observer เพื่อป้องกันการทำงานซ้ำ
-                                shipLocationLiveData.removeObserver(this);
-                            } else {
-                                Log.e(TAG, "ERROR: shipLoCode ที่คืนค่าไม่ตรงกัน! ควรได้: " + shipLoCode + " แต่ได้: " + shipLocation.getShipLoCode());
-                            }
-                        } else {
-                            Log.e(TAG, "ERROR: ไม่พบข้อมูล Location สำหรับ shipLoCode: " + shipLoCode);
-                        }
-                    }
-                });
 
-                Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + formattedTime);
-            }
-        });
+
+
+//        shipmentListViewModel.getShippedCount().observe(getViewLifecycleOwner(), count -> {
+//            Log.d(TAG, "Update Shipments shipped: " + count);
+//            txtview_shipped.setText(String.valueOf(count));
+//            int queue = allqueue - count;
+//            Log.d(TAG, "Update Shipments queue: " + queue);
+//            txtview_inqueue.setText(String.valueOf(queue));
+//            if(count == allqueue){
+//                SharedPreferencesHelper.saveMileIn(requireContext(), true);
+//                btn_camera.setVisibility(View.VISIBLE);
+//            }
+//        });
+//
+//        shipmentListViewModel.getNearArrival().observe(getViewLifecycleOwner(), shipmentLists -> {
+//            Log.d(TAG, "Shipments ENTER: " + shipmentLists.size());
+//            getLocationFromService(); // ดึงพิกัดก่อนยืนยัน
+//
+//            for (ShipmentList shipment : shipmentLists) {
+//                int shipLoCode = shipment.getShipListShipLoCode();
+//                Log.d(TAG, "Locode ที่ได้จาก Shipment: " + shipLoCode);
+//
+//                long timestamp = System.currentTimeMillis(); // เวลาถ่ายรูป (หน่วยเป็น milliseconds)
+//                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+//                String formattedTime = sdf.format(new Date(timestamp));
+//
+//                LiveData<ShipLocation> shipLocationLiveData = shipLocationViewModel.getLocationByShipLoCode(shipLoCode);
+//                Log.d(TAG, "ค้นหา Location ด้วย shipLoCode: " + shipLoCode);
+//
+//                shipLocationLiveData.observe(getViewLifecycleOwner(), new Observer<ShipLocation>() {
+//                    @Override
+//                    public void onChanged(ShipLocation shipLocation) {
+//                        if (shipLocation != null) {
+//                            Log.d(TAG, "ได้ค่า Locode: " + shipLocation.getShipLoCode() + " ที่อยู่: " + shipLocation.getShipLoAddr());
+//
+//                            if (shipLocation.getShipLoCode() == shipLoCode) {
+//                                // อัปเดต Shipment หลังจากที่มีข้อมูลแล้ว
+//                                shipment.setShipListStatus("ใกล้ถึงแล้ว");
+//                                shipment.setLatUpdateStatus(latitude);
+//                                shipment.setLongUpdateStatus(longitude);
+//                                shipment.setLastUpdateStatus(formattedTime);
+////                                shipment.setGeofenceID("");
+//
+//                                shipmentListViewModel.update(shipment);
+//
+//                                // ส่ง Notification หลังจากได้ข้อมูลที่อยู่แล้ว
+////                                notificationHelper.sendHighPriorityNotification(
+////                                        "ใกล้ถึง",
+////                                        shipLocation.getShipLoAddr(),
+////                                        MainActivity.class
+////                                );
+//
+//                                // ลบ Observer เพื่อป้องกันการทำงานซ้ำ
+//                                shipLocationLiveData.removeObserver(this);
+//                            } else {
+//                                Log.e(TAG, "ERROR: shipLoCode ที่คืนค่าไม่ตรงกัน! ควรได้: " + shipLoCode + " แต่ได้: " + shipLocation.getShipLoCode());
+//                            }
+//                        } else {
+//                            Log.e(TAG, "ERROR: ไม่พบข้อมูล Location สำหรับ shipLoCode: " + shipLoCode);
+//                        }
+//                    }
+//                });
+//
+//                Log.d(TAG, "Shipment with seq " + shipment.getShipListSeq() + " is SHIPPED. " + formattedTime);
+//            }
+//        });
 
         // ไว้เทส
 //        btn_camera.setVisibility(View.VISIBLE);
 //        SharedPreferencesHelper.saveMileIn(requireContext(), true);
 
-        btn_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getActivity(), CameraXActivity.class);
-                ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
-            }
-        });
+//        btn_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent(getActivity(), CameraXActivity.class);
+//                ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+//            }
+//        });
         return view;
+    }
+
+    // ฟังก์ชันจัดกลุ่ม Invoice ตาม Location
+    private Map<String, List<Invoice>> groupInvoicesByLocation(List<Invoice> invoices) {
+        Map<String, List<Invoice>> groupedMap = new HashMap<>();
+        for (Invoice invoice : invoices) {
+            String location = invoice.getShipLoAddr(); // ใช้ค่าของ ShipLocation เป็นตัวจัดกลุ่ม
+            if (!groupedMap.containsKey(location)) {
+                groupedMap.put(location, new ArrayList<>());
+            }
+            groupedMap.get(location).add(invoice);
+        }
+        return groupedMap;
+    }
+
+        // ฟังก์ชันเช็คว่ามีไอเท็มเหลือหรือไม่
+    private void checkItemList(List<Invoice> items) {
+        if (items != null && !items.isEmpty()) {
+            btn_camera.setVisibility(View.VISIBLE);
+        } else {
+            btn_camera.setVisibility(View.GONE);
+        }
+    }
+
+        private void checkAndRequestPermissions() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // ถ้าสิทธิ์ยังไม่ได้รับ ให้ขอใหม่
+            PermissionManager.requestPermissions(requireActivity());
+        } else {
+            // ถ้าได้รับแล้ว ทำงานต่อได้เลย
+            Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getActivity(), CameraXActivity.class);
+            ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+        }
     }
 
 //    @Override

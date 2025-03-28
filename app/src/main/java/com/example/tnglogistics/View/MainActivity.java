@@ -99,16 +99,16 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        truckViewModel = TruckViewModel.getInstance(getApplication());
-
-        truckViewModel.getTruckByRegFromSharedPreferences(this).observe(this, truck -> {
-            if (truck != null) {
-                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg(), Toast.LENGTH_SHORT).show();
-//                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
-            } else {
-//                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        truckViewModel = TruckViewModel.getInstance(getApplication());
+//
+//        truckViewModel.getTruckByRegFromSharedPreferences(this).observe(this, truck -> {
+//            if (truck != null) {
+//                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg(), Toast.LENGTH_SHORT).show();
+////                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
+//            } else {
+////                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
 //        // ลงทะเบียน Permission Launcher
 //        PermissionManager.registerPermissionLauncher(this);
@@ -124,10 +124,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             switch (lastFragment) {
-                case "PlanFragment":
-                    fragment = PlanFragment.newInstance();
-                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
-                    break;
+//                case "PlanFragment":
+//                    fragment = PlanFragment.newInstance();
+//                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
+//                    break;
 //                case "PreviewPictureFragment":
 //                    fragment = PreviewPictureFragment.newInstance();
 //                    break;
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                     fragment = StatusFragment.newInstance();
                     break;
                 default:
-                    fragment = PlanFragment.newInstance();
+                    fragment = StatusFragment.newInstance();
                     Log.d(TAG, "Call DefaultFragment");
                     break;
             }
@@ -145,15 +145,15 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
 
         }
-        imgview_logo_navbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferencesHelper.setUserLoggedIn(MainActivity.this, false);
-                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
-                startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-                finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
-            }
-        });
+//        imgview_logo_navbar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                SharedPreferencesHelper.setUserLoggedIn(MainActivity.this, false);
+//                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+//                startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
+//                finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
+//            }
+//        });
 //            finish();
     }
 

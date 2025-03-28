@@ -12,6 +12,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_TRUCK = "TruckReg";
     private static final String KEY_TRIP = "TripCode";
     private static final String KEY_MILEIN = "MileIn";
+    private static final String KEY_USER = "User";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
@@ -22,6 +23,18 @@ public class SharedPreferencesHelper {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(KEY_USER_SESSION, isLoggedIn);
+        editor.apply();
+    }
+
+    public static int getEmployee(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_USER, 0);  // Default to false
+    }
+
+    public static void setEmployee(Context context, int EmpCode) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(KEY_USER, EmpCode);
         editor.apply();
     }
 
@@ -61,16 +74,16 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getString(KEY_TRUCK, "");
     }
 
-    public static void saveTrip(Context context, int tripCode){
+    public static void saveTrip(Context context, String tripCode){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();;
-        editor.putInt(KEY_TRIP, tripCode);
+        editor.putString(KEY_TRIP, tripCode);
         editor.apply();
     }
 
-    public static int getTrip(Context context){
+    public static String getTrip(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_TRIP, 0);
+        return sharedPreferences.getString(KEY_TRIP, "");
     }
 
     public static void saveMileIn(Context context, boolean isMileIn){

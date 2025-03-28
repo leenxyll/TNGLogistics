@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferencesHelper.saveLastActivity(this,"");
         SharedPreferencesHelper.saveLastFragment(this,"");
         SharedPreferencesHelper.saveTruck(this, "");
-        SharedPreferencesHelper.saveTrip(this, 0);
+        SharedPreferencesHelper.saveTrip(this, "");
         SharedPreferencesHelper.saveMileIn(this, false);
 
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
@@ -47,13 +47,13 @@ public class LoginActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             switch (lastFragment) {
-                case "PlanFragment":
-                    fragment = PlanFragment.newInstance();
-                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
-                    break;
-                case "PreviewPictureFragment":
-                    fragment = PreviewPictureFragment.newInstance();
-                    break;
+//                case "PlanFragment":
+//                    fragment = PlanFragment.newInstance();
+//                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
+//                    break;
+//                case "PreviewPictureFragment":
+//                    fragment = PreviewPictureFragment.newInstance();
+//                    break;
                 case "StatusFragment":
                     fragment = StatusFragment.newInstance();
                     break;

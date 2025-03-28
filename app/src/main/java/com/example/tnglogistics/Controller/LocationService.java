@@ -48,54 +48,57 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // สร้าง Notification channel สำหรับ Foreground Service (สำหรับ Android 8.0 ขึ้นไป)
         createNotificationChannel();
-
-        // สร้าง FusedLocationProviderClient สำหรับติดตามตำแหน่ง
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        Log.d(TAG, "Create FLP");
 
-        // สร้าง LocationCallback เพื่อติดตามตำแหน่ง
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                if (locationResult != null) {
-                    for (Location location : locationResult.getLocations()) {
-                        currentLocation = location;
-                        // อัปเดตตำแหน่งที่ได้รับ
-                        Log.d(TAG, "Location: " + location.getLatitude() + ", " + location.getLongitude() + ", " + location.getTime());
-                    }
+                if (locationResult != null && locationResult.getLastLocation() != null) {
+                    currentLocation = locationResult.getLastLocation();
+                    Log.d(TAG, "Location updated: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
                 }
             }
         };
 
-        // เริ่มการติดตามตำแหน่ง
         startLocationUpdates();
     }
 
-    public Location getCurrentLocation() {
-        return currentLocation;
-    }
-
-    private void startLocationUpdates() {
-//        LocationRequest locationRequest = LocationRequest.create();
-//        locationRequest.setInterval(30000); // อัปเดตทุกๆ 30 วินาที
-//        locationRequest.setFastestInterval(30000); // ความถี่สูงสุดที่สามารถอัปเดตได้
-//        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // ตำแหน่งที่มีความแม่นยำสูง
-
-        LocationRequest locationRequest = new LocationRequest.Builder(30000)  // อัปเดตทุกๆ 30 วินาที
-                .setMinUpdateIntervalMillis(30000)  // ความถี่สูงสุดที่สามารถอัปเดตได้
-                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)  // ตำแหน่งที่มีความแม่นยำสูง
-                .build();
-
-        // ตรวจสอบว่าได้รับสิทธิ์การเข้าถึงตำแหน่งหรือไม่ (สำหรับ Android 6.0 ขึ้นไป)
+    public void getCurrentLocation(LocationListener listener) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
-        // เริ่มติดตามตำแหน่ง
+        if (currentLocation != null) {
+            listener.onLocationReceived(currentLocation);
+        } else {
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    currentLocation = location;
+                }
+                listener.onLocationReceived(currentLocation);
+            });
+        }
+    }
+
+    public interface LocationListener {
+        void onLocationReceived(Location location);
+    }
+
+    private void startLocationUpdates() {
+        LocationRequest locationRequest = new LocationRequest.Builder(30000) // อัปเดตทุก 10 วิ
+                .setMinUpdateIntervalMillis(1000)  // ความถี่สูงสุดที่อัปเดตได้
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setWaitForAccurateLocation(true)
+//                .setMinUpdateDistanceMeters(10)  // อัปเดตเมื่อเคลื่อนที่เกิน 10 เมตร
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
@@ -104,9 +107,8 @@ public class LocationService extends Service {
             NotificationChannel serviceChannel = new NotificationChannel(
                     "LocationServiceChannel",
                     "Location Service Channel",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_LOW
             );
-
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
@@ -116,31 +118,23 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // สร้าง Notification สำหรับ Foreground Service
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, "LocationServiceChannel")
-//                .setContentTitle("Location Service")
-//                .setContentText("Tracking location...")
-                .setContentTitle("กำลังติดตามตำแหน่งการส่งสินค้า")
-//                .setContentText("ระบบกำลังติดตามตำแหน่งของคุณเพื่อช่วยในการส่งสินค้า")
+                .setContentTitle("กำลังติดตามตำแหน่ง")
                 .setSmallIcon(R.drawable.logo)
                 .setContentIntent(pendingIntent)
                 .build();
 
-        // ทำงานในโหมด Foreground Service
         startForeground(1, notification);
-
-        // ให้บริการทำงานต่อไปจนกว่าจะถูกหยุด
+        startLocationUpdates();  // ป้องกันการหยุดทำงานเมื่อระบบ Restart Service
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // หยุดการติดตามตำแหน่งเมื่อ Service ถูกทำลาย
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
-
 }
