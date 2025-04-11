@@ -189,7 +189,8 @@ public class ShipDetailFragment extends Fragment {
                             String geofenceID = invoice.getGeofenceID();
                             geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
                         } else {
-
+                            btn_camera.setVisibility(View.VISIBLE);
+                            container_btn.setVisibility(View.INVISIBLE);
                         }
                     } else {
                         Log.d(TAG, "Geofence already added, skipping...");
@@ -211,7 +212,7 @@ public class ShipDetailFragment extends Fragment {
                                 checkAndRequestPermissions();
                             }
                         });
-                    }else if(invoice.getInvoiceShipStatusCode() == 2 & SharedPreferencesHelper.getMileType(getContext()) == 1 & args == null && !invoice.isAddGeofence() && invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0){
+                    }else if(!invoice.isAddGeofence() && invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0){
                         // ไม่มีพิกัด
                         btn_camera.setVisibility(View.VISIBLE);
                         container_btn.setVisibility(View.INVISIBLE);

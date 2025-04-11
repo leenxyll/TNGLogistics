@@ -174,26 +174,30 @@ public class Repository {
 
                                 } else {
                                     // ❌ ไม่มีค่าพิกัด → ใช้ GeocodeHelper หา LatLng
-                                    String address = newInvoice.getShipLoAddr();
-                                    Log.d(TAG, "Addr: "+ address);
-                                    GeocodeHelper.getLatLngAsync(context, address, new GeocodeHelper.GeocodeCallback() {
-                                        @Override
-                                        public void onAddressFetched(LatLng latLng) {
-                                            if (latLng != null) {
-                                                Log.d(TAG, "Fetched LatLng: " + latLng.latitude + ", " + latLng.longitude);
-
-                                                // ✅ อัปเดตค่า LatLng
-                                                newInvoice.setShipLoLat(latLng.latitude);
-                                                newInvoice.setShipLoLong(latLng.longitude);
-                                                executorService.execute(() -> invoiceDao.update(newInvoice));
-                                            } else {
-                                                newInvoice.setShipLoLat(0.0);
-                                                newInvoice.setShipLoLong(0.0);
-                                                executorService.execute(() -> invoiceDao.update(newInvoice));
-                                                Log.e(TAG, "Cannot fetch LatLng for: " + address);
-                                            }
-                                        }
-                                    });
+//                                    String address = newInvoice.getShipLoAddr();
+//                                    Log.d(TAG, "Addr: "+ address);
+//                                    GeocodeHelper.getLatLngAsync(context, address, new GeocodeHelper.GeocodeCallback() {
+//                                        @Override
+//                                        public void onAddressFetched(LatLng latLng) {
+//                                            if (latLng != null) {
+//                                                Log.d(TAG, "Fetched LatLng: " + latLng.latitude + ", " + latLng.longitude);
+//
+//                                                // ✅ อัปเดตค่า LatLng
+//                                                newInvoice.setShipLoLat(latLng.latitude);
+//                                                newInvoice.setShipLoLong(latLng.longitude);
+//                                                executorService.execute(() -> invoiceDao.update(newInvoice));
+//                                            } else {
+//                                                newInvoice.setShipLoLat(0.0);
+//                                                newInvoice.setShipLoLong(0.0);
+//                                                executorService.execute(() -> invoiceDao.update(newInvoice));
+//                                                Log.e(TAG, "Cannot fetch LatLng for: " + address);
+//                                            }
+//                                        }
+//                                    });
+                                    newInvoice.setShipLoLat(0.0);
+                                    newInvoice.setShipLoLong(0.0);
+                                    executorService.execute(() -> invoiceDao.update(newInvoice));
+                                    Log.e(TAG, "Cannot fetch LatLng");
                                 }
 
 

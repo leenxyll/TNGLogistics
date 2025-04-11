@@ -15,7 +15,7 @@ public class RetrofitClient {
 
     private RetrofitClient() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://tangbot.tangnamglass.com:4443") // เปลี่ยนเป็น URL ของ API จริง
+                .baseUrl("https://568b-2001-fb1-a3-4795-d0e5-359b-2329-bde.ngrok-free.app ") // เปลี่ยนเป็น URL ของ API จริง
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())) // รองรับค่า null
                 .build();
 

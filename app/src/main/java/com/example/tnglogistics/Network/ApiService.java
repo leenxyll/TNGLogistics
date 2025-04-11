@@ -50,26 +50,26 @@ public interface ApiService {
     @PATCH("/mobile/UpdateTrip")
     Call<Void> updateTrip(@Body Trip trip);
 
-    @POST("/mobile/auth/login")
+    @POST("/auth/login")
     Call<JsonObject> login(@Body JsonObject credentials); // เพิ่ม method login
 
-    @GET("/mobile/auth/getBranchLocation") // เพิ่ม endpoint นี้
+    @GET("/auth/getBranchLocation") // เพิ่ม endpoint นี้
     Call<JsonObject> getBranchLocation(@Query("BrchCode") String branchCode);
 
-    @GET("/mobile/driver/trip/getShipmentList")
+    @GET("/driver/trip/getShipmentList")
     Call<JsonObject> getShipmentList(@Query("EmpCode") int EmpCode);
 
-    @POST("/mobile/driver/invoice/updateStatus")
+    @POST("/driver/invoice/updateStatus")
     Call<JsonObject> updateInvoiceStatus(@Body InvoiceShipLog log);
 
 //    @POST("/driver/trip/updateStatus")
 //    Call<JsonObject>
 
-    @POST("/mobile/driver/mileLog/insertData")
+    @POST("/driver/mileLog/insertData")
     Call<JsonObject> insertMileLogData(@Body JsonObject mileLog);
 
     @Multipart
-    @POST("/mobile/driver/mileLog/uploadPic")
+    @POST("/driver/mileLog/uploadPic")
     Call<JsonObject> updateMileLogPic(
             @Part MultipartBody.Part image,
             @Part("MileLogTripCode") RequestBody MileLogTripCode,
