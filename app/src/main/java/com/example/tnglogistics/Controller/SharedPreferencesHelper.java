@@ -11,8 +11,9 @@ public class SharedPreferencesHelper {
     private static final String KEY_USER_SESSION = "UserSession";
     private static final String KEY_TRUCK = "TruckReg";
     private static final String KEY_TRIP = "TripCode";
-    private static final String KEY_MILEIN = "MileIn";
+    private static final String KEY_MILE = "Mile";
     private static final String KEY_USER = "User";
+    private static final String KEY_SEQ = "Seq";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
@@ -31,10 +32,10 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getInt(KEY_USER, 0);  // Default to false
     }
 
-    public static void setEmployee(Context context, int EmpCode) {
+    public static void setEmployee(Context context, int empCode) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(KEY_USER, EmpCode);
+        editor.putInt(KEY_USER, empCode);
         editor.apply();
     }
 
@@ -86,18 +87,29 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getString(KEY_TRIP, "");
     }
 
-    public static void saveMileIn(Context context, boolean isMileIn){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILEIN, Context.MODE_PRIVATE);
+    public static void saveMileType(Context context, int mileType){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();;
-        editor.putBoolean(KEY_MILEIN, isMileIn);
+        editor.putInt(KEY_MILE, mileType);
         editor.apply();
     }
 
-    public static boolean getMileIn(Context context){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILEIN, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(KEY_MILEIN, false);
+    public static int getMileType(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_MILE, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_MILE, 0);
     }
 
+    public static int getInvoiceSeq(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_SEQ, 0);  // Default to false
+    }
+
+    public static void setInvoiceSeq(Context context, int invoiceSeq) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(KEY_SEQ, invoiceSeq);
+        editor.apply();
+    }
 
 
 

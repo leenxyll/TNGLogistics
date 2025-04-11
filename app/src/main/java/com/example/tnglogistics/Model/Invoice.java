@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "Invoice")
 public class Invoice {
     private int ShipListSeq;
+    private String TripCode;
     @PrimaryKey
     @NonNull
     private String InvoiceCode;
@@ -26,6 +27,7 @@ public class Invoice {
     private Double LatUpdateStatus;
     private Double LongUpdateStatus;
     private String GeofenceID;
+    private boolean isAddGeofence;
 
     public int getShipListSeq() {
         return ShipListSeq;
@@ -33,6 +35,14 @@ public class Invoice {
 
     public void setShipListSeq(int shipListSeq) {
         ShipListSeq = shipListSeq;
+    }
+
+    public String getTripCode() {
+        return TripCode;
+    }
+
+    public void setTripCode(String tripCode) {
+        TripCode = tripCode;
     }
 
     public String getInvoiceCode() {
@@ -153,5 +163,13 @@ public class Invoice {
 
     public void setGeofenceID(String geofenceID) {
         GeofenceID = geofenceID;
+    }
+
+    public boolean isAddGeofence() {
+        return isAddGeofence;
+    }
+
+    public void setAddGeofence(boolean addGeofence) {
+        isAddGeofence = addGeofence;
     }
 }

@@ -2,6 +2,8 @@ package com.example.tnglogistics.View;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.tnglogistics.Controller.LocationService;
+import com.example.tnglogistics.Controller.NetworkReceiver;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
@@ -28,7 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private TruckViewModel truckViewModel;
 
-    private ActivityResultLauncher<Intent> cameraLauncher;
+    private ActivityResultLauncher<Intent> cameraMileLauncher;
+    private ActivityResultLauncher<Intent> cameraCFLauncher;
+
+    private NetworkReceiver networkReceiver = new NetworkReceiver();
 
     // initial fragment
 //    private PlanFragment plan_frag;
@@ -52,12 +58,15 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferencesHelper.saveLastActivity(this, "MainActivity");
         Log.d(TAG, TAG +" onStop");
+        unregisterReceiver(networkReceiver);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG, TAG +" onStart");
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, filter);
     }
 
     @Override
@@ -88,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // กำหนด cameraLauncher ใน Activity
-        cameraLauncher = registerForActivityResult(
+        cameraMileLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
@@ -99,19 +108,19 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-//        truckViewModel = TruckViewModel.getInstance(getApplication());
-//
-//        truckViewModel.getTruckByRegFromSharedPreferences(this).observe(this, truck -> {
-//            if (truck != null) {
-//                Toast.makeText(this, "ลงทะเบียนด้วยทะเบียนรถ : " + truck.getTruckReg(), Toast.LENGTH_SHORT).show();
-////                Toast.makeText(this, "Trip : "+ SharedPreferencesHelper.getTrip(this), Toast.LENGTH_SHORT).show();
-//            } else {
-////                Toast.makeText(this, "ไม่พบทะเบียนรถที่ตรงกับข้อมูลที่เก็บไว้", Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        cameraCFLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        String imagePath = result.getData().getStringExtra("image_path");
+                        long imageTimestamp = result.getData().getLongExtra("image_timestamp", 0);
+                        openFragmentPreviewPicCF(imagePath, imageTimestamp); // ส่งค่าไป FragmentB
+                    }
+                }
+        );
 
 //        // ลงทะเบียน Permission Launcher
-//        PermissionManager.registerPermissionLauncher(this);
+        PermissionManager.registerPermissionLauncher(this);
 //        // ขอสิทธิ์
 //        PermissionManager.requestPermission(this);
 
@@ -134,6 +143,9 @@ public class MainActivity extends AppCompatActivity {
                 case "StatusFragment":
                     fragment = StatusFragment.newInstance();
                     break;
+                    case "ShipDetailFragment":
+                        fragment = ShipDetailFragment.newInstance();
+                        break;
                 default:
                     fragment = StatusFragment.newInstance();
                     Log.d(TAG, "Call DefaultFragment");
@@ -158,8 +170,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้
-    public ActivityResultLauncher<Intent> getCameraLauncher() {
-        return this.cameraLauncher;
+    public ActivityResultLauncher<Intent> getCameraMileLauncher() {
+        return this.cameraMileLauncher;
+    }
+
+    // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้
+    public ActivityResultLauncher<Intent> getCameraCFLauncher() {
+        return this.cameraCFLauncher;
     }
 
     private void openFragmentPreviewPicture(String imagePath, long imageTimestamp) {
@@ -177,13 +194,19 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-//    private void startLocationService() {
-//        // เริ่ม startForegroundService เพื่อเริ่ม LocationService
-//        Intent serviceIntent = new Intent(this, LocationService.class);
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            startForegroundService(serviceIntent); // ใช้ startForegroundService สำหรับ Android 8.0 (API 26) ขึ้นไป
-//        } else {
-//            startService(serviceIntent); // ใช้ startService สำหรับเวอร์ชันเก่ากว่า
-//        }
-//    }
+    private void openFragmentPreviewPicCF(String imagePath, long imageTimestamp) {
+        PreviewPictureCFFragment frag_preview_pic_cf = PreviewPictureCFFragment.newInstance();
+
+        // ส่งค่าไปให้ FragmentB ผ่าน arguments
+        Bundle args = new Bundle();
+        args.putString("image_path", imagePath);
+        args.putLong("image_timestamp", imageTimestamp);
+        frag_preview_pic_cf.setArguments(args);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, frag_preview_pic_cf)
+//                .addToBackStack(null)
+                .commit();
+    }
+
 }

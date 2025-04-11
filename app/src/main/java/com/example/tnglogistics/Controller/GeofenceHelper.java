@@ -45,12 +45,14 @@ public class GeofenceHelper {
 
     // เพิ่ม geofence
     public void addGeofence(String ID, double latitude,double longitude) {
+        Log.d(TAG, "Geofence added: " + ID);
+        Log.d(TAG, "Geofence added: " + latitude + ", "+ longitude);
         Geofence geofence = new Geofence.Builder()
                 .setCircularRegion(latitude, longitude, radius)
                 .setRequestId(ID)
                 .setTransitionTypes(transitionTypes)
-//                .setLoiteringDelay(15000) // ทดสอบ 15 วินาที
-                .setLoiteringDelay(600000) // คงอยู่ 10 นาที
+                .setLoiteringDelay(15000) // ทดสอบ 15 วินาที
+//                .setLoiteringDelay(600000) // คงอยู่ 10 นาที
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
         geofenceList.add(geofence);

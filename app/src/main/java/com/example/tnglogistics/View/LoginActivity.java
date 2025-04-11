@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferencesHelper.saveLastFragment(this,"");
         SharedPreferencesHelper.saveTruck(this, "");
         SharedPreferencesHelper.saveTrip(this, "");
-        SharedPreferencesHelper.saveMileIn(this, false);
+        SharedPreferencesHelper.saveMileType(this, 1);
 
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
         Log.d(TAG, lastFragment + " is lastFragment");

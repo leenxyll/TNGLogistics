@@ -31,9 +31,12 @@ import android.widget.Toast;
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.Employee;
+import com.example.tnglogistics.Model.Repository;
 import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.Network.RetrofitClient;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.InvoiceViewModel;
 import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -54,6 +57,7 @@ import retrofit2.Response;
  */
 public class LoginDriverFragment extends Fragment {
     private static final String TAG = "LoginDriverFragment";
+    private InvoiceViewModel invoiceViewModel;
     private LocationService locationService;
     private boolean isBound = false;
     private int EmpCode;
@@ -347,12 +351,27 @@ public class LoginDriverFragment extends Fragment {
                     distance = haversine(latitude, longitude, branchLatitude, branchLongitude);
                     Log.d(TAG, "Distance: " + distance);
                     if (distance <= radius) {
+                        // แล้วดึง Invoice ครั้งแรก
+                        invoiceViewModel = InvoiceViewModel.getInstance(requireActivity().getApplication());
+
                         Intent intent = new Intent(getActivity(), MainActivity.class);
-                        SharedPreferencesHelper.setUserLoggedIn(requireContext(), true);
                         SharedPreferencesHelper.setEmployee(requireContext(), EmpCode);
-                        requireActivity().finish();
-                        startActivity(intent);
-                        Toast.makeText(getContext(), "เข้าสู่ระบบสำเร็จ", Toast.LENGTH_SHORT).show();
+                        invoiceViewModel.getShipmentList(getContext(), new Repository.StatusCallback() {
+                            @Override
+                            public void onStatusReceived(boolean status) {
+                                if (status) {
+                                    SharedPreferencesHelper.setUserLoggedIn(requireContext(), true);
+                                    Employee employee = new Employee(EmpCode, branchCode, branchName, branchLatitude, branchLongitude, radius);
+                                    invoiceViewModel.insertEmployee(employee);
+                                    requireActivity().finish();
+                                    startActivity(intent);
+                                    Toast.makeText(getContext(), "เข้าสู่ระบบสำเร็จ", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // ดำเนินการเมื่อไม่สำเร็จ
+                                    Toast.makeText(getContext(), "ไม่พบรอบการส่ง", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                     } else {
                         Toast.makeText(getContext(), "คุณอยู่นอกเขตของ " + branchName, Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Distance: " + distance + " > Radius : " + radius);

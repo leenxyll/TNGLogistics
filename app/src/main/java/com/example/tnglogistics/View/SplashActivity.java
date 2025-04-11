@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Controller.SyncDataHelper;
 import com.example.tnglogistics.R;
 
 public class SplashActivity extends AppCompatActivity {
@@ -31,6 +32,8 @@ public class SplashActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+//        SyncDataHelper.startSyncDataWhenConnected(this);
 
 //        new Handler().postDelayed(new Runnable() {
 //            @Override

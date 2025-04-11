@@ -28,7 +28,7 @@
             android:background="@drawable/rounded_main"
             android:backgroundTint="@color/neutral4"
             android:ems="10"
-            android:hint="กรุณากรอกทะเบียนรถ"
+            android:hint="กรุณากรอกรหัสพนักงาน"
             android:inputType="number"
             android:padding="16dp"
             android:textSize="16sp"

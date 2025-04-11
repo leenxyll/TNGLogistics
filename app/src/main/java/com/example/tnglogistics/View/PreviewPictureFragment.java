@@ -1,15 +1,19 @@
 package com.example.tnglogistics.View;
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -24,6 +28,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -36,14 +42,18 @@ import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.TextRecognitionHelper;
+import com.example.tnglogistics.Model.Invoice;
 import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.Model.Trip;
 import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.R;
+import com.example.tnglogistics.ViewModel.InvoiceViewModel;
 import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
 import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
 import com.example.tnglogistics.ViewModel.TripViewModel;
 import com.example.tnglogistics.ViewModel.TruckViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,43 +71,47 @@ import java.util.UUID;
 public class PreviewPictureFragment extends Fragment {
     private static String TAG ="PreviewPictureFragment";
     private TextRecognitionHelper txtRecog;
-    private ShipLocationViewModel shipLocationViewModel;
-    private ShipmentListViewModel shipmentListViewModel;
-    private TripViewModel tripViewModel;
+    private String imagePath;
+    private long imageTimestamp;
+//    private ShipLocationViewModel shipLocationViewModel;
+//    private ShipmentListViewModel shipmentListViewModel;
+//    private TripViewModel tripViewModel;
+    private InvoiceViewModel invoiceViewModel;
     private GeofenceHelper geofenceHelper;
 //    private Location currentLocation;
 //    private Trip aTrip;
     private EditText edittxt_detectnum = null;
+    private TextView txtview_detectnum;
     private TruckViewModel truckViewModel;
 //    private Truck aTruck;
     private LocationService locationService;
     private boolean isBound = false;
     private double latitude = 0.0;
     private double longitude = 0.0;
-    private Handler gpsHandler;
-    private Runnable gpsRunnable;
+    private FusedLocationProviderClient fusedLocationClient;
 
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
-            locationService = binder.getService();
-            isBound = true;
-            Log.d(TAG, "LocationService Connected");
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
-        }
-    };
+//    private ServiceConnection serviceConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+//            locationService = binder.getService();
+//            isBound = true;
+//            Log.d(TAG, "LocationService Connected");
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            isBound = false;
+//        }
+//    };
 
     @Override
     public void onStart() {
         super.onStart();
-        Intent intent = new Intent(requireContext(), LocationService.class);
-        requireContext().bindService(intent, serviceConnection, requireContext().BIND_AUTO_CREATE);
+//        Intent intent = new Intent(requireContext(), LocationService.class);
+//        requireContext().bindService(intent, serviceConnection, requireContext().BIND_AUTO_CREATE);
     }
 
 
@@ -108,24 +123,24 @@ public class PreviewPictureFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        startGPSMonitoring();
+        PermissionManager.startGPSMonitoring(requireContext(), requireActivity());
     }
 
     @Override
     public void onPause() {
         super.onPause();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
-        stopGPSMonitoring();
+        PermissionManager.stopGPSMonitoring();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
-        if (isBound) {
-            requireContext().unbindService(serviceConnection);
-            isBound = false;
-        }
+//        if (isBound) {
+//            requireContext().unbindService(serviceConnection);
+//            isBound = false;
+//        }
     }
 
     @Override
@@ -153,17 +168,16 @@ public class PreviewPictureFragment extends Fragment {
         ImageView imgview_preview = view.findViewById(R.id.imgview_preview);
         ImageView imgview_edt = view.findViewById(R.id.imgview_edt);
         TextView txtview_time = view.findViewById(R.id.txtview_time);
-        TextView txtview_detectnum = view.findViewById(R.id.txtview_detectnum);
+        txtview_detectnum = view.findViewById(R.id.txtview_detectnum);
         LinearLayout container_milleage = view.findViewById(R.id.container_milleage);
         Button btn_confirm = view.findViewById(R.id.btn_confirm);
         Button btn_opencameara_agian = view.findViewById(R.id.btn_opencamera_again);
-        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
-        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
-        tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
-        truckViewModel = TruckViewModel.getInstance(requireActivity().getApplication());
-
-        String imagePath;
-        long imageTimestamp;
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+//        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
+//        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
+//        tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
+//        truckViewModel = TruckViewModel.getInstance(requireActivity().getApplication());
+        invoiceViewModel = InvoiceViewModel.getInstance(requireActivity().getApplication());
 
         Bundle args = getArguments();
 
@@ -226,7 +240,7 @@ public class PreviewPictureFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
-                ((MainActivity) getActivity()).getCameraLauncher().launch(intent);
+                ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
             }
         });
 
@@ -401,15 +415,60 @@ public class PreviewPictureFragment extends Fragment {
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!SharedPreferencesHelper.getMileIn(getContext())){
-                    //ขาออก
-                    startLocationService();
-                    //updatestatus and generate geofenceID => กำลังจัดส่ง (2)
-
+                int mileType = SharedPreferencesHelper.getMileType(getContext());
+                if(mileType == 1 || mileType == 3){
+                    // ขาออก และ ขาถึง
+                    Log.d(TAG, "MileType: "+mileType);
+                    requestLocation(mileType);
+                    ShipDetailFragment frag_shipdetail = ShipDetailFragment.newInstance();
+                    // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, frag_shipdetail);
+                    // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+                    new Handler().postDelayed(() -> {
+                        transaction.commit();
+                    }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
                 }else {
-                    //ขาเข้า
-                    stopLocationService();
+                    // ขาเข้า
+                    Log.d(TAG, "MileType: "+mileType);
+                    requestLocation(mileType);
+                    Intent intent = new Intent(getActivity(), SplashActivity.class);
+                    // ถ้ามัน sync แล้วให้ล้างข้อมูลเลย
+                    new Handler().postDelayed(() -> {
+                        InvoiceViewModel.resetInstance();
+                        requireActivity().finish();
+                        startActivity(intent);
+                        SharedPreferencesHelper.setUserLoggedIn(requireContext(), false);
+                        SharedPreferencesHelper.setEmployee(requireContext(), 0);
+//                        transaction.commit();
+                    }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
                 }
+
+
+//                switch (SharedPreferencesHelper.getMileIn(getContext())){
+//                    case 1:
+//                        //ขาออก
+////                        startLocationService();
+//                        requestLocation(2, 1);
+//                        ShipDetailFragment frag_shipdetail = ShipDetailFragment.newInstance();
+//                        // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
+//                        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                        transaction.replace(R.id.fragment_container, frag_shipdetail);
+//                        // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+//                        new Handler().postDelayed(() -> {
+//                            transaction.commit();
+//                        }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+//                        break;
+//
+//                    case 2:
+//                        //ขาเข้า
+////                        stopLocationService();
+//                        break;
+//
+//                    case 3:
+//                        //ถึงสถานที่
+//                        break;
+//                }
             }
         });
 
@@ -454,24 +513,124 @@ public class PreviewPictureFragment extends Fragment {
         Log.d(TAG, "🚫 LocationService Stopped");
     }
 
-    private void startGPSMonitoring() {
-        gpsHandler = new Handler();
-        gpsRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!PermissionManager.checkGPS(requireContext())) {
-                    PermissionManager.showEnableGPSDialog(requireActivity());
-                }
-                gpsHandler.postDelayed(this, 3000); // เช็คทุก 3 วินาที
-            }
-        };
-        gpsHandler.post(gpsRunnable);
-    }
+    private void requestLocation(int mileType) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
-    private void stopGPSMonitoring() {
-        if (gpsHandler != null && gpsRunnable != null) {
-            gpsHandler.removeCallbacks(gpsRunnable);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show explanation to the user before requesting permission again
+                new AlertDialog.Builder(requireContext())
+                        .setMessage("ต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อใช้งาน")
+                        .setPositiveButton("ตกลง", (dialog, which) ->
+                                ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1))
+                        .setNegativeButton("ยกเลิก", null)
+                        .show();
+            } else {
+                // Request permission directly if rationale is not needed (i.e., the user denied previously)
+                // กรณีเคยปฏิเสธสิทธิ์มาก่อน พาไปที่หน้าตั้งค่า
+                new AlertDialog.Builder(requireActivity())
+                        .setTitle("จำเป็นต้องเปิดสิทธิ์ตำแหน่งในการตั้งค่า")
+                        .setMessage("เพื่อให้คุณสามารถเข้าใช้งาน จำเป็นต้องเปิดสิทธิ์การเข้าถึงตำแหน่ง\n\nกรุณาเปิดสิทธิ์ \"อนุญาตตลอดเวลา\" ในการตั้งค่าแอป เพื่อเข้าใช้งานระบบ")
+                        .setPositiveButton("ไปที่การตั้งค่า", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.setData(Uri.fromParts("package", requireActivity().getPackageName(), null));
+                            requireActivity().startActivity(intent);
+                        })
+                        .setNegativeButton("ภายหลัง", (dialog, which) -> {
+                            dialog.dismiss();
+                            // แสดงข้อความเตือนเพิ่มเติม
+                            Toast.makeText(getContext(), "ต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อใช้งาน", Toast.LENGTH_SHORT).show();
+                        })
+                        .setCancelable(false) // ป้องกันการปิดไดอะล็อกโดยกดพื้นที่ว่าง
+                        .show();
+            }
+
+        } else {
+            // Permission is already granted
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    Log.d(TAG, "Get Location");
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    if(mileType == 1){
+                        updateInvoice(2);
+                        updateMile(1, mileType);
+                    }else if(mileType == 3){
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            int nextSeq = invoiceViewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
+                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
+                            updateMile(nextSeq, mileType);
+                            //remove geofence here and delete geofenceID
+                        });
+                    }else if(mileType == 2){
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            int nextSeq = invoiceViewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
+                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
+                            updateMile(nextSeq, mileType);
+                            //remove geofence here and delete geofenceID
+                        });
+                    }
+
+                }
+            });
         }
     }
+
+    private void updateMile(int seq, int mileType){
+        int mileRecord;
+        if (edittxt_detectnum != null) {
+            mileRecord = Integer.parseInt(edittxt_detectnum.getText().toString());
+            Log.d(TAG, "Mile: "+mileRecord);
+        } else {
+            mileRecord = Integer.parseInt(txtview_detectnum.getText().toString());
+            Log.d(TAG, "Mile: "+mileRecord);
+        }
+        invoiceViewModel.updateMile(requireContext(), seq, mileRecord, imageTimestamp,latitude, longitude, imagePath, mileType);
+    }
+
+    private void updateInvoice(int seq){
+        //updatestatus and generate geofenceID => กำลังจัดส่ง (2)
+        Map<String, String> geofenceMap = new HashMap<>();
+
+        LiveData<List<Invoice>> invoiceLiveData = invoiceViewModel.getinvoiceByTrip(requireContext());
+        invoiceLiveData.observe(getViewLifecycleOwner(), new Observer<List<Invoice>>() {
+            @Override
+            public void onChanged(List<Invoice> invoiceList) {
+                if(invoiceList != null && !invoiceList.isEmpty()){
+                    Log.d(TAG, "Invoice Data: " + invoiceList.size());
+
+                    for (Invoice invoice : invoiceList){
+                        String invoiceCode = invoice.getInvoiceCode();
+                        invoiceViewModel.updateInvoice(invoice, seq,2, latitude, longitude, imageTimestamp, requireContext());
+
+                        // add Geofence ID
+                        if(invoice.getGeofenceID() == null || invoice.getGeofenceID().isEmpty()){
+                            String generateID = UUID.randomUUID().toString();
+                            invoice.setGeofenceID(generateID);
+                            geofenceMap.put(invoiceCode, generateID);
+                            Log.d(TAG, "New GeofenceID assigned: " + generateID + " to invoice: "+invoiceCode);
+                            // update ?
+                            invoiceViewModel.update(invoice);
+                        } else {
+                            geofenceMap.put(invoiceCode, invoice.getGeofenceID());
+                            Log.d(TAG, "GeofenceID already exists: " + invoice.getGeofenceID()+ " to invoice: "+invoiceCode);
+                        }
+
+//                        if (invoice.getGeofenceID() != null){
+////                            geofenceHelper = GeofenceHelper.getInstance(requireContext());
+////                            String geofenceID = geofenceMap.get(invoiceCode);
+////                            geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
+//
+//                        } else {
+//                            Log.d(TAG, "Geofence already added, skipping...");
+//                        }
+                    }
+                }
+                Log.d(TAG, "observe null");
+                invoiceLiveData.removeObserver(this);
+            }
+        });
+    }
+
 
 }

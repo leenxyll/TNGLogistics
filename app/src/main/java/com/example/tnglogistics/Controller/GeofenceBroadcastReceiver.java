@@ -1,29 +1,18 @@
 package com.example.tnglogistics.Controller;
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
-import android.location.Location;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.tnglogistics.Model.ShipmentList;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import com.example.tnglogistics.View.MainActivity;
 import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-
-import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-
-//import okhttp3.Call;
-//import okhttp3.Callback;
-//import okhttp3.OkHttpClient;
-//import okhttp3.Request;
-//import okhttp3.Response;
 
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "GeofenceBroadcastReceiver";
@@ -34,7 +23,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 //        Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Receiver called " + intent.getAction());
 
-        shipmentListViewModel = ShipmentListViewModel.getInstance((Application) context.getApplicationContext());
+//        shipmentListViewModel = ShipmentListViewModel.getInstance((Application) context.getApplicationContext());
         NotificationHelper notificationHelper = new NotificationHelper(context);
 
         // ตรวจสอบ GeofencingEvent
@@ -52,6 +41,13 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         }
 
         int transitionType = geofencingEvent.getGeofenceTransition();
+        Log.d(TAG, "Geofence transition: " + transitionType);
+        // ดึงพิกัดของจุดที่เกิดเหตุการณ์
+        double latitude = geofencingEvent.getTriggeringLocation().getLatitude();
+        double longitude = geofencingEvent.getTriggeringLocation().getLongitude();
+        Log.d(TAG, "Triggered Location: Lat = " + latitude + ", Lng = " + longitude);
+
+
 
         for (Geofence geofence : geofenceList) {
             String geofenceId = geofence.getRequestId();
@@ -62,15 +58,9 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
 //                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
 //                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
-                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
-                    break;
-
-                case Geofence.GEOFENCE_TRANSITION_DWELL:
-                    Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
-//                    Toast.makeText(context, "ถึงแล้ว", Toast.LENGTH_SHORT).show();
-                    notificationHelper.sendHighPriorityNotification("ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
-                    shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
-
+//                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
+                    // เรียกใช้ WorkManager เพื่ออัปเดต InvoiceShipStatusCode
+                    updateInvoiceStatus(context, geofenceId, latitude, longitude);
                     GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
                     if (geofenceHelper != null) {
                         Log.e(TAG, "GeofenceHelper remove geofence.");
@@ -78,6 +68,21 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     } else {
                         Log.e(TAG, "GeofenceHelper instance is null, cannot remove geofence.");
                     }
+                    break;
+
+                case Geofence.GEOFENCE_TRANSITION_DWELL:
+                    Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
+//                    Toast.makeText(context, "ถึงแล้ว", Toast.LENGTH_SHORT).show();
+//                    notificationHelper.sendHighPriorityNotification("ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
+//                    shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
+
+//                    GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
+//                    if (geofenceHelper != null) {
+//                        Log.e(TAG, "GeofenceHelper remove geofence.");
+//                        geofenceHelper.removeGeofenceByID(geofenceId);
+//                    } else {
+//                        Log.e(TAG, "GeofenceHelper instance is null, cannot remove geofence.");
+//                    }
                     break;
 
                 // กรณีถ้าต้องการใช้ EXIT ในอนาคต
@@ -88,4 +93,20 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             }
         }
     }
+
+    private void updateInvoiceStatus(Context context, String geofenceId, double latitude, double longitude) {
+        // สร้างงานสำหรับ WorkManager
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(UpdateWorker.class)
+                .setInputData(new Data.Builder()
+                        .putString("geofenceId", geofenceId)
+                        .putDouble("latitude", latitude)
+                        .putDouble("longitude", longitude)
+                        .putLong("timestamp", System.currentTimeMillis())
+                        .build())
+                .build();
+
+        // เรียกใช้ WorkManager เพื่อเริ่มงาน
+        WorkManager.getInstance(context).enqueue(workRequest);
+    }
+
 }

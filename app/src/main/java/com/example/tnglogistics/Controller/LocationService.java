@@ -17,6 +17,8 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.example.tnglogistics.R;
 import com.example.tnglogistics.View.MainActivity;
@@ -29,10 +31,12 @@ import com.google.android.gms.location.Priority;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
+    public static final String ACTION_LOCATION_RECEIVED = "com.example.tnglogistics.ACTION_LOCATION_RECEIVED";
     private final IBinder binder = new LocalBinder();
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private Location currentLocation;
+    private MutableLiveData<Location> locationLiveData = new MutableLiveData<>();
 
     public class LocalBinder extends Binder {
         public LocationService getService() {
@@ -56,12 +60,17 @@ public class LocationService extends Service {
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult != null && locationResult.getLastLocation() != null) {
                     currentLocation = locationResult.getLastLocation();
+                    locationLiveData.postValue(currentLocation); // Update the location LiveData
                     Log.d(TAG, "Location updated: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
                 }
             }
         };
 
         startLocationUpdates();
+    }
+
+    public LiveData<Location> getLocationLiveData() {
+        return locationLiveData;
     }
 
     public void getCurrentLocation(LocationListener listener) {
@@ -87,8 +96,8 @@ public class LocationService extends Service {
     }
 
     private void startLocationUpdates() {
-        LocationRequest locationRequest = new LocationRequest.Builder(30000) // อัปเดตทุก 10 วิ
-                .setMinUpdateIntervalMillis(1000)  // ความถี่สูงสุดที่อัปเดตได้
+        LocationRequest locationRequest = new LocationRequest.Builder(30000) // อัปเดตทุก 30 วิ
+                .setMinUpdateIntervalMillis(10000)  // ความถี่สูงสุดที่อัปเดตได้ 10 วิ
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setWaitForAccurateLocation(true)
 //                .setMinUpdateDistanceMeters(10)  // อัปเดตเมื่อเคลื่อนที่เกิน 10 เมตร
@@ -137,4 +146,5 @@ public class LocationService extends Service {
         super.onDestroy();
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
+
 }

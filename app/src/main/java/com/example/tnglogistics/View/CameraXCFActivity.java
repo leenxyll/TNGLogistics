@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.icu.text.SimpleDateFormat;
-import android.icu.util.TimeZone;
 import android.media.ExifInterface;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,8 +41,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-public class CameraXActivity extends AppCompatActivity {
-    private static final String TAG = "CameraXActivity";
+public class CameraXCFActivity extends AppCompatActivity {
+    private static final String TAG = "CameraXCFActivity";
     private PreviewView previewView;
     private ImageCapture imageCapture;
     private String formattedTime;
@@ -52,11 +51,12 @@ public class CameraXActivity extends AppCompatActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private float currentZoomRatio = 1f; // เริ่มต้นที่ 1x
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_camera_x);
+        setContentView(R.layout.activity_camera_xcfactivity);
 
         Button btn_capture = findViewById(R.id.btn_capture);
         previewView = findViewById(R.id.preview_view);
@@ -89,14 +89,12 @@ public class CameraXActivity extends AppCompatActivity {
                 takePicture();
             }
         });
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
     }
-
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
@@ -150,7 +148,7 @@ public class CameraXActivity extends AppCompatActivity {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                Toast.makeText(CameraXActivity.this, "Error taking picture", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraXCFActivity.this, "Error taking picture", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -182,10 +180,10 @@ public class CameraXActivity extends AppCompatActivity {
         Log.d(TAG, "Scale Factors: scaleX=" + scaleX + ", scaleY=" + scaleY);
 
         // พิกัดของกรอบการครอปใน PreviewView (Rect(90, 930, 990, 1230))
-        int previewCropLeft = 250;
-        int previewCropTop = 930;
-        int previewCropRight = 830;
-        int previewCropBottom = 1230;
+        int previewCropLeft = 0;
+        int previewCropTop = 0;
+        int previewCropRight = 1080;
+        int previewCropBottom = 2161;
 
         // คำนวณตำแหน่งการครอปในภาพจริงจากพิกัดใน PreviewView
         int cropX = (int) (previewCropLeft * scaleX);
@@ -205,7 +203,7 @@ public class CameraXActivity extends AppCompatActivity {
         Bitmap cropped = Bitmap.createBitmap(original, cropX, cropY, cropWidth, cropHeight);
 
         // ใช้ฟังก์ชัน resizeBitmap() ก่อนบันทึก
-        Bitmap resizedBitmap = resizeBitmap(cropped, 300);
+        Bitmap resizedBitmap = resizeBitmap(cropped, 600);
 
         File croppedFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 formattedTime + ".jpg");
@@ -255,4 +253,5 @@ public class CameraXActivity extends AppCompatActivity {
             return 0;
         }
     }
+
 }

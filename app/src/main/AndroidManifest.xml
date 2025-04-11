@@ -12,7 +12,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" /> <!-- เข้าถึงเน็ต -->
     <uses-permission android:name="android.permission.INTERNET" /> <!-- กล้อง -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- แจ้งเตือน -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +25,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TNGLogistics"
         tools:targetApi="34" >
+        <activity
+            android:name=".View.CameraXCFActivity"
+            android:exported="false" />
         <activity
             android:name=".View.CameraXActivity"
             android:exported="false" />
@@ -42,16 +46,30 @@
         <activity
             android:name=".View.MainActivity"
             android:exported="false" />
+
         <service
             android:name=".Controller.LocationService"
-            android:foregroundServiceType="location"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="location" /> <!-- <service android:name=".Controller.MyService" -->
+        <!-- android:exported="false" -->
+        <!-- android:permission="android.permission.BIND_JOB_SERVICE"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
         <receiver
-            android:name="com.example.tnglogistics.Controller.GeofenceBroadcastReceiver"
+            android:name=".Controller.GeofenceBroadcastReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.example.geofencing.GEOFENCE_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Controller.NetworkReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
     </application>
