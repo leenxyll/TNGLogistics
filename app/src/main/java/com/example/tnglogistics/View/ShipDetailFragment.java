@@ -189,6 +189,8 @@ public class ShipDetailFragment extends Fragment {
                             String geofenceID = invoice.getGeofenceID();
                             geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
                         } else {
+                            invoice.setInvoiceShipStatusCode(3);
+                            invoiceViewModel.update(invoice);
                             btn_camera.setVisibility(View.VISIBLE);
                             container_btn.setVisibility(View.INVISIBLE);
                         }
