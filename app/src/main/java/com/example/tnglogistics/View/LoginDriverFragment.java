@@ -349,6 +349,7 @@ public class LoginDriverFragment extends Fragment {
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
                     distance = haversine(latitude, longitude, branchLatitude, branchLongitude);
+                    Log.d(TAG, "lat lng: " + latitude + ", " + longitude );
                     Log.d(TAG, "Distance: " + distance);
                     if (distance <= radius) {
                         // แล้วดึง Invoice ครั้งแรก

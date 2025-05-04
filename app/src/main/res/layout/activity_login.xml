@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
+    android:background="@color/white"
     tools:context=".View.LoginActivity">
 
     <androidx.appcompat.widget.SwitchCompat

@@ -1,8 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_marginTop="10dp">
+    android:orientation="vertical"
+    android:layout_marginTop="10dp"
+    android:background="@color/white">
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -12,18 +13,65 @@
         android:padding="20dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/txtInvoiceCode"
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="txtInvoiceCode"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:id="@+id/txtInvoiceCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Invoice Code" />
+
+            <ImageButton
+                android:id="@+id/btnExpand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_drop_down_black"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/txtCustomerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="txtCustomerName"/>
+            android:text="Customer Name" />
+
+        <!-- กลุ่มข้อมูลที่ต้องซ่อนไว้เมื่อย่อ -->
+        <LinearLayout
+            android:id="@+id/expandableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txtInvoiceNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/txtReceiverName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Receiver" />
+
+            <TextView
+                android:id="@+id/txtReceiverPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Phone"
+                android:textColor="@android:color/holo_blue_dark"
+                android:autoLink="phone"
+                android:clickable="true" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

@@ -181,6 +181,7 @@ public class ShipDetailFragment extends Fragment {
                     aInvoice = invoice;
                     if (invoice.getGeofenceID() != null && !invoice.isAddGeofence()){
                         if(invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0) {
+                            //มีพิกัด
                             Log.d(TAG, "Geofence ID : " + invoice.getGeofenceID());
                             Log.d(TAG, "location : " + invoice.getShipLoLat() + ", " + invoice.getShipLoLong());
                             invoice.setAddGeofence(true);
@@ -189,6 +190,7 @@ public class ShipDetailFragment extends Fragment {
                             String geofenceID = invoice.getGeofenceID();
                             geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
                         } else {
+                            //ไม่มีพิกัด
                             invoice.setInvoiceShipStatusCode(3);
                             invoiceViewModel.update(invoice);
                             btn_camera.setVisibility(View.VISIBLE);
@@ -216,6 +218,11 @@ public class ShipDetailFragment extends Fragment {
                         });
                     }else if(!invoice.isAddGeofence() && invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0){
                         // ไม่มีพิกัด
+                        btn_camera.setVisibility(View.VISIBLE);
+                        container_btn.setVisibility(View.INVISIBLE);
+                    }else{
+                        invoice.setInvoiceShipStatusCode(3);
+                        invoiceViewModel.update(invoice);
                         btn_camera.setVisibility(View.VISIBLE);
                         container_btn.setVisibility(View.INVISIBLE);
                     }

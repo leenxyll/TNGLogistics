@@ -3,7 +3,7 @@ package com.example.tnglogistics.Model;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 
-@Entity(tableName = "MileLog",
+@Entity(tableName = "mile_log",
         primaryKeys = {"MileLogTripCode", "MileLogRow"}
 )
 public class MileLog {
@@ -19,8 +19,8 @@ public class MileLog {
     private String MileLogPicPath;
     private int MileLogTypeCode;
     private int MileLogEmpCode;
-    public boolean isSynced;
-    public boolean isImageSynced;
+    private boolean isSynced;
+    private boolean isImageSynced;
 
     @NonNull
     public String getMileLogTripCode() {
