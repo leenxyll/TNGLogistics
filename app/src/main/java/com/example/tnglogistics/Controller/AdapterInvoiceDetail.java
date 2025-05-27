@@ -39,8 +39,20 @@ public class AdapterInvoiceDetail extends RecyclerView.Adapter<AdapterInvoiceDet
         Invoice invoice = invoices.get(position);
         holder.txtInvoiceCode.setText(invoice.getShipListSeq() + ". " + invoice.getInvoiceCode());
         holder.txtCustomerName.setText(invoice.getCusName());
-        holder.txtReceiverName.setText("ช่องทางติดต่อ : " + invoice.getInvoiceReceiverName());
-        holder.txtReceiverPhone.setText("เบอร์ : " + invoice.getInvoiceReceiverPhone());
+
+        if(invoice.getInvoiceReceiverName() == null){
+            holder.txtReceiverName.setVisibility(View.GONE);
+        }else{
+            holder.txtReceiverName.setVisibility(View.VISIBLE);
+            holder.txtReceiverName.setText("ช่องทางติดต่อ : " + invoice.getInvoiceReceiverName());
+        }
+
+        if(invoice.getInvoiceReceiverPhone() == null){
+            holder.txtReceiverPhone.setVisibility(View.GONE);
+        }else {
+            holder.txtReceiverPhone.setVisibility(View.VISIBLE);
+            holder.txtReceiverPhone.setText("เบอร์ : " + invoice.getInvoiceReceiverPhone());
+        }
 
         if(invoice.getInvoiceNote() != null){
             holder.txtInvoiceNote.setVisibility(View.VISIBLE);
