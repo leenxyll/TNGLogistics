@@ -45,6 +45,7 @@ import com.example.tnglogistics.R;
 import com.example.tnglogistics.ViewModel.ViewModel;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,7 +177,19 @@ public class StatusFragment extends Fragment {
         viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
         // Observe ข้อมูลที่จัดกลุ่มตาม Location
-        viewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
+//        viewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
+//            if (invoices != null && !invoices.isEmpty()) {
+//                allqueue = invoices.size();
+//                txtview_allqueue.setText(String.valueOf(invoices.size()));
+//                Map<String, List<Invoice>> groupedInvoices = groupInvoicesByLocation(invoices);
+//                adapterInvoiceHelper = new AdapterInvoiceHelper(groupedInvoices);
+//                recyclerView.setAdapter(adapterInvoiceHelper);
+//                checkItemList(invoices);
+//                updateUI();
+//            }
+//        });
+
+        viewModel.getinvoiceByTrip(requireContext()).observe(getViewLifecycleOwner(), invoices -> {
             if (invoices != null && !invoices.isEmpty()) {
                 allqueue = invoices.size();
                 txtview_allqueue.setText(String.valueOf(invoices.size()));
@@ -259,12 +272,18 @@ public class StatusFragment extends Fragment {
     private Map<String, List<Invoice>> groupInvoicesByLocation(List<Invoice> invoices) {
         Map<String, List<Invoice>> groupedMap = new HashMap<>();
         for (Invoice invoice : invoices) {
-            String location = invoice.getShipLoAddr(); // ใช้ค่าของ ShipLocation เป็นตัวจัดกลุ่ม
+            String location = invoice.getShipLoAddr();
             if (!groupedMap.containsKey(location)) {
                 groupedMap.put(location, new ArrayList<>());
             }
             groupedMap.get(location).add(invoice);
         }
+
+        // เรียงลำดับ invoice ใน List ของแต่ละ location ตาม ShipListSeq
+        for (List<Invoice> invoiceList : groupedMap.values()) {
+            invoiceList.sort(Comparator.comparingInt(Invoice::getShipListSeq));
+        }
+
         return groupedMap;
     }
 

@@ -67,6 +67,16 @@ public class AdapterInvoiceHelper extends RecyclerView.Adapter<AdapterInvoiceHel
         this.groupedInvoices = groupedInvoices;
         this.locationKeys = new ArrayList<>(groupedInvoices.keySet());
 
+        // เรียงลำดับ location ตาม ShipListSeq ที่เล็กที่สุดใน group
+        this.locationKeys.sort((location1, location2) -> {
+            int minSeq1 = groupedInvoices.get(location1).stream()
+                    .mapToInt(Invoice::getShipListSeq)
+                    .min().orElse(Integer.MAX_VALUE);
+            int minSeq2 = groupedInvoices.get(location2).stream()
+                    .mapToInt(Invoice::getShipListSeq)
+                    .min().orElse(Integer.MAX_VALUE);
+            return Integer.compare(minSeq1, minSeq2);
+        });
     }
 
     @NonNull

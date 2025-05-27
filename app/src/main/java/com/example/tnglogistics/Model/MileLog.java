@@ -21,6 +21,7 @@ public class MileLog {
     private int MileLogEmpCode;
     private boolean isSynced;
     private boolean isImageSynced;
+    private int MileLogLocation;
 
     @NonNull
     public String getMileLogTripCode() {
@@ -117,5 +118,13 @@ public class MileLog {
 
     public void setImageSynced(boolean imageSynced) {
         isImageSynced = imageSynced;
+    }
+
+    public int getMileLogLocation() {
+        return MileLogLocation;
+    }
+
+    public void setMileLogLocation(int mileLogLocation) {
+        MileLogLocation = mileLogLocation;
     }
 }
