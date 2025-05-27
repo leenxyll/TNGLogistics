@@ -23,10 +23,16 @@ public interface InvoiceDao {
     @Query("SELECT * From Invoice WHERE GeofenceID = :GeofenceID")
     Invoice getInvoiceByGeofence(String GeofenceID);
 
+    @Query("SELECT * FROM Invoice WHERE InvoiceShipLoCode = :ShipLoCode AND InvoiceShipStatusCode != 4 AND InvoiceShipStatusCode != 5")
+    LiveData<List<Invoice>> getInvoicesByLocation(int ShipLoCode);
+
+    @Query("SELECT * FROM Invoice WHERE GeofenceID = :geofenceID")
+    List<Invoice> getInvoicesByGeofenceID(String geofenceID);
+
     @Update
     void update(Invoice invoice);
-
     // และเงื่อนไขที่
+
     @Query("SELECT * FROM Invoice WHERE InvoiceShipStatusCode IN (2, 3) ORDER BY ShipListSeq ASC LIMIT 1")
     LiveData<List<Invoice>> getInvoiceWithMinSeq();
 
@@ -35,10 +41,11 @@ public interface InvoiceDao {
 
     @Query("SELECT COUNT(*) FROM Invoice WHERE InvoiceShipStatusCode = 5")
     LiveData<Integer> countInvoicesWithStatusFive();
-
 //    @Query("SELECT * FROM Invoice GROUP BY ShipLoAddr ORDER BY ShipLoAddr ASC")
+
 //    LiveData<List<Invoice>> getInvoicesGroupedByLocation();
 
     @Query("DELETE FROM Invoice")
     void deleteAll();
+
 }

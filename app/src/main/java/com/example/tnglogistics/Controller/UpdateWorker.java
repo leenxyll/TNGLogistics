@@ -58,15 +58,49 @@ public class UpdateWorker extends Worker {
     private void updateInvoiceStatus(String geofenceId, double latitude, double longitude, long timestamp) {
         Log.d(TAG, "Updating invoice status for Geofence: " + geofenceId);
 
-        Invoice invoice = repository.getInvoiceByGeofenceID(geofenceId);
-        NotificationHelper notificationHelper = new NotificationHelper(context);
-        notificationHelper.sendHighPriorityNotification("ใกล้ถึง"  + invoice.getShipLoAddr()+ "แล้ว", "เมื่อถึงสถานที่จัดส่งกรุณาเข้ามาที่แอปเพื่อยืนยันการถึงสถานที่จัดส่ง", MainActivity.class);
-        if (invoice != null) {
-            repository.updateInvoiceStatus(invoice, 3, 3, latitude, longitude, timestamp, context);
+        // ดึง Invoice ทั้งหมดที่ใช้ Geofence ID เดียวกัน
+        List<Invoice> invoices = repository.getInvoicesByGeofenceID(geofenceId);
+
+        if (invoices != null && !invoices.isEmpty()) {
+            NotificationHelper notificationHelper = new NotificationHelper(context);
+
+            // ใช้ข้อมูลจาก Invoice แรกเพื่อแสดง notification
+            Invoice firstInvoice = invoices.get(0);
+            notificationHelper.sendHighPriorityNotification(
+                    "ใกล้ถึง " + firstInvoice.getShipLoAddr() + " แล้ว",
+                    "มี " + invoices.size() + " รายการที่ต้องจัดส่ง กรุณาเข้ามาที่แอปเพื่อยืนยันการถึงสถานที่จัดส่ง",
+                    MainActivity.class
+            );
+
+            // Update สถานะของ Invoice ทั้งหมดในสถานที่เดียวกัน
+            for (Invoice invoice : invoices) {
+                // ตรวจสอบว่า Invoice ยังไม่เสร็จสิ้น (ไม่ใช่สถานะ 4 หรือ 5)
+                if (invoice.getInvoiceShipStatusCode() != 4 && invoice.getInvoiceShipStatusCode() != 5) {
+                    Log.d(TAG, "Updating invoice: " + invoice.getInvoiceCode() + " to status 3");
+
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        int nextSeq = repository.getNextInvoiceLogSeq(invoice.getInvoiceCode());
+                        repository.updateInvoiceStatus(invoice, nextSeq, 3, latitude, longitude, timestamp, context);
+                    });
+                }
+            }
         } else {
-            Log.e(TAG, "Invoice not found for Geofence: " + geofenceId);
+            Log.e(TAG, "No invoices found for Geofence: " + geofenceId);
         }
     }
+
+//    private void updateInvoiceStatus(String geofenceId, double latitude, double longitude, long timestamp) {
+//        Log.d(TAG, "Updating invoice status for Geofence: " + geofenceId);
+//
+//        Invoice invoice = repository.getInvoiceByGeofenceID(geofenceId);
+//        NotificationHelper notificationHelper = new NotificationHelper(context);
+//        notificationHelper.sendHighPriorityNotification("ใกล้ถึง"  + invoice.getShipLoAddr()+ "แล้ว", "เมื่อถึงสถานที่จัดส่งกรุณาเข้ามาที่แอปเพื่อยืนยันการถึงสถานที่จัดส่ง", MainActivity.class);
+//        if (invoice != null) {
+//            repository.updateInvoiceStatus(invoice, 3, 3, latitude, longitude, timestamp, context);
+//        } else {
+//            Log.e(TAG, "Invoice not found for Geofence: " + geofenceId);
+//        }
+//    }
 }
 
 

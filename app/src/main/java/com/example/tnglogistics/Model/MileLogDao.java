@@ -33,4 +33,11 @@ public interface MileLogDao {
 
     @Query("DELETE FROM Mile_Log")
     void deleteAll();
+
+    // เพิ่มเมธอดสำหรับตรวจสอบว่าเคยถ่ายเลขไมล์สำหรับสถานที่นี้แล้วหรือไม่
+    @Query("SELECT COUNT(*) FROM Mile_Log " +
+            "WHERE MileLogTripCode = :TripCode " +
+            "AND MileLogLocation = :ShipLoCode " +
+            "AND MileLogTypeCode = :MileTypeCode")
+    int hasMileLogForLocation(String TripCode, int ShipLoCode, int MileTypeCode);
 }

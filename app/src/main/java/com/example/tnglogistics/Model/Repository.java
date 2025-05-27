@@ -66,6 +66,18 @@ public class Repository {
         return invoiceDao.getInvoiceByGeofence(GeofenceID);
     }
 
+    public boolean hasMileLogForLocation(String tripCode, int location, int mileTypeCode) {
+        return mileLogDao.hasMileLogForLocation(tripCode, location, mileTypeCode) > 0;
+    }
+
+    public LiveData<List<Invoice>> getInvoicesByLocation(int shipLoCode){
+        return invoiceDao.getInvoicesByLocation(shipLoCode);
+    }
+
+    public List<Invoice> getInvoicesByGeofenceID(String geofenceID){
+        return invoiceDao.getInvoicesByGeofenceID(geofenceID);
+    }
+
     public LiveData<Integer> countInvoicesWithStatusFour(){
         return invoiceDao.countInvoicesWithStatusFour();
     }
@@ -315,7 +327,7 @@ public class Repository {
         return invoiceShipLogDao.getNextInvoiceLogSeq(invoiceCode);
     }
 
-    public void updateMile(Context context,int MileLogSeq, int MileLogRecord, long MileLogUpdate, Double MileLogLat, Double MileLogLong, String MileLogPicPath, int MileLogTypeCode){
+    public void updateMile(Context context,int MileLogSeq, int MileLogRecord, long MileLogUpdate, Double MileLogLat, Double MileLogLong, String MileLogPicPath, int MileLogTypeCode, int MileLogLocation){
         Log.d(TAG, "UpdateMile");
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
         String formattedTime = sdf.format(new Date(MileLogUpdate));
@@ -331,6 +343,7 @@ public class Repository {
         mileLog.setMileLogLong(MileLogLong);
         mileLog.setMileLogPicPath(MileLogPicPath);
         mileLog.setMileLogTypeCode(MileLogTypeCode);
+        mileLog.setMileLogLocation(MileLogLocation); // เพิ่มบรรทัดนี้
         mileLog.setSynced(false);
         mileLog.setImageSynced(false);
         executorService.execute(() -> {

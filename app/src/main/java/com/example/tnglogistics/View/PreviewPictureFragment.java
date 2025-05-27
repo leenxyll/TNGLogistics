@@ -41,6 +41,7 @@ import com.example.tnglogistics.ViewModel.ViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -398,6 +399,54 @@ public class PreviewPictureFragment extends Fragment {
         }
     }
 
+//    // แก้ไข requestLocation method
+//    private void requestLocation(int mileType, LocationCallback callback) {
+//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            // ... permission handling code เหมือนเดิม
+//
+//        } else {
+//            // Permission is already granted
+//            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+//                if (location != null) {
+//                    Log.d(TAG, "Get Location");
+//                    latitude = location.getLatitude();
+//                    longitude = location.getLongitude();
+//
+//                    if(mileType == 1){
+//                        //ไมล์ออก
+//                        updateInvoice(2);
+//                        updateMile(1, mileType);
+//                    }else if(mileType == 3){
+//                        //ไมล์ถึง
+//                        Executors.newSingleThreadExecutor().execute(() -> {
+//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
+//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
+//                            updateMile(nextSeq, mileType);
+//
+//                            // เรียก callback เมื่อทำงานเสร็จ
+//                            requireActivity().runOnUiThread(() -> callback.onLocationProcessed());
+//                        });
+//                        return; // return เพื่อไม่ให้เรียก callback ซ้ำ
+//                    }else if(mileType == 2){
+//                        Executors.newSingleThreadExecutor().execute(() -> {
+//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
+//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
+//                            updateMile(nextSeq, mileType);
+//
+//                            // เรียก callback เมื่อทำงานเสร็จ
+//                            requireActivity().runOnUiThread(() -> callback.onLocationProcessed());
+//                        });
+//                        return; // return เพื่อไม่ให้เรียก callback ซ้ำ
+//                    }
+//
+//                    // สำหรับ mileType == 1
+//                    callback.onLocationProcessed();
+//                }
+//            });
+//        }
+//    }
+
     private void updateMile(int seq, int mileType){
         int mileRecord;
         if (edittxt_detectnum != null) {
@@ -407,11 +456,14 @@ public class PreviewPictureFragment extends Fragment {
             mileRecord = Integer.parseInt(txtview_detectnum.getText().toString());
             Log.d(TAG, "Mile: "+mileRecord);
         }
-        viewModel.updateMile(requireContext(), seq, mileRecord, imageTimestamp,latitude, longitude, imagePath, mileType);
+
+        // ดึง location จาก SharedPreferences
+        int currentLocation = SharedPreferencesHelper.getCurrentInvoiceLocation(getContext());
+
+        viewModel.updateMile(requireContext(), seq, mileRecord, imageTimestamp, latitude, longitude, imagePath, mileType, currentLocation);
     }
 
     private void updateInvoice(int seq){
-        //updatestatus and generate geofenceID => กำลังจัดส่ง (2)
         Map<String, String> geofenceMap = new HashMap<>();
 
         LiveData<List<Invoice>> invoiceLiveData = viewModel.getinvoiceByTrip(requireContext());
@@ -421,38 +473,65 @@ public class PreviewPictureFragment extends Fragment {
                 if(invoiceList != null && !invoiceList.isEmpty()){
                     Log.d(TAG, "Invoice Data: " + invoiceList.size());
 
-                    for (Invoice invoice : invoiceList){
-                        String invoiceCode = invoice.getInvoiceCode();
-                        viewModel.updateInvoiceStatus(invoice, seq,2, latitude, longitude, imageTimestamp, requireContext());
+                    // จัดกลุ่มตาม Location
+                    Map<Integer, List<Invoice>> locationGroups = new HashMap<>();
+                    for (Invoice invoice : invoiceList) {
+                        int location = invoice.getInvoiceShipLoCode();
+                        Log.d(TAG, "ShipLo For Key: "+location);
+                        if (!locationGroups.containsKey(location)) {
+                            locationGroups.put(location, new ArrayList<>());
+                        }
+                        locationGroups.get(location).add(invoice);
+                    }
 
-                        // add Geofence ID
-                        if(invoice.getGeofenceID() == null || invoice.getGeofenceID().isEmpty()){
-                            String generateID = UUID.randomUUID().toString();
-                            invoice.setGeofenceID(generateID);
-                            geofenceMap.put(invoiceCode, generateID);
-                            Log.d(TAG, "New GeofenceID assigned: " + generateID + " to invoice: "+invoiceCode);
-                            // update ?
-                            viewModel.update(invoice);
-                        } else {
-                            geofenceMap.put(invoiceCode, invoice.getGeofenceID());
-                            Log.d(TAG, "GeofenceID already exists: " + invoice.getGeofenceID()+ " to invoice: "+invoiceCode);
+                    // สำหรับแต่ละ location ให้ใช้ Geofence ID เดียวกัน
+                    for (Map.Entry<Integer, List<Invoice>> entry : locationGroups.entrySet()) {
+                        int location = entry.getKey();
+                        List<Invoice> invoicesInLocation = entry.getValue();
+
+                        String sharedGeofenceID = null;
+
+                        // หา Geofence ID ที่มีอยู่แล้ว หรือสร้างใหม่
+                        for (Invoice invoice : invoicesInLocation) {
+                            if (invoice.getGeofenceID() != null && !invoice.getGeofenceID().isEmpty()) {
+                                sharedGeofenceID = invoice.getGeofenceID();
+                                break;
+                            }
                         }
 
-//                        if (invoice.getGeofenceID() != null){
-////                            geofenceHelper = GeofenceHelper.getInstance(requireContext());
-////                            String geofenceID = geofenceMap.get(invoiceCode);
-////                            geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
-//
-//                        } else {
-//                            Log.d(TAG, "Geofence already added, skipping...");
-//                        }
+                        if (sharedGeofenceID == null) {
+                            sharedGeofenceID = UUID.randomUUID().toString();
+                        }
+
+                        // กำหนด Geofence ID เดียวกันให้ Invoice ทั้งหมดใน location นี้
+                        for (Invoice invoice : invoicesInLocation) {
+                            String invoiceCode = invoice.getInvoiceCode();
+
+                            // ดึง seq แยกสำหรับแต่ละ invoice
+//                            Executors.newSingleThreadExecutor().execute(() -> {
+//                                int invoiceSeq = viewModel.getNextInvoiceLogSeq(invoiceCode);
+//                                requireActivity().runOnUiThread(() -> {
+                                        viewModel.updateInvoiceStatus(invoice, seq, 2, latitude, longitude, imageTimestamp, getContext());
+//                                });
+//                            });
+
+                            if (invoice.getGeofenceID() == null || invoice.getGeofenceID().isEmpty()) {
+                                invoice.setGeofenceID(sharedGeofenceID);
+                                geofenceMap.put(invoiceCode, sharedGeofenceID);
+                                Log.d(TAG, "Shared GeofenceID assigned: " + sharedGeofenceID + " to invoice: " + invoiceCode);
+                                viewModel.update(invoice);
+                            } else {
+                                geofenceMap.put(invoiceCode, invoice.getGeofenceID());
+                                Log.d(TAG, "GeofenceID already exists: " + invoice.getGeofenceID() + " to invoice: " + invoiceCode);
+                            }
+                        }
                     }
                 }
-                Log.d(TAG, "observe null");
                 invoiceLiveData.removeObserver(this);
             }
         });
     }
+
 
 
 }

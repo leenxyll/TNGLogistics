@@ -18,6 +18,7 @@ import com.example.tnglogistics.Model.Repository;
 import com.example.tnglogistics.Model.SubIssue;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ViewModel extends AndroidViewModel {
@@ -68,8 +69,21 @@ public class ViewModel extends AndroidViewModel {
     public LiveData<List<Invoice>> getInvoiceBySeq(){
         return repository.getInvoiceBySeq();
     }
+
     public Invoice getInvoiceByGeofenceID(String GeofenceID){
         return repository.getInvoiceByGeofenceID(GeofenceID);
+    }
+
+    public List<Invoice> getInvoicesByGeofenceID(String geofenceID) {
+        return repository.getInvoicesByGeofenceID(geofenceID);
+    }
+
+    public boolean hasMileLogForLocation(String tripCode, int location, int mileTypeCode) {
+        return repository.hasMileLogForLocation(tripCode, location, mileTypeCode);
+    }
+
+    public LiveData<List<Invoice>> getInvoicesByLocation(int shipLoCode) {
+        return repository.getInvoicesByLocation(shipLoCode);
     }
 
 
@@ -121,8 +135,8 @@ public class ViewModel extends AndroidViewModel {
         return repository.getUnsyncedMileLogsImage();
     }
 
-    public void updateMile(Context context,int MileLogSeq, int MileLogRecord, long MileLogUpdate, Double MileLogLat, Double MileLogLong, String MileLogPicPath, int MileLogTypeCode){
-        repository.updateMile(context, MileLogSeq, MileLogRecord, MileLogUpdate, MileLogLat, MileLogLong, MileLogPicPath, MileLogTypeCode);
+    public void updateMile(Context context,int MileLogSeq, int MileLogRecord, long MileLogUpdate, Double MileLogLat, Double MileLogLong, String MileLogPicPath, int MileLogTypeCode, int MileLogLocation){
+        repository.updateMile(context, MileLogSeq, MileLogRecord, MileLogUpdate, MileLogLat, MileLogLong, MileLogPicPath, MileLogTypeCode, MileLogLocation);
     }
 
     public void updateShipmentPicture(String invoiceCode, long ShipPicUpdate, List<String> ShipPicPath, int ShipPicTypeCode){
@@ -141,9 +155,12 @@ public class ViewModel extends AndroidViewModel {
                     filteredList.add(invoice);
                 }
             }
+            // เรียงลำดับตรงนี้
+            filteredList.sort(Comparator.comparingInt(Invoice::getShipListSeq));
             return filteredList;
         });
     }
+
 
 //    public void insertIssue(Issue issue){
 //        repository.insertIssue(issue);

@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 
 /**
@@ -141,11 +142,9 @@ public class ShipDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_ship_detail, container, false);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-//        ImageView imgview_preview = view.findViewById(R.id.imgview_preview);
         container_btn = view.findViewById(R.id.container_arrived);
         btn_camera = view.findViewById(R.id.btn_camera);
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
@@ -155,147 +154,198 @@ public class ShipDetailFragment extends Fragment {
         // Observe ข้อมูลที่จัดกลุ่มตาม Location
         viewModel.getInvoiceBySeq().observe(getViewLifecycleOwner(), invoices -> {
             if (invoices != null && !invoices.isEmpty()) {
-                for(Invoice invoice : invoices){
-                    aInvoice = invoice;
-                    if (invoice.getGeofenceID() != null && !invoice.isAddGeofence()){
-                        if(invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0) {
-                            Log.d(TAG, "มีพิกัด เพิ่ม Geofence");
-                            //มีพิกัด
-                            Log.d(TAG, "Geofence ID : " + invoice.getGeofenceID());
-                            Log.d(TAG, "location : " + invoice.getShipLoLat() + ", " + invoice.getShipLoLong());
-                            invoice.setAddGeofence(true);
-                            viewModel.update(invoice);
-                            geofenceHelper = GeofenceHelper.getInstance(requireContext());
-                            String geofenceID = invoice.getGeofenceID();
-                            geofenceHelper.addGeofence(geofenceID, invoice.getShipLoLat(), invoice.getShipLoLong());
-                        } else {
-                            Log.d(TAG, "ไม่มีพิกัด เพิ่ม Geofence");
-                            //ไม่มีพิกัด
-                            btn_camera.setVisibility(View.VISIBLE);
-                            container_btn.setVisibility(View.GONE);
-                        }
-                    } else {
-                        Log.d(TAG, "Geofence already added, skipping...");
-                    }
+                // จัดกลุ่มตาม Location
+                Map<String, List<Invoice>> locationGroups = groupInvoicesByLocation(invoices);
 
-                    if(invoice.getInvoiceShipStatusCode() == 3 && SharedPreferencesHelper.getMileType(getContext()) == 1){
-                        Log.d(TAG, "status 3 และ mile 1");
-                        // ใกล้ถึง
-                        btn_camera.setVisibility(View.VISIBLE);
-                        container_btn.setVisibility(View.GONE);
-                    }else if(invoice.getInvoiceShipStatusCode() == 3 && SharedPreferencesHelper.getMileType(getContext()) == 3){
-                        Log.d(TAG, "status 3 และ mile 3");
-                        btn_camera.setVisibility(View.GONE);
-                        container_btn.setVisibility(View.VISIBLE);
-                        btn_confirm = view.findViewById(R.id.btn_confirm);
-                        btn_reportIssue = view.findViewById(R.id.btn_report_issue);
-                        btn_confirm.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-//                                cameraMile = false;
-                                SharedPreferencesHelper.setCameraMile(requireContext(), false);
-                                checkAndRequestPermissions();
-                            }
-                        });
-                        btn_reportIssue.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ReportIssueFragment frag_report_issue = ReportIssueFragment.newInstance(invoice);
-                                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
-                                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                                transaction.replace(R.id.fragment_container, frag_report_issue);
-                                transaction.addToBackStack(null); // <-- จุดสำคัญสำหรับการย้อนกลับ
-                                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
-                                new Handler().postDelayed(() -> {
-                                    transaction.commit();
-                                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
-                            }
-                        });
-                    }
-                    else if(invoice.getInvoiceShipStatusCode() == 2 && SharedPreferencesHelper.getMileType(requireContext()) == 3){
-                        Log.d(TAG, "status 2 และ mile 3");
-                        btn_camera.setVisibility(View.GONE);
-                        container_btn.setVisibility(View.VISIBLE);
-                        btn_confirm = view.findViewById(R.id.btn_confirm);
-                        btn_reportIssue = view.findViewById(R.id.btn_report_issue);
-                        btn_confirm.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-//                                cameraMile = false;
-                                SharedPreferencesHelper.setCameraMile(requireContext(), false);
-                                checkAndRequestPermissions();
-                            }
-                        });
-                        btn_reportIssue.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ReportIssueFragment frag_report_issue = ReportIssueFragment.newInstance(invoice);
-                                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
-                                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                                transaction.replace(R.id.fragment_container, frag_report_issue);
-                                transaction.addToBackStack(null); // <-- จุดสำคัญสำหรับการย้อนกลับ
-                                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
-                                new Handler().postDelayed(() -> {
-                                    transaction.commit();
-                                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
-                            }
-                        });
-                    }
-                    else if(invoice.getInvoiceShipStatusCode() == 2 && SharedPreferencesHelper.getMileType(getContext()) == 1){
-                        Log.d(TAG, "status 2 และ mile 1");
-                        // ใกล้ถึง
-                        btn_camera.setVisibility(View.VISIBLE);
-                        container_btn.setVisibility(View.GONE);
-                    }
-//                    else if(!invoice.isAddGeofence() && invoice.getShipLoLat() != 0.0 && invoice.getShipLoLong() != 0.0){
-//                        // ไม่มีพิกัด
-//                        btn_camera.setVisibility(View.VISIBLE);
-//                        container_btn.setVisibility(View.GONE);
-//                    }else{
-//                        invoice.setInvoiceShipStatusCode(3);
-//                        viewModel.update(invoice);
-//                        btn_camera.setVisibility(View.VISIBLE);
-//                        container_btn.setVisibility(View.GONE);
-//                    }
-                }
-                Map<String, List<Invoice>> groupedInvoices = groupInvoicesByLocation(invoices);
-                adapterInvoiceHelper = new AdapterInvoiceHelper(groupedInvoices);
+                // จัดการ Geofence สำหรับแต่ละ Location
+                handleGeofenceForLocations(locationGroups);
+
+                // ตรวจสอบสถานะการแสดงปุ่มตามที่เคยทำ
+                checkMileLogAndUpdateUI(invoices);
+
+                // แสดงรายการ
+                adapterInvoiceHelper = new AdapterInvoiceHelper(locationGroups);
                 recyclerView.setAdapter(adapterInvoiceHelper);
             } else {
+                Log.d(TAG, "Invoice is empty with MileType "+SharedPreferencesHelper.getMileType(requireContext()));
                 SharedPreferencesHelper.saveMileType(requireContext(), 2);
-                Log.d(TAG, "Save MileType To "+ SharedPreferencesHelper.getMileType(requireContext()));
+                Log.d(TAG, "Save MileType To " + SharedPreferencesHelper.getMileType(requireContext()));
                 StatusFragment frag_status = StatusFragment.newInstance();
-                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, frag_status);
-                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
                 new Handler().postDelayed(() -> {
-                    transaction.commit();
-                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+                transaction.commit();
+                }, 500);
             }
         });
-
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "on Click");
-                SharedPreferencesHelper.saveMileType(requireContext(),3);
+                SharedPreferencesHelper.saveMileType(requireContext(), 3);
                 SharedPreferencesHelper.setCameraMile(requireContext(), true);
-//                cameraMile = true;
+
+                // เก็บ location ปัจจุบันไว้ใน SharedPreferences
+                if (aInvoice != null) {
+                    SharedPreferencesHelper.saveCurrentInvoiceLocation(requireContext(), aInvoice.getInvoiceShipLoCode());
+                }
+
                 checkAndRequestPermissions();
             }
         });
 
-
         return view;
+    }
+
+    private void handleGeofenceForLocations(Map<String, List<Invoice>> locationGroups) {
+        for (Map.Entry<String, List<Invoice>> entry : locationGroups.entrySet()) {
+            String location = entry.getKey();
+            List<Invoice> invoicesInLocation = entry.getValue();
+
+            // ตรวจสอบว่ามี Invoice ที่ยังไม่ได้เพิ่ม Geofence ใน location นี้หรือไม่
+            boolean needsGeofence = false;
+            Invoice representativeInvoice = null;
+            String sharedGeofenceID = null;
+
+            // หา Geofence ID ที่มีอยู่แล้ว หรือ Invoice ที่ต้องการเพิ่ม Geofence
+            for (Invoice invoice : invoicesInLocation) {
+                if (invoice.getGeofenceID() != null && !invoice.getGeofenceID().isEmpty()) {
+                    sharedGeofenceID = invoice.getGeofenceID();
+                }
+                if (invoice.getGeofenceID() != null && !invoice.isAddGeofence()) {
+                    needsGeofence = true;
+                    representativeInvoice = invoice;
+                }
+            }
+
+            // ถ้าไม่มี Geofence ID ให้สร้างใหม่
+            if (sharedGeofenceID == null && needsGeofence) {
+                sharedGeofenceID = UUID.randomUUID().toString();
+            }
+
+            if (needsGeofence && representativeInvoice != null && sharedGeofenceID != null) {
+                if (representativeInvoice.getShipLoLat() != 0.0 && representativeInvoice.getShipLoLong() != 0.0) {
+                    Log.d(TAG, "เพิ่ม Geofence สำหรับ Location: " + location);
+
+                    // เพิ่ม Geofence
+                    geofenceHelper = GeofenceHelper.getInstance(requireContext());
+                    geofenceHelper.addGeofence(sharedGeofenceID, representativeInvoice.getShipLoLat(), representativeInvoice.getShipLoLong());
+
+                    // อัปเดต Invoice ทั้งหมดใน location นี้ให้ใช้ GeofenceID เดียวกัน
+                    for (Invoice invoice : invoicesInLocation) {
+                        if (invoice.getGeofenceID() == null || invoice.getGeofenceID().isEmpty()) {
+                            invoice.setGeofenceID(sharedGeofenceID);
+                        }
+                        invoice.setAddGeofence(true);
+                        viewModel.update(invoice);
+                    }
+                } else {
+                    Log.d(TAG, "ไม่มีพิกัดสำหรับ Location: " + location);
+                    showMileButton();
+                }
+            }
+        }
+    }
+
+    private void checkMileLogAndUpdateUI(List<Invoice> invoices) {
+        for(Invoice invoice : invoices) {
+            aInvoice = invoice;
+
+            String currentLocation = invoice.getShipLoAddr();
+            int currentLocationCode = invoice.getInvoiceShipLoCode();
+            String tripCode = SharedPreferencesHelper.getTrip(getContext());
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                boolean hasMile = viewModel.hasMileLogForLocation(tripCode, currentLocationCode, 3);
+
+                requireActivity().runOnUiThread(() -> {
+                    updateUIBasedOnMileStatus(invoice, hasMile);
+                });
+            });
+            break; // เอาแค่ invoice แรกมาตรวจสอบ UI
+        }
+    }
+
+    private void updateUIBasedOnMileStatus(Invoice invoice, boolean hasMileForThisLocation) {
+        if(invoice.getInvoiceShipStatusCode() == 3 && SharedPreferencesHelper.getMileType(getContext()) == 1){
+            Log.d(TAG, "status 3 และ mile 1");
+
+            if (hasMileForThisLocation) {
+                Log.d(TAG, "เคยถ่ายเลขไมล์สำหรับสถานที่นี้แล้ว - ข้ามการถ่ายเลขไมล์"+invoice.getInvoiceCode()+", "+invoice.getShipLoAddr());
+                btn_camera.setVisibility(View.GONE);
+                container_btn.setVisibility(View.VISIBLE);
+                setupConfirmButtons(invoice);
+            } else {
+                Log.d(TAG, "ยังไม่เคยถ่ายเลขไมล์สำหรับสถานที่นี้ - ต้องถ่ายเลขไมล์"+invoice.getInvoiceCode()+", "+invoice.getShipLoAddr());
+                btn_camera.setVisibility(View.VISIBLE);
+                container_btn.setVisibility(View.GONE);
+            }
+        }
+        else if(invoice.getInvoiceShipStatusCode() == 3 && SharedPreferencesHelper.getMileType(getContext()) == 3){
+            Log.d(TAG, "status 3 และ mile 3");
+            btn_camera.setVisibility(View.GONE);
+            container_btn.setVisibility(View.VISIBLE);
+            setupConfirmButtons(invoice);
+        }
+        else if(invoice.getInvoiceShipStatusCode() == 2 && SharedPreferencesHelper.getMileType(requireContext()) == 3){
+            Log.d(TAG, "status 2 และ mile 3");
+            btn_camera.setVisibility(View.GONE);
+            container_btn.setVisibility(View.VISIBLE);
+            setupConfirmButtons(invoice);
+        }
+        else if(invoice.getInvoiceShipStatusCode() == 2 && SharedPreferencesHelper.getMileType(getContext()) == 1){
+            Log.d(TAG, "status 2 และ mile 1");
+
+            if (hasMileForThisLocation) {
+                Log.d(TAG, "เคยถ่ายเลขไมล์สำหรับสถานที่นี้แล้ว - ข้ามการถ่ายเลขไมล์");
+                btn_camera.setVisibility(View.GONE);
+                container_btn.setVisibility(View.VISIBLE);
+                setupConfirmButtons(invoice);
+            } else {
+                Log.d(TAG, "ยังไม่เคยถ่ายเลขไมล์สำหรับสถานที่นี้ - ต้องถ่ายเลขไมล์");
+                btn_camera.setVisibility(View.VISIBLE);
+                container_btn.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void setupConfirmButtons(Invoice invoice) {
+        btn_confirm = getView().findViewById(R.id.btn_confirm);
+        btn_reportIssue = getView().findViewById(R.id.btn_report_issue);
+
+        btn_confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferencesHelper.setCameraMile(requireContext(), false);
+                checkAndRequestPermissions();
+            }
+        });
+
+        btn_reportIssue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ReportIssueFragment frag_report_issue = ReportIssueFragment.newInstance(invoice);
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, frag_report_issue);
+                transaction.addToBackStack(null);
+                new Handler().postDelayed(() -> {
+                    transaction.commit();
+                }, 500);
+            }
+        });
+    }
+
+    private void showMileButton() {
+        btn_camera.setVisibility(View.VISIBLE);
+        container_btn.setVisibility(View.GONE);
     }
 
     // ฟังก์ชันจัดกลุ่ม Invoice ตาม Location
     private Map<String, List<Invoice>> groupInvoicesByLocation(List<Invoice> invoices) {
         Map<String, List<Invoice>> groupedMap = new HashMap<>();
         for (Invoice invoice : invoices) {
-            String location = invoice.getShipLoAddr(); // ใช้ค่าของ ShipLocation เป็นตัวจัดกลุ่ม
+            String location = invoice.getShipLoAddr();
             if (!groupedMap.containsKey(location)) {
                 groupedMap.put(location, new ArrayList<>());
             }
@@ -319,17 +369,13 @@ public class ShipDetailFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), CameraXActivity.class);
                 ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
             }else {
-//                Intent intent = new Intent(getActivity(), CameraXCFActivity.class);
-//                ((MainActivity) getActivity()).getCameraCFLauncher().launch(intent);
                 ShipmentPictureFragment frag_cf = ShipmentPictureFragment.newInstance();
-                // ใช้ FragmentTransaction เพื่อแทนที่ Fragment ใน MainActivity
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, frag_cf);
-                transaction.addToBackStack(null); // <-- จุดสำคัญสำหรับการย้อนกลับ
-                // ใช้ Handler หรือ postDelayed เพื่อรอให้ข้อมูลเสร็จก่อนการแทนที่ Fragment
+                transaction.addToBackStack(null);
                 new Handler().postDelayed(() -> {
                     transaction.commit();
-                }, 500);  // รอให้ข้อมูลอัปเดตก่อน 500ms (คุณสามารถปรับเวลาให้เหมาะสม)
+                }, 500);
             }
         }
     }
