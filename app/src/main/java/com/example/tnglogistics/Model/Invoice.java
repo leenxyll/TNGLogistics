@@ -22,6 +22,7 @@ public class Invoice {
     private String InvoiceReceiverName;
     private String InvoiceReceiverPhone;
     private String InvoiceNote;
+//    private int InvoiceIssueCode;
     private int InvoiceShipStatusCode;
     private String InvoiceShipStatusLastUpdate;
     private Double LatUpdateStatus;
@@ -124,6 +125,14 @@ public class Invoice {
     public void setInvoiceNote(String invoiceNote) {
         InvoiceNote = invoiceNote;
     }
+
+//    public int getInvoiceIssueCode() {
+//        return InvoiceIssueCode;
+//    }
+//
+//    public void setInvoiceIssueCode(int invoiceIssueCode) {
+//        InvoiceIssueCode = invoiceIssueCode;
+//    }
 
     public int getInvoiceShipStatusCode() {
         return InvoiceShipStatusCode;

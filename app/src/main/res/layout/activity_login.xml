@@ -10,20 +10,13 @@
     android:background="@color/white"
     tools:context=".View.LoginActivity">
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/btn_switch"
+    <TextView
+        android:id="@+id/tvAppVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOff="  คนขับ  "
-        android:textOn="  เช็คเกอร์  "
-        android:thumb="@drawable/switch_thumb"
-        android:track="@drawable/switch_track"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:showText="true"
-        app:thumbTint="@color/white"
-        app:trackTint="@color/neutral" />
+        android:text="Version"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"/>
 
     <FrameLayout
         android:id="@+id/fragment_container"

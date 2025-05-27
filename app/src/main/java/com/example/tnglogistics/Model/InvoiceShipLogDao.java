@@ -11,23 +11,23 @@ import java.util.List;
 @Dao
 public interface InvoiceShipLogDao {
 
-    @Query("SELECT COALESCE(MAX(InvoiceShipLogSeq), 0) + 1 FROM InvoiceShipLog WHERE InvoiceShipLogCode = :InvoiceShipLogCode")
+    @Query("SELECT COALESCE(MAX(InvoiceShipLogSeq), 0) + 1 FROM Invoice_Ship_Log WHERE InvoiceShipLogCode = :InvoiceShipLogCode")
     int getNextInvoiceLogSeq(String InvoiceShipLogCode);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertShipLog(InvoiceShipLog shipLog);
 
-    @Query("SELECT * FROM InvoiceShipLog WHERE isSynced = false ORDER BY InvoiceShipLogUpdate ASC")
+    @Query("SELECT * FROM Invoice_Ship_Log WHERE isSynced = false ORDER BY InvoiceShipLogUpdate ASC")
     List<InvoiceShipLog> getUnsyncedInvoiceShipLogs();
 
 //    @Query("UPDATE InvoiceShipLog SET isSynced = true WHERE InvoiceShipLogSeq = :InvoiceShipLogSeq AND InvoiceShipLogCode = :InvoiceCode")
 //    void markAsSynced(int InvoiceShipLogSeq, String InvoiceCode);
 
-    @Query("SELECT COUNT(*) FROM InvoiceShipLog WHERE InvoiceShipLogCode = :code AND InvoiceShipLogSeq = :seq")
+    @Query("SELECT COUNT(*) FROM Invoice_Ship_Log WHERE InvoiceShipLogCode = :code AND InvoiceShipLogSeq = :seq")
     int checkIfLogExists(String code, int seq);
 
 
-    @Query("SELECT * FROM InvoiceShipLog WHERE InvoiceShipLogCode = :code AND InvoiceShipLogSeq = :seq LIMIT 1")
+    @Query("SELECT * FROM Invoice_Ship_Log WHERE InvoiceShipLogCode = :code AND InvoiceShipLogSeq = :seq LIMIT 1")
     InvoiceShipLog getShipLogByCodeAndSeq(String code, int seq);
 
     @Update

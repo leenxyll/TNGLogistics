@@ -9,6 +9,7 @@ import androidx.work.WorkerParameters;
 
 import com.example.tnglogistics.Model.MileLog;
 import com.example.tnglogistics.Model.Repository;
+import com.example.tnglogistics.Model.ShipmentPicture;
 
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class SyncImageWorker extends Worker {
         for (MileLog log : unsyncedMileLogsImage) {
             repository.syncMileLogPicture(log);
         }
+
+        List<ShipmentPicture> unsyncedShipmentPictures = repository.getUnsyncedShipPicImage();
+        repository.syncShipmentPicture(unsyncedShipmentPictures);
 
         return Result.success();
     }

@@ -3,7 +3,7 @@ package com.example.tnglogistics.Model;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 
-@Entity(tableName = "mile_log",
+@Entity(tableName = "Mile_Log",
         primaryKeys = {"MileLogTripCode", "MileLogRow"}
 )
 public class MileLog {

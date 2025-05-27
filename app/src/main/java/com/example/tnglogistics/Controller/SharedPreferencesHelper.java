@@ -9,11 +9,12 @@ public class SharedPreferencesHelper {
     private static final String KEY_LAST_ACTIVITY = "lastScreen";
     private static final String KEY_LAST_FRAGMENT = "lastFragment";
     private static final String KEY_USER_SESSION = "UserSession";
-    private static final String KEY_TRUCK = "TruckReg";
+//    private static final String KEY_TRUCK = "TruckReg";
     private static final String KEY_TRIP = "TripCode";
     private static final String KEY_MILE = "Mile";
     private static final String KEY_USER = "User";
-    private static final String KEY_SEQ = "Seq";
+    private static final String KEY_TAKEMILE = "TakeMile";
+//    private static final String KEY_SEQ = "Seq";
 
     public static boolean isUserLoggedIn(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
@@ -60,20 +61,20 @@ public class SharedPreferencesHelper {
 
     public static String getLastFragment(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "LoginDriverFragment");
+        return sharedPreferences.getString(KEY_LAST_FRAGMENT, "");
     }
 
-    public static void saveTruck(Context context, String truckReg){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();;
-        editor.putString(KEY_TRUCK, truckReg);
-        editor.apply();
-    }
-
-    public static String getTruck(Context context){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_TRUCK, "");
-    }
+//    public static void saveTruck(Context context, String truckReg){
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();;
+//        editor.putString(KEY_TRUCK, truckReg);
+//        editor.apply();
+//    }
+//
+//    public static String getTruck(Context context){
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRUCK, Context.MODE_PRIVATE);
+//        return sharedPreferences.getString(KEY_TRUCK, "");
+//    }
 
     public static void saveTrip(Context context, String tripCode){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TRIP, Context.MODE_PRIVATE);
@@ -99,18 +100,27 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getInt(KEY_MILE, 0);
     }
 
-    public static int getInvoiceSeq(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_SEQ, 0);  // Default to false
+    public static boolean isCameraMile(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TAKEMILE, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_TAKEMILE, true);
     }
 
-    public static void setInvoiceSeq(Context context, int invoiceSeq) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+    public static void setCameraMile(Context context, boolean isCameraMile) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_TAKEMILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(KEY_SEQ, invoiceSeq);
+        editor.putBoolean(KEY_TAKEMILE, isCameraMile);
         editor.apply();
     }
-
-
+//    public static int getInvoiceSeq(Context context) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+//        return sharedPreferences.getInt(KEY_SEQ, 0);  // Default to false
+//    }
+//
+//    public static void setInvoiceSeq(Context context, int invoiceSeq) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_APP_PREF, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.putInt(KEY_SEQ, invoiceSeq);
+//        editor.apply();
+//    }
 
 }

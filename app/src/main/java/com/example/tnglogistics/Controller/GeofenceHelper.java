@@ -22,7 +22,7 @@ import java.util.List;
 public class GeofenceHelper {
     private static final String TAG = "GeofenceHelper";
 
-    private float radius = 5000; // 5 km.
+    private float radius = 2500; // 5 km.
 //    private float radius = 1000; // ทดสอบ 1 km.
     private int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL;
     private PendingIntent pendingIntent;

@@ -49,6 +49,7 @@
                     android:id="@+id/txtview_allqueue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text=""
                     android:textSize="24sp"
                     android:textStyle="bold"
@@ -57,6 +58,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="จุดส่งทั้งหมด"
                     android:textSize="14sp"
                     android:textColor="@color/neutral1" />
@@ -78,6 +80,7 @@
                     android:id="@+id/txtview_shipped"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text=""
                     android:textSize="24sp"
                     android:textStyle="bold"
@@ -86,6 +89,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="จัดส่งแล้ว"
                     android:textSize="14sp"
                     android:textColor="@color/neutral1" />
@@ -106,6 +110,7 @@
                     android:id="@+id/txtview_queue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text=""
                     android:textSize="24sp"
                     android:textStyle="bold"
@@ -114,6 +119,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="ค้างส่ง"
                     android:textSize="14sp"
                     android:textColor="@color/neutral1" />

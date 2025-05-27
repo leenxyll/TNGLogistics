@@ -10,24 +10,27 @@ import java.util.List;
 
 @Dao
 public interface MileLogDao {
-    @Query("SELECT COALESCE(MAX(MileLogRow), 0) + 1 FROM mile_log WHERE MileLogTripCode = :tripCode")
+    @Query("SELECT COALESCE(MAX(MileLogRow), 0) + 1 FROM Mile_Log WHERE MileLogTripCode = :tripCode")
     int getNextMileLogSeq(String tripCode);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertMileLog(MileLog mileLog);
 
-    @Query("SELECT * FROM mile_log WHERE isSynced = false ORDER BY MileLogUpdate ASC")
+    @Query("SELECT * FROM Mile_Log WHERE isSynced = false ORDER BY MileLogUpdate ASC")
     List<MileLog> getUnsyncedMileLogs();
 
-    @Query("SELECT * FROM mile_log WHERE isImageSynced = false ORDER BY MileLogUpdate ASC")
+    @Query("SELECT * FROM Mile_Log WHERE isImageSynced = false ORDER BY MileLogUpdate ASC")
     List<MileLog> getUnsyncedMileLogsImage();
 
-    @Query("SELECT COUNT(*) FROM mile_log WHERE MilelogTripCode = :code AND MileLogRow = :seq")
+    @Query("SELECT COUNT(*) FROM Mile_Log WHERE MilelogTripCode = :code AND MileLogRow = :seq")
     int checkIfLogExists(String code, int seq);
 
-    @Query("SELECT * FROM mile_log WHERE MilelogTripCode = :code AND MileLogSeq = :seq LIMIT 1")
+    @Query("SELECT * FROM Mile_Log WHERE MilelogTripCode = :code AND MileLogSeq = :seq LIMIT 1")
     MileLog getMileLogByCodeAndSeq(String code, int seq);
 
     @Update
     void update(MileLog mileLog);
+
+    @Query("DELETE FROM Mile_Log")
+    void deleteAll();
 }

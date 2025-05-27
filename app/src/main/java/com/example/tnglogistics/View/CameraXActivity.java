@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.TimeZone;
 import android.media.ExifInterface;
@@ -166,6 +167,8 @@ public class CameraXActivity extends AppCompatActivity {
             original = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
         }
 
+        Rect cropRect = CameraXOverlay.getCropRect();
+
         // อ่านขนาดจริงของภาพที่ถ่ายได้
         int imageWidth = original.getWidth();
         int imageHeight = original.getHeight();
@@ -182,10 +185,10 @@ public class CameraXActivity extends AppCompatActivity {
         Log.d(TAG, "Scale Factors: scaleX=" + scaleX + ", scaleY=" + scaleY);
 
         // พิกัดของกรอบการครอปใน PreviewView (Rect(90, 930, 990, 1230))
-        int previewCropLeft = 250;
-        int previewCropTop = 930;
-        int previewCropRight = 830;
-        int previewCropBottom = 1230;
+        int previewCropLeft = cropRect.left;
+        int previewCropTop = cropRect.top;
+        int previewCropRight = cropRect.right;
+        int previewCropBottom = cropRect.bottom;
 
         // คำนวณตำแหน่งการครอปในภาพจริงจากพิกัดใน PreviewView
         int cropX = (int) (previewCropLeft * scaleX);
@@ -217,6 +220,15 @@ public class CameraXActivity extends AppCompatActivity {
         }
 
         Log.d(TAG, "Cropped Image Saved: " + croppedFile.getAbsolutePath());
+
+        // ลบรูปต้นฉบับ
+        File originalFile = new File(imagePath);
+        if (originalFile.exists()) {
+            boolean deleted = originalFile.delete();
+            if (!deleted) {
+                Log.w(TAG, "Failed to delete original image: " + imagePath);
+            }
+        }
 
         return croppedFile.getAbsolutePath();
     }

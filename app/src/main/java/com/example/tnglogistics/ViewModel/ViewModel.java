@@ -12,28 +12,30 @@ import androidx.lifecycle.Transformations;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Model.Employee;
 import com.example.tnglogistics.Model.Invoice;
+import com.example.tnglogistics.Model.Issue;
 import com.example.tnglogistics.Model.MileLog;
 import com.example.tnglogistics.Model.Repository;
+import com.example.tnglogistics.Model.SubIssue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvoiceViewModel extends AndroidViewModel {
-    private static InvoiceViewModel instance;
+public class ViewModel extends AndroidViewModel {
+    private static ViewModel instance;
     private final Repository repository;
     private final MediatorLiveData<List<Invoice>> invoiceList = new MediatorLiveData<>();
 //    private LiveData<List<Invoice>> invoicesGrouped;
 
-    public InvoiceViewModel(Application application) {
+    public ViewModel(Application application) {
         super(application);
         repository = new Repository(application);
         invoiceList.addSource(repository.getAllInvoice(), invoiceList::setValue);
 //        invoicesGrouped = repository.getInvoicesGroupedByLocation();
     }
 
-    public static InvoiceViewModel getInstance(Application application){
+    public static ViewModel getInstance(Application application){
         if (instance == null) {
-            instance = new InvoiceViewModel(application);
+            instance = new ViewModel(application);
         }
         return instance;
     }
@@ -45,6 +47,10 @@ public class InvoiceViewModel extends AndroidViewModel {
         // ล้างข้อมูลในฐานข้อมูลผ่าน repository
         instance.repository.clearAllData();
         instance = null;
+    }
+
+    public LiveData<List<SubIssue>> getSubIssueByIssueTypeCode(int IssueTypeCode){
+        return repository.getSubIssueByIssueTypeCode(IssueTypeCode);
     }
 
     public void insertEmployee(Employee employee){
@@ -62,6 +68,10 @@ public class InvoiceViewModel extends AndroidViewModel {
     public LiveData<List<Invoice>> getInvoiceBySeq(){
         return repository.getInvoiceBySeq();
     }
+    public Invoice getInvoiceByGeofenceID(String GeofenceID){
+        return repository.getInvoiceByGeofenceID(GeofenceID);
+    }
+
 
     public LiveData<Integer> countInvoicesWithStatusFour(){
         return repository.countInvoicesWithStatusFour();
@@ -75,16 +85,29 @@ public class InvoiceViewModel extends AndroidViewModel {
         repository.getShipmentList(context, callback);
     }
 
+    public void getSubIssue(){
+        repository.getSubIssue();
+    }
+
     public void update(Invoice invoice){
         repository.updateInvoice(invoice);
     }
 
-    public void updateInvoice(Invoice invoice, int seq, int statusCode, Double lat, Double lng, long timeStamp, Context context){
+    public void updateInvoiceStatus(Invoice invoice, int seq, int statusCode, Double lat, Double lng, long timeStamp, Context context){
         repository.updateInvoiceStatus(invoice, seq, statusCode, lat, lng, timeStamp, context);
     }
+
+    public void updateInvoiceStatus(Invoice invoice, int seq, int statusCode, Double lat, Double lng, long timeStamp, String issueDesc, int issueTypeCode, Context context){
+        repository.updateInvoiceStatus(invoice, seq, statusCode, lat, lng, timeStamp, issueDesc, issueTypeCode, context);
+    }
+
 //    public LiveData<List<Invoice>> getInvoicesGroupedByLocation() {
 //        return invoicesGrouped;
 //    }
+
+    public int getNextShipListPic(String invoiceCode){
+        return repository.getNextShipListPic(invoiceCode);
+    }
 
     public int getNextMileLogSeq(String tripCode){
         return repository.getNextMileLogSeq(tripCode);
@@ -100,6 +123,10 @@ public class InvoiceViewModel extends AndroidViewModel {
 
     public void updateMile(Context context,int MileLogSeq, int MileLogRecord, long MileLogUpdate, Double MileLogLat, Double MileLogLong, String MileLogPicPath, int MileLogTypeCode){
         repository.updateMile(context, MileLogSeq, MileLogRecord, MileLogUpdate, MileLogLat, MileLogLong, MileLogPicPath, MileLogTypeCode);
+    }
+
+    public void updateShipmentPicture(String invoiceCode, long ShipPicUpdate, List<String> ShipPicPath, int ShipPicTypeCode){
+        repository.updateShipmentPicture(invoiceCode, ShipPicUpdate, ShipPicPath, ShipPicTypeCode);
     }
 
     // เพิ่มเมธอดสำหรับดึง invoice ตาม tripCode
@@ -118,5 +145,8 @@ public class InvoiceViewModel extends AndroidViewModel {
         });
     }
 
+//    public void insertIssue(Issue issue){
+//        repository.insertIssue(issue);
+//    }
 
 }

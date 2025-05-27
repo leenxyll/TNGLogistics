@@ -1,14 +1,8 @@
 package com.example.tnglogistics.View;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -17,8 +11,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,18 +25,13 @@ import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Model.Employee;
 import com.example.tnglogistics.Model.Repository;
-import com.example.tnglogistics.Model.Truck;
 import com.example.tnglogistics.Network.RetrofitClient;
 import com.example.tnglogistics.R;
-import com.example.tnglogistics.ViewModel.InvoiceViewModel;
-import com.example.tnglogistics.ViewModel.TripViewModel;
-import com.example.tnglogistics.ViewModel.TruckViewModel;
+import com.example.tnglogistics.ViewModel.ViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.json.JSONException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,7 +44,7 @@ import retrofit2.Response;
  */
 public class LoginDriverFragment extends Fragment {
     private static final String TAG = "LoginDriverFragment";
-    private InvoiceViewModel invoiceViewModel;
+    private ViewModel viewModel;
     private LocationService locationService;
     private boolean isBound = false;
     private int EmpCode;
@@ -150,7 +137,7 @@ public class LoginDriverFragment extends Fragment {
                     truckRegNumber = Integer.parseInt(truckreg);
                     loginUser(truckRegNumber);
                 } else {
-                    Toast.makeText(getContext(), "กรุณากรอกทะเบียนรถ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "รหัสพนักงาน", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -353,17 +340,19 @@ public class LoginDriverFragment extends Fragment {
                     Log.d(TAG, "Distance: " + distance);
                     if (distance <= radius) {
                         // แล้วดึง Invoice ครั้งแรก
-                        invoiceViewModel = InvoiceViewModel.getInstance(requireActivity().getApplication());
+                        viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         SharedPreferencesHelper.setEmployee(requireContext(), EmpCode);
-                        invoiceViewModel.getShipmentList(getContext(), new Repository.StatusCallback() {
+                        viewModel.getShipmentList(getContext(), new Repository.StatusCallback() {
                             @Override
                             public void onStatusReceived(boolean status) {
                                 if (status) {
+                                    viewModel.getSubIssue();
+                                    SharedPreferencesHelper.saveLastFragment(requireContext(), "");
                                     SharedPreferencesHelper.setUserLoggedIn(requireContext(), true);
                                     Employee employee = new Employee(EmpCode, branchCode, branchName, branchLatitude, branchLongitude, radius);
-                                    invoiceViewModel.insertEmployee(employee);
+                                    viewModel.insertEmployee(employee);
                                     requireActivity().finish();
                                     startActivity(intent);
                                     Toast.makeText(getContext(), "เข้าสู่ระบบสำเร็จ", Toast.LENGTH_SHORT).show();

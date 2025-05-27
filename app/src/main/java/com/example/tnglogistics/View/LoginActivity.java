@@ -1,7 +1,10 @@
 package com.example.tnglogistics.View;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +16,9 @@ import androidx.fragment.app.Fragment;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.R;
+import com.google.android.datatransport.backend.cct.BuildConfig;
 
-public class LoginActivity extends AppCompatActivity {
+public class  LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
 
     @Override
@@ -32,14 +36,27 @@ public class LoginActivity extends AppCompatActivity {
         // ขอสิทธิ์
         PermissionManager.requestPermissions(this);
 
+        TextView tvAppVersion = findViewById(R.id.tvAppVersion);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionName = pInfo.versionName;
+            int versionCode = (int) pInfo.getLongVersionCode(); // Android P+ (API 28+)
+            tvAppVersion.setText("Version " + versionName);
+            Log.d(TAG, "versionName: " + versionName);
+            Log.d(TAG, "versionCode: " + versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        SharedPreferencesHelper.saveLastFragment(this, "LoginDriverFragment");
+
+
+
         SharedPreferencesHelper.setUserLoggedIn(this, false);
         SharedPreferencesHelper.saveLastActivity(this,"");
         SharedPreferencesHelper.saveLastFragment(this,"");
-        SharedPreferencesHelper.saveTruck(this, "");
         SharedPreferencesHelper.saveTrip(this, "");
         SharedPreferencesHelper.saveMileType(this, 1);
+        SharedPreferencesHelper.setCameraMile(this, true);
 
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
         Log.d(TAG, lastFragment + " is lastFragment");
@@ -54,9 +71,9 @@ public class LoginActivity extends AppCompatActivity {
 //                case "PreviewPictureFragment":
 //                    fragment = PreviewPictureFragment.newInstance();
 //                    break;
-                case "StatusFragment":
-                    fragment = StatusFragment.newInstance();
-                    break;
+//                case "StatusFragment":
+//                    fragment = StatusFragment.newInstance();
+//                    break;
                 case "LoginDriverFragment":
                     fragment = LoginDriverFragment.newInstance();
                     break;

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
-@Entity(tableName = "InvoiceShipLog",
+@Entity(tableName = "Invoice_Ship_Log",
         primaryKeys = {"InvoiceShipLogCode", "InvoiceShipLogSeq"},
         foreignKeys = {
                 @ForeignKey(entity = Invoice.class,
@@ -23,6 +23,8 @@ public class InvoiceShipLog {
     private Double InvoiceShipLogLat;
     private Double InvoiceShipLogLong;
     private int InvoiceShipLogEmpCode;
+    private String InvoiceShipLogIssueDescription;
+    private int InvoiceShipLogSubCode;
     public boolean isSynced;
 
     public String getInvoiceShipLogCode() {
@@ -79,6 +81,22 @@ public class InvoiceShipLog {
 
     public void setInvoiceShipLogEmpCode(int invoiceShipLogEmpCode) {
         InvoiceShipLogEmpCode = invoiceShipLogEmpCode;
+    }
+
+    public String getInvoiceShipLogIssueDescription() {
+        return InvoiceShipLogIssueDescription;
+    }
+
+    public void setInvoiceShipLogIssueDescription(String invoiceShipLogIssueDescription) {
+        InvoiceShipLogIssueDescription = invoiceShipLogIssueDescription;
+    }
+
+    public int getInvoiceShipLogSubCode() {
+        return InvoiceShipLogSubCode;
+    }
+
+    public void setInvoiceShipLogSubCode(int invoiceShipLogSubCode) {
+        InvoiceShipLogSubCode = invoiceShipLogSubCode;
     }
 
     public boolean isSynced() {

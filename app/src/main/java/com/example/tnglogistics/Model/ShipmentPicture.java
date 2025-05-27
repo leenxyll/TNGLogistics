@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
 @Entity(
-        tableName = "shipment_picture",
+        tableName = "Shipment_Picture",
         primaryKeys = {"ShipPicInvoiceCode", "ShipPicRow"},
         foreignKeys = {
                 @ForeignKey(entity = Invoice.class,

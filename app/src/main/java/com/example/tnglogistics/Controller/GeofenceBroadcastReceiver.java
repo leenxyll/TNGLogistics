@@ -8,22 +8,18 @@ import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
-import com.example.tnglogistics.View.MainActivity;
-import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import java.util.List;
 
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "GeofenceBroadcastReceiver";
-    private ShipmentListViewModel shipmentListViewModel;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 //        Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Receiver called " + intent.getAction());
 
-//        shipmentListViewModel = ShipmentListViewModel.getInstance((Application) context.getApplicationContext());
         NotificationHelper notificationHelper = new NotificationHelper(context);
 
         // ตรวจสอบ GeofencingEvent

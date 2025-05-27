@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".View.StatusFragment">
+    tools:context=".View.ShipDetailFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,14 +32,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txtview_title" />
 
-        <ImageView
-            android:id="@+id/imgview_preview"
-            android:layout_width="600px"
-            android:layout_height="800px"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycleview_address" />
-
         <Button
             android:id="@+id/btn_camera"
             android:layout_width="match_parent"
@@ -49,19 +41,6 @@
             android:text="ถ่ายเลขไมล์เพื่อยืนยันถึงสถานที่จัดส่ง"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"></Button>
-
-        <Button
-            android:id="@+id/btn_confirmPic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_main"
-            android:backgroundTint="@color/neutral1"
-            android:text="ยืนยันการส่งสินค้า"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"></Button>
 
         <LinearLayout
@@ -70,6 +49,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:visibility="gone"
+            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
@@ -82,9 +62,7 @@
                 android:backgroundTint="@color/neutral4"
                 android:text="แจ้งปัญหาการจัดส่ง"
                 android:textColor="@color/neutral1"
-                android:textSize="16sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"></Button>
+                android:textSize="16sp"></Button>
 
             <Button
                 android:id="@+id/btn_confirm"
@@ -96,8 +74,7 @@
                 android:backgroundTint="@color/neutral1"
                 android:text="ถ่ายรูปเพื่อยืนยันการส่งสินค้า"
                 android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"></Button>
+                android:textSize="16sp"></Button>
         </LinearLayout>
 
 

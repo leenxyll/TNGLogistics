@@ -2,27 +2,19 @@ package com.example.tnglogistics.View;
 
 import android.Manifest;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.icu.text.SimpleDateFormat;
-import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Constraints;
@@ -32,7 +24,6 @@ import androidx.work.WorkManager;
 
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,38 +32,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.tnglogistics.Controller.AdapterAddrHelper;
 import com.example.tnglogistics.Controller.AdapterInvoiceHelper;
-import com.example.tnglogistics.Controller.AdapterShipLocationHelper;
-import com.example.tnglogistics.Controller.LocationHelper;
 import com.example.tnglogistics.Controller.LocationService;
 //import com.example.tnglogistics.Controller.MyService;
-import com.example.tnglogistics.Controller.NotificationHelper;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
 import com.example.tnglogistics.Controller.SyncImageWorker;
 import com.example.tnglogistics.Model.Employee;
 import com.example.tnglogistics.Model.Invoice;
 import com.example.tnglogistics.Model.MileLog;
-import com.example.tnglogistics.Model.ShipLocation;
-import com.example.tnglogistics.Model.ShipmentList;
 import com.example.tnglogistics.R;
-import com.example.tnglogistics.ViewModel.InvoiceViewModel;
-import com.example.tnglogistics.ViewModel.RecycleAddrViewModel;
-import com.example.tnglogistics.ViewModel.ShipLocationViewModel;
-import com.example.tnglogistics.ViewModel.ShipmentListViewModel;
-import com.example.tnglogistics.ViewModel.TripViewModel;
-import com.example.tnglogistics.ViewModel.TruckViewModel;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.example.tnglogistics.ViewModel.ViewModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -82,7 +56,7 @@ import java.util.Map;
  */
 public class StatusFragment extends Fragment {
     private static final String TAG = "StatusFragment";
-    private InvoiceViewModel invoiceViewModel;
+    private ViewModel viewModel;
     private AdapterInvoiceHelper adapterInvoiceHelper;
     private int allqueue;
     private LocationService locationService;
@@ -100,6 +74,7 @@ public class StatusFragment extends Fragment {
     private MutableLiveData<Double> distanceLiveData = new MutableLiveData<>();
     private double distance = Double.MAX_VALUE;
     private static boolean isDialogShowing; // ป้องกัน Dialog ซ้ำ
+    private AlertDialog progressDialog;
 
     // เชื่อมต่อกับ LocationService
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -198,10 +173,10 @@ public class StatusFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.recycleview_address);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        invoiceViewModel = InvoiceViewModel.getInstance(requireActivity().getApplication());
+        viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
         // Observe ข้อมูลที่จัดกลุ่มตาม Location
-        invoiceViewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
+        viewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
             if (invoices != null && !invoices.isEmpty()) {
                 allqueue = invoices.size();
                 txtview_allqueue.setText(String.valueOf(invoices.size()));
@@ -221,7 +196,7 @@ public class StatusFragment extends Fragment {
             }
         });
 
-//        invoiceViewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
+//        viewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
 //            @Override
 //            public void onChanged(Employee employee) {
 //                branchName = employee.getBrchName();
@@ -232,7 +207,7 @@ public class StatusFragment extends Fragment {
 //        });
 
         if (SharedPreferencesHelper.getMileType(requireContext()) == 2) {
-            invoiceViewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
+            viewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
                 @Override
                 public void onChanged(Employee employee) {
                     branchName = employee.getBrchName();
@@ -249,7 +224,7 @@ public class StatusFragment extends Fragment {
                     Log.d(TAG, "Distance: " + aDouble);
                     if (aDouble <= radius) {
                         new Thread(() -> {
-                            List<MileLog> unsyncedMileLogsImage = invoiceViewModel.getUnsyncedMileLogsImage();
+                            List<MileLog> unsyncedMileLogsImage = viewModel.getUnsyncedMileLogsImage();
                             Log.d(TAG, "unsyncedMileLogsImage size: " + unsyncedMileLogsImage.size());
 
                             if (!unsyncedMileLogsImage.isEmpty()) {
@@ -325,7 +300,7 @@ public class StatusFragment extends Fragment {
     }
 
     private void updateUI() {
-        invoiceViewModel.countInvoicesWithStatusFour().observe(getViewLifecycleOwner(), shippedCount -> {
+        viewModel.countInvoicesWithStatusFour().observe(getViewLifecycleOwner(), shippedCount -> {
             // why 0 ?
             int shipped = shippedCount != null ? shippedCount : 0;
             int queue = allqueue - shipped;
@@ -360,7 +335,6 @@ public class StatusFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         startSyncImageWorker();
-//                        isDialogShowing = false; // ✅ ปิด Dialog แล้วรีเซ็ตค่า
                     }
                 })
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -371,7 +345,26 @@ public class StatusFragment extends Fragment {
                 })
                 .show();
     }
+
+    private void showLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setCancelable(false); // ป้องกันการกดปิด
+
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_loading, null);
+        builder.setView(view);
+
+        progressDialog = builder.create();
+        progressDialog.show();
+    }
+
+    private void dismissLoadingDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
     private void startSyncImageWorker() {
+        showLoadingDialog();
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
@@ -381,5 +374,8 @@ public class StatusFragment extends Fragment {
                 .build();
 
         WorkManager.getInstance(requireContext()).enqueue(syncImageWorkRequest);
+        new Handler().postDelayed(() -> {
+            dismissLoadingDialog();
+        }, 500);
     }
 }

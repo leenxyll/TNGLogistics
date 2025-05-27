@@ -6,9 +6,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,20 +17,16 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.NetworkReceiver;
 import com.example.tnglogistics.Controller.PermissionManager;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
+import com.example.tnglogistics.Model.Invoice;
 import com.example.tnglogistics.R;
-import com.example.tnglogistics.ViewModel.TripViewModel;
-import com.example.tnglogistics.ViewModel.TruckViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private TruckViewModel truckViewModel;
 
     private ActivityResultLauncher<Intent> cameraMileLauncher;
-    private ActivityResultLauncher<Intent> cameraCFLauncher;
 
     private NetworkReceiver networkReceiver = new NetworkReceiver();
 
@@ -103,18 +97,8 @@ public class MainActivity extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         String imagePath = result.getData().getStringExtra("image_path");
                         long imageTimestamp = result.getData().getLongExtra("image_timestamp", 0);
+                        Invoice invoice = result.getData().getParcelableExtra("invoice");
                         openFragmentPreviewPicture(imagePath, imageTimestamp); // ส่งค่าไป FragmentB
-                    }
-                }
-        );
-
-        cameraCFLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        String imagePath = result.getData().getStringExtra("image_path");
-                        long imageTimestamp = result.getData().getLongExtra("image_timestamp", 0);
-                        openFragmentPreviewPicCF(imagePath, imageTimestamp); // ส่งค่าไป FragmentB
                     }
                 }
         );
@@ -157,26 +141,11 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
 
         }
-//        imgview_logo_navbar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                SharedPreferencesHelper.setUserLoggedIn(MainActivity.this, false);
-//                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
-//                startActivity(intent); // เรียก startActivity() เพื่อเปิด Activity ใหม่
-//                finish(); // ปิด Fragment หรือ Activity ปัจจุบัน (ถ้าต้องการ)
-//            }
-//        });
-//            finish();
     }
 
     // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้
     public ActivityResultLauncher<Intent> getCameraMileLauncher() {
         return this.cameraMileLauncher;
-    }
-
-    // สร้าง getter method เพื่อให้ Fragment สามารถเข้าถึงได้
-    public ActivityResultLauncher<Intent> getCameraCFLauncher() {
-        return this.cameraCFLauncher;
     }
 
     private void openFragmentPreviewPicture(String imagePath, long imageTimestamp) {
@@ -190,21 +159,6 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, frag_preview_pic)
-//                .addToBackStack(null)
-                .commit();
-    }
-
-    private void openFragmentPreviewPicCF(String imagePath, long imageTimestamp) {
-        PreviewPictureCFFragment frag_preview_pic_cf = PreviewPictureCFFragment.newInstance();
-
-        // ส่งค่าไปให้ FragmentB ผ่าน arguments
-        Bundle args = new Bundle();
-        args.putString("image_path", imagePath);
-        args.putLong("image_timestamp", imageTimestamp);
-        frag_preview_pic_cf.setArguments(args);
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, frag_preview_pic_cf)
 //                .addToBackStack(null)
                 .commit();
     }
