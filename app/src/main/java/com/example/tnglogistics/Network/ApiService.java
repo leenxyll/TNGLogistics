@@ -17,32 +17,6 @@ import retrofit2.http.Query;
 import java.util.List;
 
 public interface ApiService {
-//    @POST("/mobile/CreateTruck")
-//    Call<JsonObject> insertTruck(@Body JsonObject params);
-//
-//    @POST("/mobile/CreateTrip")
-//    Call<JsonObject> insertTrip(@Body JsonObject params);
-//
-//    @GET("/mobile/GetTruck")
-//    Call<Truck> getTruck(@Query("TruckReg") String truckReg);
-//
-//    @GET("/mobile/GetShipLocationByAddr")
-//    Call<ShipLocation> getShipLocationByAddr(@Query("ShipLoAddr") String shipLoAddr);
-//    @GET("/mobile/GetShipLocationByCode")
-//    Call<ShipLocation> getShipLocationByCode(@Query("ShipLoCode") int ShipLoCode);
-//
-//    @POST("/mobile/CreateShipLocation") // URL ตาม API ที่ Server กำหนด
-//    Call<JsonObject> insertShipLocation(@Body ShipLocation shipLocation);
-//
-//    @POST("/mobile/CreateShipmentList")
-//    Call<Void> insertShipmentList(@Body ShipmentList shipmentList);
-//
-//    @PATCH("/mobile/UpdateShipmentList")
-//    Call<Void> updateShipmentList(@Body ShipmentList shipmentList);
-//
-//    @PATCH("/mobile/UpdateTrip")
-//    Call<Void> updateTrip(@Body Trip trip);
-
     @POST("/mobile/auth/login")
     Call<JsonObject> login(@Body JsonObject credentials); // เพิ่ม method login
 
@@ -57,9 +31,6 @@ public interface ApiService {
 
     @POST("/mobile/driver/invoice/updateStatus")
     Call<JsonObject> updateInvoiceStatus(@Body InvoiceShipLog log);
-
-//    @POST("/driver/trip/updateStatus")
-//    Call<JsonObject>
 
     @POST("/mobile/driver/mileLog/insertData")
     Call<JsonObject> insertMileLogData(@Body JsonObject mileLog);

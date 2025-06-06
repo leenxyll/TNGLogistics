@@ -16,10 +16,10 @@ public interface MileLogDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertMileLog(MileLog mileLog);
 
-    @Query("SELECT * FROM Mile_Log WHERE isSynced = false ORDER BY MileLogUpdate ASC")
+    @Query("SELECT * FROM Mile_Log WHERE isSynced = 0 ORDER BY MileLogUpdate ASC")
     List<MileLog> getUnsyncedMileLogs();
 
-    @Query("SELECT * FROM Mile_Log WHERE isImageSynced = false ORDER BY MileLogUpdate ASC")
+    @Query("SELECT * FROM Mile_Log WHERE isImageSynced = 0 ORDER BY MileLogUpdate ASC")
     List<MileLog> getUnsyncedMileLogsImage();
 
     @Query("SELECT COUNT(*) FROM Mile_Log WHERE MilelogTripCode = :code AND MileLogRow = :seq")

@@ -15,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.tnglogistics.Controller.LocationService;
 import com.example.tnglogistics.Controller.SharedPreferencesHelper;
-import com.example.tnglogistics.Controller.SyncDataHelper;
 import com.example.tnglogistics.R;
 
 public class SplashActivity extends AppCompatActivity {
@@ -33,11 +32,6 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-//        SyncDataHelper.startSyncDataWhenConnected(this);
-
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
         Log.d(TAG, "Login " +SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this));
                 if (SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this)) {
                     Log.d(TAG, "Login call main " +SharedPreferencesHelper.isUserLoggedIn(SplashActivity.this));
@@ -48,25 +42,6 @@ public class SplashActivity extends AppCompatActivity {
                     // ถ้ายังไม่ล็อกอิน ไปยัง LoginActivity
                     startActivity(new Intent(SplashActivity.this, LoginActivity.class));
                 }
-//                finish(); // ปิด SplashActivity
-//            }
-//        }, SPLASH_TIMEOUT);
-
-//        String lastActivity = SharedPreferencesHelper.getLastActivity(this);
-//        Intent intent;
-
-//        switch(lastActivity){
-//            ca
-//            case "MainActivity":
-//                intent = new Intent(this, MainActivity.class);
-//                break;
-//            default:
-//                intent = new Intent(this, MainActivity.class);
-//                break;
-//
-//        }
-//
-//        startActivity(intent);
         finish();
     }
 

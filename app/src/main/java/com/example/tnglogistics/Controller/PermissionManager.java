@@ -184,37 +184,11 @@ public class PermissionManager {
         }
     }
 
-    // เพิ่มฟังก์ชันสำหรับแสดงหน้าแนะนำประโยชน์ก่อนขอสิทธิ์ (แนะนำให้เรียกก่อน requestBackgroundLocation)
-//    private static void showLocationBenefitsDialog(Activity activity) {
-//        new AlertDialog.Builder(activity)
-//                .setTitle("ประโยชน์ของการแชร์ตำแหน่ง")
-//                .setMessage("สวัสดีคุณคนขับ!\n\nการแชร์ตำแหน่งของคุณจะช่วยให้:\n\n1. คุณได้รับคำแนะนำเส้นทางที่ดีที่สุดตลอดการเดินทาง\n2. ลูกค้าทราบเวลาจัดส่งที่แม่นยำ\n3. ระบบส่งงานใกล้เคียงให้คุณโดยอัตโนมัติ\n4. มีหลักฐานยืนยันการส่งสินค้าถึงจุดหมาย\n\nเราใช้ข้อมูลตำแหน่งเฉพาะเพื่อการจัดส่งสินค้าเท่านั้น")
-//                .setPositiveButton("ตกลง ดำเนินการต่อ", (dialog, which) -> {
-//                    requestBackgroundLocation(activity);
-//                })
-//                .setCancelable(false)
-//                .show();
-//    }
-
 
     public static boolean checkGPS(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
-
-//    public static void startGPSMonitoring(Context context, Activity activity) {
-//        gpsHandler = new Handler();
-//        gpsRunnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                if (!PermissionManager.checkGPS(context)) {
-//                    PermissionManager.showEnableGPSDialog(activity);
-//                }
-//                gpsHandler.postDelayed(this, 10*1000); // เช็คทุก 3 วินาที
-//            }
-//        };
-//        gpsHandler.post(gpsRunnable);
-//    }
 
     // เช็ค Location Permission
     public static boolean hasLocationPermission(Context context) {

@@ -53,6 +53,3 @@ public class NetworkReceiver extends BroadcastReceiver {
                 .enqueueUniqueWork(SYNC_WORK_NAME, ExistingWorkPolicy.KEEP, (OneTimeWorkRequest) syncRequest);
     }
 }
-
-//private static final String TAG = "NetworkReceiver";
-//    Log.d(TAG, "On Recieve");

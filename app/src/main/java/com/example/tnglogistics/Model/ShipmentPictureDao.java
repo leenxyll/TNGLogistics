@@ -16,10 +16,10 @@ public interface ShipmentPictureDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertShipPic(ShipmentPicture shipmentPicture);
 
-    @Query("SELECT * FROM Shipment_Picture WHERE isSynced = false ORDER BY ShipPicUpdate ASC")
+    @Query("SELECT * FROM Shipment_Picture WHERE isSynced = 0 ORDER BY ShipPicUpdate ASC")
     List<ShipmentPicture> getUnsyncedShipPic();
 
-    @Query("SELECT * FROM Shipment_Picture WHERE isImageSynced = false ORDER BY ShipPicUpdate ASC")
+    @Query("SELECT * FROM Shipment_Picture WHERE isImageSynced = 0 ORDER BY ShipPicUpdate ASC")
     List<ShipmentPicture> getUnsyncedShipPicImage();
 
     @Query("SELECT COUNT(*) FROM Shipment_Picture WHERE ShipPicInvoiceCode = :code AND ShipPicRow = :row")

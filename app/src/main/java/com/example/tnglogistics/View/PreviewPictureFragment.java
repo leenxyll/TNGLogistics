@@ -68,8 +68,6 @@ public class PreviewPictureFragment extends Fragment {
     private ViewModel viewModel;
     private EditText edittxt_detectnum = null;
     private TextView txtview_detectnum;
-//    private LocationService locationService;
-//    private boolean isBound = false;
     private double latitude = 0.0;
     private double longitude = 0.0;
     private FusedLocationProviderClient fusedLocationClient;
@@ -78,8 +76,6 @@ public class PreviewPictureFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-//        Intent intent = new Intent(requireContext(), LocationService.class);
-//        requireContext().bindService(intent, serviceConnection, requireContext().BIND_AUTO_CREATE);
     }
 
 
@@ -97,36 +93,27 @@ public class PreviewPictureFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-//        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
         PermissionManager.stopGPSMonitoring();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-//        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
-//        if (isBound) {
-//            requireContext().unbindService(serviceConnection);
-//            isBound = false;
-//        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-//        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-//        SharedPreferencesHelper.saveLastFragment(requireContext(), "PreviewPictureFragment");
     }
 
     @Override
@@ -141,10 +128,6 @@ public class PreviewPictureFragment extends Fragment {
         Button btn_confirm = view.findViewById(R.id.btn_confirm);
         Button btn_opencameara_agian = view.findViewById(R.id.btn_opencamera_again);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-//        shipLocationViewModel = ShipLocationViewModel.getInstance(requireActivity().getApplication());
-//        shipmentListViewModel = ShipmentListViewModel.getInstance(requireActivity().getApplication());
-//        tripViewModel = TripViewModel.getInstance(requireActivity().getApplication());
-//        truckViewModel = TruckViewModel.getInstance(requireActivity().getApplication());
         viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
         Bundle args = getArguments();
@@ -253,105 +236,6 @@ public class PreviewPictureFragment extends Fragment {
         return view;
     }
 
-    // ดึงพิกัดล่าสุดจาก LocationService
-//    private void getLocationFromService() {
-//        if (isBound && locationService != null) {
-//            Location currentLocation = locationService.getCurrentLocation();
-//            if (currentLocation != null) {
-//                latitude = currentLocation.getLatitude();
-//                longitude = currentLocation.getLongitude();
-//                Log.d(TAG, "Current Location: Lat = " + latitude + ", Lng = " + longitude);
-////                Toast.makeText(requireContext(), "Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_LONG).show();
-//            } else {
-//                Log.e(TAG, "Location not available yet.");
-//            }
-//        } else {
-//            Log.e(TAG, "LocationService is not bound.");
-//        }
-//    }
-
-
-    private void startLocationService() {
-        // เริ่ม startForegroundService เพื่อเริ่ม LocationService
-        Intent serviceIntent = new Intent(requireContext(), LocationService.class);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.d(TAG, "🚫 LocationService startForegroundService");
-            requireContext().startForegroundService(serviceIntent); // ใช้ startForegroundService สำหรับ Android 8.0 (API 26) ขึ้นไป
-        } else {
-            Log.d(TAG, "🚫 LocationService startService");
-            requireContext().startService(serviceIntent); // ใช้ startService สำหรับเวอร์ชันเก่ากว่า
-        }
-    }
-
-    private void stopLocationService() {
-        Intent serviceIntent = new Intent(requireContext(), LocationService.class);
-        requireContext().stopService(serviceIntent);
-        Log.d(TAG, "🚫 LocationService Stopped");
-    }
-
-//    private void requestLocation(int mileType) {
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED) {
-//
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-//                // Show explanation to the user before requesting permission again
-//                new AlertDialog.Builder(requireContext())
-//                        .setMessage("ต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อใช้งาน")
-//                        .setPositiveButton("ตกลง", (dialog, which) ->
-//                                ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1))
-//                        .setNegativeButton("ยกเลิก", null)
-//                        .show();
-//            } else {
-//                // Request permission directly if rationale is not needed (i.e., the user denied previously)
-//                // กรณีเคยปฏิเสธสิทธิ์มาก่อน พาไปที่หน้าตั้งค่า
-//                new AlertDialog.Builder(requireActivity())
-//                        .setTitle("จำเป็นต้องเปิดสิทธิ์ตำแหน่งในการตั้งค่า")
-//                        .setMessage("เพื่อให้คุณสามารถเข้าใช้งาน จำเป็นต้องเปิดสิทธิ์การเข้าถึงตำแหน่ง\n\nกรุณาเปิดสิทธิ์ \"อนุญาตตลอดเวลา\" ในการตั้งค่าแอป เพื่อเข้าใช้งานระบบ")
-//                        .setPositiveButton("ไปที่การตั้งค่า", (dialog, which) -> {
-//                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-//                            intent.setData(Uri.fromParts("package", requireActivity().getPackageName(), null));
-//                            requireActivity().startActivity(intent);
-//                        })
-//                        .setNegativeButton("ภายหลัง", (dialog, which) -> {
-//                            dialog.dismiss();
-//                            // แสดงข้อความเตือนเพิ่มเติม
-//                            Toast.makeText(getContext(), "ต้องการสิทธิ์การเข้าถึงตำแหน่งเพื่อใช้งาน", Toast.LENGTH_SHORT).show();
-//                        })
-//                        .setCancelable(false) // ป้องกันการปิดไดอะล็อกโดยกดพื้นที่ว่าง
-//                        .show();
-//            }
-//
-//        } else {
-//            // Permission is already granted
-//            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-//                if (location != null) {
-//                    Log.d(TAG, "Get Location");
-//                    latitude = location.getLatitude();
-//                    longitude = location.getLongitude();
-//                    if(mileType == 1){
-//                        updateInvoice(2);
-//                        updateMile(1, mileType);
-//                    }else if(mileType == 3){
-//                        // ลบ geofence มั้ย
-//                        Executors.newSingleThreadExecutor().execute(() -> {
-//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
-//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
-//                            updateMile(nextSeq, mileType);
-//                            //remove geofence here and delete geofenceID
-//                        });
-//                    }else if(mileType == 2){
-//                        Executors.newSingleThreadExecutor().execute(() -> {
-//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
-//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
-//                            updateMile(nextSeq, mileType);
-//                            //remove geofence here and delete geofenceID
-//                        });
-//                    }
-//
-//                }
-//            });
-//        }
-//    }
 
     // แก้ไข requestLocation method
     private void requestLocation(int mileType, LocationCallback callback) {
@@ -398,54 +282,6 @@ public class PreviewPictureFragment extends Fragment {
             });
         }
     }
-
-//    // แก้ไข requestLocation method
-//    private void requestLocation(int mileType, LocationCallback callback) {
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED) {
-//            // ... permission handling code เหมือนเดิม
-//
-//        } else {
-//            // Permission is already granted
-//            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-//                if (location != null) {
-//                    Log.d(TAG, "Get Location");
-//                    latitude = location.getLatitude();
-//                    longitude = location.getLongitude();
-//
-//                    if(mileType == 1){
-//                        //ไมล์ออก
-//                        updateInvoice(2);
-//                        updateMile(1, mileType);
-//                    }else if(mileType == 3){
-//                        //ไมล์ถึง
-//                        Executors.newSingleThreadExecutor().execute(() -> {
-//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
-//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
-//                            updateMile(nextSeq, mileType);
-//
-//                            // เรียก callback เมื่อทำงานเสร็จ
-//                            requireActivity().runOnUiThread(() -> callback.onLocationProcessed());
-//                        });
-//                        return; // return เพื่อไม่ให้เรียก callback ซ้ำ
-//                    }else if(mileType == 2){
-//                        Executors.newSingleThreadExecutor().execute(() -> {
-//                            int nextSeq = viewModel.getNextMileLogSeq(SharedPreferencesHelper.getTrip(getContext()));
-//                            Log.d(TAG, "Next Seq MileLog: "+nextSeq);
-//                            updateMile(nextSeq, mileType);
-//
-//                            // เรียก callback เมื่อทำงานเสร็จ
-//                            requireActivity().runOnUiThread(() -> callback.onLocationProcessed());
-//                        });
-//                        return; // return เพื่อไม่ให้เรียก callback ซ้ำ
-//                    }
-//
-//                    // สำหรับ mileType == 1
-//                    callback.onLocationProcessed();
-//                }
-//            });
-//        }
-//    }
 
     private void updateMile(int seq, int mileType){
         int mileRecord;
@@ -507,13 +343,8 @@ public class PreviewPictureFragment extends Fragment {
                         for (Invoice invoice : invoicesInLocation) {
                             String invoiceCode = invoice.getInvoiceCode();
 
-                            // ดึง seq แยกสำหรับแต่ละ invoice
-//                            Executors.newSingleThreadExecutor().execute(() -> {
-//                                int invoiceSeq = viewModel.getNextInvoiceLogSeq(invoiceCode);
-//                                requireActivity().runOnUiThread(() -> {
-                                        viewModel.updateInvoiceStatus(invoice, seq, 2, latitude, longitude, imageTimestamp, getContext());
-//                                });
-//                            });
+                            viewModel.updateInvoiceStatus(invoice, seq, 2, latitude, longitude, imageTimestamp, getContext());
+
 
                             if (invoice.getGeofenceID() == null || invoice.getGeofenceID().isEmpty()) {
                                 invoice.setGeofenceID(sharedGeofenceID);

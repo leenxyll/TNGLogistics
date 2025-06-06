@@ -105,11 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
 //        // ลงทะเบียน Permission Launcher
         PermissionManager.registerPermissionLauncher(this);
-//        // ขอสิทธิ์
-//        PermissionManager.requestPermission(this);
-
-        // เริ่มติดตามตำแหน่ง
-//        startLocationService();
 
         String lastFragment = SharedPreferencesHelper.getLastFragment(this);
         Log.d(TAG, lastFragment + " is lastFragment");
@@ -117,13 +112,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             switch (lastFragment) {
-//                case "PlanFragment":
-//                    fragment = PlanFragment.newInstance();
-//                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
-//                    break;
-//                case "PreviewPictureFragment":
-//                    fragment = PreviewPictureFragment.newInstance();
-//                    break;
                 case "StatusFragment":
                     fragment = StatusFragment.newInstance();
                     break;

@@ -79,15 +79,8 @@ public class ReportIssueFragment extends Fragment implements
     private int currentPosition;
     private String currentDescription;
 
-//    public static ReportIssueFragment newInstance() {
-//        return new ReportIssueFragment();
-//    }
-
     public static ReportIssueFragment newInstance(Invoice invoice) {
         ReportIssueFragment fragment = new ReportIssueFragment();
-//        Bundle args = new Bundle();
-//        args.putSerializable("invoice", invoice);  // หรือใช้ Parcelable ถ้า Invoice implements Parcelable
-//        fragment.setArguments(args);
         aInvoice = invoice;
         return fragment;
     }
@@ -135,17 +128,6 @@ public class ReportIssueFragment extends Fragment implements
         });
 
         // ตั้งค่า Camera Launcher
-//        cameraLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == Activity.RESULT_OK && currentPhotoUri != null) {
-//                        // เพิ่มรูปภาพลงใน adapter
-//                        if (currentSubIssue != null) {
-//                            adapter.addPhoto(currentSubIssue.getSubIssueTypeCode(), currentPhotoUri);
-//                            Toast.makeText(requireContext(), "เพิ่มรูปภาพแล้ว", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -317,20 +299,6 @@ public class ReportIssueFragment extends Fragment implements
     }
 
     private void reportDelivery(String invoiceCode) {
-        // Check if at least one image is uploaded
-        // ดึงรายการ SubIssue ทั้งหมดจาก adapter
-//        List<SubIssue> subIssueList = adapter.getSubIssues();  // ต้องเพิ่ม getSubIssues() ใน AdapterSubIssue
-//
-//        for (SubIssue subIssue : subIssueList) {
-//            if ("Y".equals(subIssue.getRequirePic())) {
-//                List<Uri> photos = adapter.getPhotos(subIssue.getSubIssueTypeCode());
-//                if (photos == null || photos.isEmpty()) {
-//                    Toast.makeText(getContext(), "กรุณาถ่ายรูปสำหรับ: " + subIssue.getSubIssueTypeName(), Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
-//            }
-//        }
-
         if (currentSubIssue != null && "Y".equals(currentSubIssue.getRequirePic())) {
             List<Uri> photos = adapter.getPhotos(currentSubIssue.getSubIssueTypeCode());
             if (photos == null || photos.isEmpty()) {
@@ -403,16 +371,6 @@ public class ReportIssueFragment extends Fragment implements
                         int nextSeq = viewModel.getNextInvoiceLogSeq(aInvoice.getInvoiceCode());
                         Log.d(TAG, "Next Seq InvoiceShipLog: " + nextSeq);
                         String invoiceCode = aInvoice.getInvoiceCode();
-//                        viewModel.updateInvoiceStatus(aInvoice, nextSeq, 5, latitude, longitude, imageTimestamp, requireContext());
-//                        Log.d(TAG, "update invoice: " + invoiceCode);
-
-                        //เพิ่ม Issue / อัปเดท Invoice พร้อมใส่ IssueCode ไปด้วย
-
-//                        Issue aIssue = new Issue(currentDescription, 0, latitude, longitude, imageTimestamp, currentSubIssue.getSubIssueTypeCode(), false);
-//                        viewModel.insertIssue(aIssue);
-//                        Log.d(TAG, "des : " + aIssue.getIssueDescription());
-
-//                        viewModel.updateInvoiceWithIssue(aInvoice, nextSeq, 5, latitude, longitude, imageTimestamp, requireContext(), aIssue);
                         viewModel.updateInvoiceStatus(aInvoice, nextSeq, 5, latitude, longitude, imageTimestamp, currentDescription, currentSubIssue.getSubIssueTypeCode(), requireContext());
                         Log.d(TAG, "update invoice: " + invoiceCode);
 

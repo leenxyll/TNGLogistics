@@ -99,7 +99,6 @@ public class GeofenceHelper {
             return pendingIntent;
         }
         Intent intent = new Intent(context, GeofenceBroadcastReceiver.class);
-//        intent.setAction("com.example.geofencing.GEOFENCE_ACTION");
         pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         Log.d(TAG, "PendingIntent not null "+ pendingIntent);
         return pendingIntent;

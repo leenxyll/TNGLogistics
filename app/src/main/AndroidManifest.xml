@@ -26,9 +26,6 @@
         android:theme="@style/Theme.TNGLogistics"
         tools:targetApi="34" >
         <activity
-            android:name=".View.CameraXCFActivity"
-            android:exported="false" />
-        <activity
             android:name=".View.CameraXActivity"
             android:exported="false" />
         <activity
@@ -50,13 +47,7 @@
         <service
             android:name=".Controller.LocationService"
             android:exported="false"
-            android:foregroundServiceType="location" /> <!-- <service android:name=".Controller.MyService" -->
-        <!-- android:exported="false" -->
-        <!-- android:permission="android.permission.BIND_JOB_SERVICE"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
-        <!-- </intent-filter> -->
-        <!-- </service> -->
+            android:foregroundServiceType="location" />
         <receiver
             android:name=".Controller.GeofenceBroadcastReceiver"
             android:enabled="true"

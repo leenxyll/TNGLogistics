@@ -25,13 +25,11 @@ public class ViewModel extends AndroidViewModel {
     private static ViewModel instance;
     private final Repository repository;
     private final MediatorLiveData<List<Invoice>> invoiceList = new MediatorLiveData<>();
-//    private LiveData<List<Invoice>> invoicesGrouped;
 
     public ViewModel(Application application) {
         super(application);
         repository = new Repository(application);
         invoiceList.addSource(repository.getAllInvoice(), invoiceList::setValue);
-//        invoicesGrouped = repository.getInvoicesGroupedByLocation();
     }
 
     public static ViewModel getInstance(Application application){
@@ -115,9 +113,6 @@ public class ViewModel extends AndroidViewModel {
         repository.updateInvoiceStatus(invoice, seq, statusCode, lat, lng, timeStamp, issueDesc, issueTypeCode, context);
     }
 
-//    public LiveData<List<Invoice>> getInvoicesGroupedByLocation() {
-//        return invoicesGrouped;
-//    }
 
     public int getNextShipListPic(String invoiceCode){
         return repository.getNextShipListPic(invoiceCode);
@@ -160,10 +155,5 @@ public class ViewModel extends AndroidViewModel {
             return filteredList;
         });
     }
-
-
-//    public void insertIssue(Issue issue){
-//        repository.insertIssue(issue);
-//    }
 
 }

@@ -17,7 +17,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-//        Toast.makeText(context, "Geofence triggered...", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Receiver called " + intent.getAction());
 
         NotificationHelper notificationHelper = new NotificationHelper(context);
@@ -52,9 +51,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             switch (transitionType) {
                 case Geofence.GEOFENCE_TRANSITION_ENTER:
                     Log.d(TAG, "GEOFENCE_TRANSITION_ENTER");
-//                    Toast.makeText(context, "ใกล้ถึงแล้ว", Toast.LENGTH_SHORT).show();
-//                    notificationHelper.sendHighPriorityNotification("ใกล้ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
-//                    shipmentListViewModel.updateShipmentStatus(geofenceId, "ENTER");
                     // เรียกใช้ WorkManager เพื่ออัปเดต InvoiceShipStatusCode
                     updateInvoiceStatus(context, geofenceId, latitude, longitude);
                     GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
@@ -68,24 +64,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                 case Geofence.GEOFENCE_TRANSITION_DWELL:
                     Log.d(TAG, "GEOFENCE_TRANSITION_DWELL");
-//                    Toast.makeText(context, "ถึงแล้ว", Toast.LENGTH_SHORT).show();
-//                    notificationHelper.sendHighPriorityNotification("ถึงจุดจัดส่งแล้ว", "", MainActivity.class);
-//                    shipmentListViewModel.updateShipmentStatus(geofenceId, "DWELL");
-
-//                    GeofenceHelper geofenceHelper = GeofenceHelper.getInstance(context);
-//                    if (geofenceHelper != null) {
-//                        Log.e(TAG, "GeofenceHelper remove geofence.");
-//                        geofenceHelper.removeGeofenceByID(geofenceId);
-//                    } else {
-//                        Log.e(TAG, "GeofenceHelper instance is null, cannot remove geofence.");
-//                    }
                     break;
-
-                // กรณีถ้าต้องการใช้ EXIT ในอนาคต
-//                case Geofence.GEOFENCE_TRANSITION_EXIT:
-//                    Log.d(TAG, "GEOFENCE_TRANSITION_EXIT");
-//                    Toast.makeText(context, "ออกจากพื้นที่ Geofence", Toast.LENGTH_SHORT).show();
-//                    break;
             }
         }
     }

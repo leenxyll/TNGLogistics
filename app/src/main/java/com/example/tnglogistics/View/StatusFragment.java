@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -176,18 +177,6 @@ public class StatusFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
-        // Observe ข้อมูลที่จัดกลุ่มตาม Location
-//        viewModel.getInvoiceList().observe(getViewLifecycleOwner(), invoices -> {
-//            if (invoices != null && !invoices.isEmpty()) {
-//                allqueue = invoices.size();
-//                txtview_allqueue.setText(String.valueOf(invoices.size()));
-//                Map<String, List<Invoice>> groupedInvoices = groupInvoicesByLocation(invoices);
-//                adapterInvoiceHelper = new AdapterInvoiceHelper(groupedInvoices);
-//                recyclerView.setAdapter(adapterInvoiceHelper);
-//                checkItemList(invoices);
-//                updateUI();
-//            }
-//        });
 
         viewModel.getinvoiceByTrip(requireContext()).observe(getViewLifecycleOwner(), invoices -> {
             if (invoices != null && !invoices.isEmpty()) {
@@ -208,16 +197,6 @@ public class StatusFragment extends Fragment {
                 checkAndRequestPermissions();
             }
         });
-
-//        viewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
-//            @Override
-//            public void onChanged(Employee employee) {
-//                branchName = employee.getBrchName();
-//                branchLatitude = employee.getBrchLat();
-//                branchLongitude = employee.getBrchLong();
-//                radius = employee.getRadius();
-//            }
-//        });
 
         if (SharedPreferencesHelper.getMileType(requireContext()) == 2) {
             viewModel.getEmployee(SharedPreferencesHelper.getEmployee(requireContext())).observe(getViewLifecycleOwner(), new Observer<Employee>() {
@@ -242,7 +221,7 @@ public class StatusFragment extends Fragment {
 
                             if (!unsyncedMileLogsImage.isEmpty()) {
                                 requireActivity().runOnUiThread(() -> {
-                                    showSyncDialog(); // ✅ แสดง dialog เฉพาะตอนมีข้อมูลให้ sync
+                                    showSyncDialog(); //  แสดง dialog เฉพาะตอนมีข้อมูลให้ sync
                                     btn_camera.setVisibility(View.VISIBLE);
                                     btn_camera.setText("ถึงสาขาเรียบร้อยแล้ว");
                                 });
@@ -296,21 +275,37 @@ public class StatusFragment extends Fragment {
         }
     }
 
-        private void checkAndRequestPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    private void checkAndRequestPermissions() {
+        boolean isLocationGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean isCameraGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        boolean isNotificationGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
 
-            // ถ้าสิทธิ์ยังไม่ได้รับ ให้ขอใหม่
-            PermissionManager.requestPermissions(requireActivity());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            boolean isBackgroundGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+            if (!isLocationGranted || !isCameraGranted || !isNotificationGranted || !isBackgroundGranted) {
+                // ขอ permission ทั้งหมดสำหรับ Android 10 ขึ้นไป
+                PermissionManager.requestPermissions(requireActivity());
+            } else {
+                // ได้ครบแล้ว
+                openCameraMile();
+            }
         } else {
-            // ถ้าได้รับแล้ว ทำงานต่อได้เลย
-            Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(getActivity(), CameraXActivity.class);
-            ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
+            // สำหรับ Android ต่ำกว่า 10 ไม่ต้องเช็ค background
+            if (!isLocationGranted || !isCameraGranted || !isNotificationGranted) {
+                PermissionManager.requestPermissions(requireActivity());
+            } else {
+                openCameraMile();
+            }
         }
     }
+
+    private void openCameraMile() {
+        Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getActivity(), CameraXActivity.class);
+        ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
+    }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

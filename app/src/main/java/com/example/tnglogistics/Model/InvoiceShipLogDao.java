@@ -17,7 +17,7 @@ public interface InvoiceShipLogDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertShipLog(InvoiceShipLog shipLog);
 
-    @Query("SELECT * FROM Invoice_Ship_Log WHERE isSynced = false ORDER BY InvoiceShipLogUpdate ASC")
+    @Query("SELECT * FROM Invoice_Ship_Log WHERE isSynced = 0 ORDER BY InvoiceShipLogUpdate ASC")
     List<InvoiceShipLog> getUnsyncedInvoiceShipLogs();
 
 //    @Query("UPDATE InvoiceShipLog SET isSynced = true WHERE InvoiceShipLogSeq = :InvoiceShipLogSeq AND InvoiceShipLogCode = :InvoiceCode")

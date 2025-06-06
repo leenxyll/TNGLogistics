@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -354,29 +355,47 @@ public class ShipDetailFragment extends Fragment {
         return groupedMap;
     }
 
-    private void checkAndRequestPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            // ถ้าสิทธิ์ยังไม่ได้รับ ให้ขอใหม่
-            PermissionManager.requestPermissions(requireActivity());
+    private void checkAndRequestPermissions() {
+        boolean isLocationGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean isCameraGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        boolean isNotificationGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            boolean isBackgroundGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+            if (!isLocationGranted || !isCameraGranted || !isNotificationGranted || !isBackgroundGranted) {
+                // ขอ permission ทั้งหมดสำหรับ Android 10 ขึ้นไป
+                PermissionManager.requestPermissions(requireActivity());
+            } else {
+                // ได้ครบแล้ว
+                openCameraMile();
+            }
         } else {
-            if(SharedPreferencesHelper.isCameraMile(requireContext())){
-                // ถ้าได้รับแล้ว ทำงานต่อได้เลย
-                Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getActivity(), CameraXActivity.class);
-                ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
-            }else {
-                ShipmentPictureFragment frag_cf = ShipmentPictureFragment.newInstance();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, frag_cf);
-                transaction.addToBackStack(null);
-                new Handler().postDelayed(() -> {
-                    transaction.commit();
-                }, 500);
+            // สำหรับ Android ต่ำกว่า 10 ไม่ต้องเช็ค background
+            if (!isLocationGranted || !isCameraGranted || !isNotificationGranted) {
+                PermissionManager.requestPermissions(requireActivity());
+            } else {
+                openCameraMile();
             }
         }
     }
+
+    private void openCameraMile() {
+        if(SharedPreferencesHelper.isCameraMile(requireContext())){
+            // ถ้าได้รับแล้ว ทำงานต่อได้เลย
+            Toast.makeText(getContext(), "กรุณาถ่ายเลขไมล์ให้อยู่ในกรอบ", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getActivity(), CameraXActivity.class);
+            ((MainActivity) getActivity()).getCameraMileLauncher().launch(intent);
+        }else {
+            ShipmentPictureFragment frag_cf = ShipmentPictureFragment.newInstance();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, frag_cf);
+            transaction.addToBackStack(null);
+            new Handler().postDelayed(() -> {
+                transaction.commit();
+            }, 500);
+        }
+    }
+
 }

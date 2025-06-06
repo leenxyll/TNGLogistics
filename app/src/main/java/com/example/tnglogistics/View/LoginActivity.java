@@ -64,16 +64,6 @@ public class  LoginActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             switch (lastFragment) {
-//                case "PlanFragment":
-//                    fragment = PlanFragment.newInstance();
-//                    Log.d(TAG, TAG + " : new Instant : PlanFragment ");
-//                    break;
-//                case "PreviewPictureFragment":
-//                    fragment = PreviewPictureFragment.newInstance();
-//                    break;
-//                case "StatusFragment":
-//                    fragment = StatusFragment.newInstance();
-//                    break;
                 case "LoginDriverFragment":
                     fragment = LoginDriverFragment.newInstance();
                     break;

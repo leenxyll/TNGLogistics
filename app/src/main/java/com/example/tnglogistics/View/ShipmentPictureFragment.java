@@ -85,19 +85,6 @@ public class ShipmentPictureFragment extends Fragment implements AdapterImageHel
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         viewModel = ViewModel.getInstance(requireActivity().getApplication());
 
-//        cameraLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == Activity.RESULT_OK) {
-//                        if (photoUri != null) {
-//                            imageAdapter.addImage(photoUri); // ยังใช้ Uri ได้อยู่
-//                            imagePaths.add(imagePath);
-//                            Log.d(TAG, "File path: " + imagePath); // ได้ path แบบเต็ม
-//                            updateImageCounter();
-//                        }
-//                    }
-//                });
-
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -187,23 +174,6 @@ public class ShipmentPictureFragment extends Fragment implements AdapterImageHel
         imageTimestamp = System.currentTimeMillis();
         return image;
     }
-
-//    private File compressImage(File originalFile) throws IOException {
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        Bitmap bitmap = BitmapFactory.decodeFile(originalFile.getAbsolutePath(), options);
-//
-//        File compressedFile = new File(
-//                requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-//                "COMPRESSED_" + originalFile.getName()
-//        );
-//
-//        FileOutputStream out = new FileOutputStream(compressedFile);
-//        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out); // 50 = quality, ลองปรับระหว่าง 30–70
-//        out.flush();
-//        out.close();
-//
-//        return compressedFile;
-//    }
 
     private File compressImage(File originalFile) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
